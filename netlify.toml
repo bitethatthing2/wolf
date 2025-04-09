@@ -1,6 +1,5 @@
 [build]
   command = "npm run build"
-  publish = "out"
 
 # Headers to ensure proper content types and caching
 [[headers]]
@@ -52,12 +51,6 @@
 [[redirects]]
   from = "/images/*"
   to = "/images/:splat"
-  status = 200
-
-# Handle SPA routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
   status = 200
 
 [build.environment]
