@@ -11,21 +11,50 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "no-referrer-when-downgrade"
 
+# Set proper caching and CORS headers for images
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"
+
 [[headers]]
   for = "*.png"
   [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
     Access-Control-Allow-Origin = "*"
 
 [[headers]]
   for = "*.jpg"
   [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
     Access-Control-Allow-Origin = "*"
 
 [[headers]]
   for = "*.svg"
   [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
     Access-Control-Allow-Origin = "*"
 
+[[headers]]
+  for = "/wolf-icon-white.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "image/png"
+
+[[headers]]
+  for = "/wolf-icon-black.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "image/png"
+
+# Asset redirects to ensure images are properly served
+[[redirects]]
+  from = "/images/*"
+  to = "/images/:splat"
+  status = 200
+
+# Handle SPA routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -35,5 +64,4 @@
   NODE_VERSION = "18"
   NPM_VERSION = "9"
   NEXT_USE_NETLIFY_EDGE = "true"
-  # Remove any API keys or sensitive information
-  # Add environment variables through the Netlify dashboard instead
+  # Environment variables should be added through the Netlify dashboard
