@@ -10,7 +10,6 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   swcMinify: true,
   workboxOptions: {
     disableDevLogs: true,
-    // Exclude problematic files from precaching
     exclude: [
       '_redirects',
       '**/_redirects',
@@ -21,7 +20,6 @@ const withPWA = require('@ducanh2912/next-pwa').default({
       /\.DS_Store/,
       /\.git/
     ],
-    // Define custom runtime caching rules similar to your previous project
     runtimeCaching: [
       {
         urlPattern: /^https:\/\/magnificent-churros-3c51ed\.netlify\.app\/.*$/,
@@ -30,7 +28,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
           cacheName: 'app-cache',
           expiration: {
             maxEntries: 200,
-            maxAgeSeconds: 86400 // 1 day
+            maxAgeSeconds: 86400
           }
         }
       },
@@ -41,7 +39,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
           cacheName: 'image-cache',
           expiration: {
             maxEntries: 50,
-            maxAgeSeconds: 604800 // 1 week
+            maxAgeSeconds: 604800
           }
         }
       }
@@ -55,11 +53,10 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // Ignore TypeScript errors during build
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true,
     dangerouslyAllowSVG: true,
     remotePatterns: [
       {
@@ -92,35 +89,19 @@ const nextConfig = {
       },
     ],
   },
-  // Ensure trailing slashes are added
   trailingSlash: true,
-  // Add webpack configuration if needed
-  webpack(config, { isServer, webpack }) {
-    // Inject Firebase config into service worker
+  webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Create a stringified version of the Firebase config for injection
-      const firebaseConfig = {
-        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-        authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-        measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@emotion/is-prop-valid': require.resolve('@emotion/is-prop-valid'),
       };
-
-      // Add a plugin to inject the Firebase config into the service worker
-      config.plugins.push(
-        new webpack.DefinePlugin({
-          'self.__FIREBASE_CONFIG__': JSON.stringify(firebaseConfig),
-        })
-      );
     }
-    
     return config;
   },
-  // Use static export for Netlify
-  output: 'export',
+  /* experimental: {
+    prefetchInRender: true, // Removed due to incompatibility
+  }, */
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = process.env.NODE_ENV === 'production' ? withPWA(nextConfig) : nextConfig;

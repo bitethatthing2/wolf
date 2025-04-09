@@ -84,7 +84,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/" onClick={() => setOpen(false)}>
-                <Home className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <Home className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Home
               </Link>
             </Button>
@@ -94,7 +96,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/menu" onClick={() => setOpen(false)}>
-                <UtensilsCrossed className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <UtensilsCrossed className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Menu
               </Link>
             </Button>
@@ -104,7 +108,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/locations" onClick={() => setOpen(false)}>
-                <MapPin className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <MapPin className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Locations
               </Link>
             </Button>
@@ -114,7 +120,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/events" onClick={() => setOpen(false)}>
-                <Calendar className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <Calendar className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Events
               </Link>
             </Button>
@@ -124,7 +132,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/shop" onClick={() => setOpen(false)}>
-                <ShoppingBag className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <ShoppingBag className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Shop
               </Link>
             </Button>
@@ -134,7 +144,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/order" onClick={() => setOpen(false)}>
-                <ShoppingCart className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <ShoppingCart className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Order
               </Link>
             </Button>
@@ -144,7 +156,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/chef-blog" onClick={() => setOpen(false)}>
-                <ChefHat className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <ChefHat className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Chef&apos;s Blog
               </Link>
             </Button>
@@ -154,7 +168,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/about" onClick={() => setOpen(false)}>
-                <Info className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <Info className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 About
               </Link>
             </Button>
@@ -164,7 +180,9 @@ export function MobileNav() {
               asChild
             >
               <Link href="/contact" onClick={() => setOpen(false)}>
-                <Mail className="h-5 w-5" />
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <Mail className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
                 Contact
               </Link>
             </Button>

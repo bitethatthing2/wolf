@@ -82,14 +82,8 @@ const AppInstallFlow = () => {
     setInstallStep(0);
   };
   
-  // Common button style based on theme
-  const getButtonClassName = (isSecondary = false) => {
-    return `h-16 text-lg font-semibold ${
-      isSecondary ? "" : "w-full"
-    } ${
-      isDarkTheme ? "bg-primary text-primary-foreground" : "bg-black text-white hover:bg-black/90"
-    } ${deviceType === "android" || deviceType === "ios" ? "py-3" : ""}`;
-  };
+  // Define the target button style
+  const targetButtonStyle = "flex items-center justify-center gap-2 py-3 px-6 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-black font-bold text-base rounded-md w-full max-w-md"; 
   
   // Get the appropriate installation icon based on device type and theme
   const getInstallIcon = () => {
@@ -110,33 +104,33 @@ const AppInstallFlow = () => {
   const renderContent = () => {
     if (installStep === 0) {
       return (
-        <div className="flex flex-col w-full max-w-md gap-4">
+        <div className="flex flex-col items-center w-full max-w-md gap-4">
           {deviceType === "ios" || deviceType === "android" ? (
             <Button 
               variant="default"
-              className={getButtonClassName()}
+              className={targetButtonStyle}
               onClick={handleInstallClick}
             >
               {deviceType === "android" ? (
                 <div className="flex items-center justify-center w-full">
                   <div className="flex items-center justify-center gap-3">
-                    <div className="rounded-full w-10 h-10 flex items-center justify-center overflow-hidden">
+                    <div className="rounded-full w-8 h-8 flex items-center justify-center overflow-hidden bg-white dark:bg-black"> 
                       {isDarkTheme ? (
                         <Image 
                           src="/android-installation-guide-white.png.png"
                           alt="Android Install"
-                          width={48}
-                          height={48}
-                          className="w-12 h-12"
+                          width={20}
+                          height={20}
+                          className="w-5 h-5"
                           priority
                         />
                       ) : (
                         <Image 
                           src="/android_installation_guide-black.png"
                           alt="Android Install"
-                          width={24}
-                          height={24}
-                          className="w-6 h-6"
+                          width={20}
+                          height={20}
+                          className="w-5 h-5"
                           priority
                         />
                       )}
@@ -144,179 +138,126 @@ const AppInstallFlow = () => {
                     <span>Install on Android</span>
                   </div>
                 </div>
-              ) : (
+              ) : deviceType === "ios" ? (
                 <div className="flex items-center justify-center w-full">
-                  {isDarkTheme ? (
-                    // Larger white Apple icon in dark mode
-                    <div className="relative mr-4 w-10 h-10">
+                  <div className="rounded-full w-8 h-8 flex items-center justify-center overflow-hidden bg-white dark:bg-black mr-2"> 
+                    {isDarkTheme ? (
                       <Image 
                         src="/apple_icon_install_white.png"
                         alt="iOS Install"
-                        width={40}
-                        height={40}
+                        width={20}
+                        height={20}
+                        className="w-5 h-5"
                         priority
                       />
-                    </div>
-                  ) : (
-                    // Larger black Apple icon in light mode
-                    <div className="relative mr-4 w-10 h-10">
+                    ) : (
                       <Image 
                         src="/ios_pwa_install-black.png"
                         alt="iOS Install"
-                        width={40}
-                        height={40}
+                        width={20}
+                        height={20}
+                        className="w-5 h-5"
                         priority
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                   <span>Install on iOS</span>
                 </div>
+              ) : (
+                <>
+                  {/* Increase wrapper size */}
+                  <div className="w-8 h-8 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1"> 
+                    <Download className="w-4 h-4 text-black dark:text-white" /> 
+                  </div>
+                  Install App
+                </>
               )}
             </Button>
           ) : (
             <Button 
               variant="default"
-              className={getButtonClassName()}
+              className={targetButtonStyle}
               onClick={handleInstallClick}
             >
-              <Download className="mr-2" />
+              {/* Increase wrapper size */}
+              <div className="w-8 h-8 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1"> 
+                <Download className="w-4 h-4 text-black dark:text-white" /> 
+              </div>
               Install App
             </Button>
           )}
-          <Button 
-            variant="default"
-            className={getButtonClassName()}
+          <div 
+            className={`${targetButtonStyle} cursor-pointer`} 
             onClick={handleNotificationsClick}
+            role="button" 
+            tabIndex={0} 
+            onKeyDown={(e) => e.key === 'Enter' || e.key === ' ' ? handleNotificationsClick() : null}
           >
-            <div className="flex items-center justify-center w-full">
-              <div className="flex items-center justify-center gap-3">
-                <div className="rounded-full w-10 h-10 flex items-center justify-center overflow-hidden">
-                  {isDarkTheme ? (
-                    <Image 
-                      src="/enable-notifications-dark.png"
-                      alt="Enable Notifications"
-                      width={36}
-                      height={36}
-                      className="w-9 h-9"
-                      priority
-                    />
-                  ) : (
-                    <Image 
-                      src="/enable-notifications-light-screen.png"
-                      alt="Enable Notifications"
-                      width={36}
-                      height={36}
-                      className="w-9 h-9"
-                      priority
-                    />
-                  )}
-                </div>
-                <span>Enable Notifications</span>
-              </div>
+             <div className="rounded-full w-8 h-8 flex items-center justify-center overflow-hidden bg-white dark:bg-black mr-1">
+              <Image 
+                alt="Enable Notifications"
+                src={isDarkTheme ? "/enable-notifications-light-screen.png" : "/enable-notifications-dark.png"}
+                width={20} 
+                height={20} 
+                className="w-5 h-5"
+              />
             </div>
-          </Button>
+            <span>Enable Notifications</span>
+          </div>
         </div>
       );
     } else if (installStep === 1 && deviceType === "ios") {
       return (
-        <div className={`flex flex-col w-full max-w-md items-center text-center gap-4 p-6 border rounded-lg ${isDarkTheme ? 'border-white/10 bg-black/70' : 'border-black/10 bg-white/70'} backdrop-blur-sm`}>
-          <h3 className="text-xl font-bold">Step 1: Tap the Share Button</h3>
-          <p className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Tap the Share button at the bottom of your screen</p>
-          <div className="relative w-full h-64 my-4">
-            <Image 
-              src="/share-ios.png" 
-              alt="iOS Share Button" 
-              fill
-              style={{objectFit: "contain"}}
-              className="rounded-lg"
-              priority
-            />
-          </div>
+        <div className="flex flex-col items-center w-full max-w-md gap-4">
+          <p className="text-center text-black dark:text-white">
+            Tap the Share button below, then choose 'Add to Home Screen'.
+          </p>
+          <Image 
+            src={isDarkTheme ? "/ios_add_to_homescreen_dark.png" : "/ios_add_to_homescreen_light.png"}
+            alt="Add to Home Screen Instructions"
+            width={300}
+            height={150}
+            layout="intrinsic"
+            priority
+          />
           <Button 
-            variant="default"
-            className={getButtonClassName()}
+            variant="default" 
+            className={targetButtonStyle} 
             onClick={handleNextStep}
           >
-            Next Step <ChevronRight className="ml-2" />
+            Next <ChevronRight className="ml-2" />
           </Button>
         </div>
       );
     } else if (installStep === 2 && deviceType === "ios") {
       return (
-        <div className={`flex flex-col w-full max-w-md items-center text-center gap-4 p-6 border rounded-lg ${isDarkTheme ? 'border-white/10 bg-black/70' : 'border-black/10 bg-white/70'} backdrop-blur-sm`}>
-          <h3 className="text-xl font-bold">Step 2: Add to Home Screen</h3>
-          <p className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Tap "Add to Home Screen" option</p>
-          <div className="relative w-full h-64 my-4">
-            <Image 
-              src="/ios-add-homescreen.png" 
-              alt="Add to Home Screen" 
-              fill
-              style={{objectFit: "contain"}}
-              className="rounded-lg"
-              priority
-            />
-          </div>
+        <div className="flex flex-col items-center w-full max-w-md gap-4">
+          <p className="text-center text-black dark:text-white">
+            Success! You can now launch Hustle Hard from your home screen.
+          </p>
+          <Image 
+            src="/app_icon_large.png" 
+            alt="App Icon"
+            width={120}
+            height={120}
+            priority
+          />
           <Button 
-            variant="default"
-            className={getButtonClassName()}
-            onClick={handleNextStep}
-          >
-            Next Step <ChevronRight className="ml-2" />
-          </Button>
-        </div>
-      );
-    } else if (installStep === 3) {
-      return (
-        <div className={`flex flex-col w-full max-w-md items-center text-center gap-4 p-6 border rounded-lg ${isDarkTheme ? 'border-white/10 bg-black/70' : 'border-black/10 bg-white/70'} backdrop-blur-sm`}>
-          <h3 className="text-xl font-bold">Final Step: Enable Notifications</h3>
-          <p className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Once the app is installed, tap "Enable Notifications" to stay updated</p>
-          <Button 
-            variant="default"
-            className={getButtonClassName()}
-            onClick={handleNotificationsClick}
-          >
-            <div className="flex items-center justify-center w-full">
-              <div className="flex items-center justify-center gap-3">
-                <div className="rounded-full w-10 h-10 flex items-center justify-center overflow-hidden">
-                  {isDarkTheme ? (
-                    <Image 
-                      src="/enable-notifications-dark.png"
-                      alt="Enable Notifications"
-                      width={36}
-                      height={36}
-                      className="w-9 h-9"
-                      priority
-                    />
-                  ) : (
-                    <Image 
-                      src="/enable-notifications-light-screen.png"
-                      alt="Enable Notifications"
-                      width={36}
-                      height={36}
-                      className="w-9 h-9"
-                      priority
-                    />
-                  )}
-                </div>
-                <span>Enable Notifications</span>
-              </div>
-            </div>
-          </Button>
-          <button 
-            className={`text-sm underline mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}
+            variant="default" 
+            className={targetButtonStyle} 
             onClick={handleReset}
           >
-            Back to beginning
-          </button>
+            Done
+          </Button>
         </div>
       );
     }
-    
-    return null;
+    return null; // Default case
   };
-  
+
   return (
-    <div className="w-full flex justify-center my-6">
+    <div className="my-8 p-4 border border-border rounded-lg bg-card text-card-foreground shadow-sm w-full max-w-lg mx-auto flex flex-col items-center">
+      <h3 className="text-xl font-semibold mb-4 text-center text-black dark:text-white">Get the App</h3>
       {renderContent()}
     </div>
   );

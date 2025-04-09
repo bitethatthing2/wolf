@@ -82,21 +82,27 @@ export default function DynamicFooter() {
               href="/menu" 
               className={`flex items-center justify-center py-3 px-6 ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} font-bold text-base rounded-md`}
             >
-              <UtensilsCrossed className={`h-5 w-5 ${isDark ? 'text-black' : 'text-white'} mr-2`} />
+              <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
+                <UtensilsCrossed className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+              </div>
               <span className={isDark ? 'text-black' : 'text-white'}>View Menu</span>
             </a>
             <a 
               href="/order" 
               className={`flex items-center justify-center py-3 px-6 ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} font-bold text-base rounded-md`}
             >
-              <ShoppingCart className={`h-5 w-5 ${isDark ? 'text-black' : 'text-white'} mr-2`} />
+              <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
+                <ShoppingCart className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+              </div>
               <span className={isDark ? 'text-black' : 'text-white'}>Order Now</span>
             </a>
             <a 
               href="/events" 
               className={`flex items-center justify-center py-3 px-6 ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} font-bold text-base rounded-md`}
             >
-              <Calendar className={`h-5 w-5 ${isDark ? 'text-black' : 'text-white'} mr-2`} />
+              <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
+                <Calendar className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+              </div>
               <span className={isDark ? 'text-black' : 'text-white'}>Upcoming Events</span>
             </a>
           </div>
@@ -265,7 +271,9 @@ export default function DynamicFooter() {
                     : 'bg-black hover:bg-gray-800 text-white'
                 } font-bold text-base rounded-md mb-4`}
               >
-                <ShoppingCart className={`h-5 w-5 ${isDark ? 'text-black' : 'text-white'}`} strokeWidth={2.5} />
+                <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
+                  <ShoppingCart className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} strokeWidth={2.5} />
+                </div>
                 <span className={isDark ? 'text-black' : 'text-white'}>Order Online</span>
               </a>
               <a 
@@ -276,7 +284,9 @@ export default function DynamicFooter() {
                     : 'bg-black hover:bg-gray-800 text-white'
                 } font-bold text-base rounded-md`}
               >
-                <Calendar className={`h-5 w-5 ${isDark ? 'text-black' : 'text-white'}`} strokeWidth={2.5} />
+                <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
+                  <Calendar className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} strokeWidth={2.5} />
+                </div>
                 <span className={isDark ? 'text-black' : 'text-white'}>Make a Reservation</span>
               </a>
             </div>
