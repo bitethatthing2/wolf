@@ -22,8 +22,14 @@ export function ThemeToggle() {
           variant="default" 
           size="icon" 
         >
-          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          {/* Wrap Sun icon */}
+          <div className="w-7 h-7 rounded-full bg-black dark:bg-white flex items-center justify-center rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0">
+            <Sun className="h-5 w-5 text-white dark:text-black" />
+          </div>
+          {/* Wrap Moon icon */}
+          <div className="absolute w-7 h-7 rounded-full bg-black dark:bg-white flex items-center justify-center rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100">
+            <Moon className="h-5 w-5 text-white dark:text-black" />
+          </div>
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>

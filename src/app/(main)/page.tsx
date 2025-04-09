@@ -101,48 +101,25 @@ export default function HomePage() {
           </p>
         </motion.div>
         
-        {/* Order Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="flex flex-col items-center justify-center gap-4 mt-2 w-full max-w-md mx-auto"
-        >
-          <h3 className="text-2xl font-bold text-black dark:text-white">Order Online</h3>
-          <div className="flex flex-row justify-center gap-4 w-full">
-            <Button 
-              className={`h-12 w-full max-w-[160px] text-sm sm:text-base font-semibold rounded-full transition-all flex items-center justify-center gap-2 ${theme === 'dark' ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} border border-transparent hover:border-current shadow-md hover:shadow-lg transform hover:scale-105`}
-              onClick={() => window.location.href = '/order?mode=online'}
-            >
-              <div className="w-5 h-5 relative">
-                <Image 
-                  src={theme === 'dark' ? "/order-online-icon-light.png" : "/order-online-icon-dark.png"}
-                  alt="Delivery"
-                  width={20}
-                  height={20}
-                  className="w-5 h-5"
-                />
-              </div>
-              <span>Delivery</span>
-            </Button>
-            <Button 
-              className={`h-12 w-full max-w-[160px] text-sm sm:text-base font-semibold rounded-full transition-all flex items-center justify-center gap-2 ${theme === 'dark' ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} border border-transparent hover:border-current shadow-md hover:shadow-lg transform hover:scale-105`}
-              onClick={() => window.location.href = '/order?mode=pickup'}
-            >
-              <div className="w-5 h-5 relative">
-                <Image 
-                  src={theme === 'dark' ? "/order-online-icon-light.png" : "/order-online-icon-dark.png"}
-                  alt="Pickup"
-                  width={20}
-                  height={20}
-                  className="w-5 h-5"
-                />
-              </div>
-              <span>Pickup</span>
-            </Button>
-          </div>
-        </motion.div>
-        
+        {/* Single Order Button */}
+        <div className="flex justify-center mt-8"> 
+          <Button 
+            className="flex items-center justify-center gap-2 py-3 px-6 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-black font-bold text-base rounded-md w-full max-w-[250px]"
+            onClick={() => window.location.href = '/order'}
+          >
+            <div className="w-6 h-6 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1">
+              <Image 
+                src={theme === 'dark' ? "/order-online-icon-light.png" : "/order-online-icon-dark.png"}
+                alt="Order Online"
+                width={16}
+                height={16}
+                className="w-4 h-4"
+              />
+            </div>
+            <span>Order Online</span>
+          </Button>
+        </div>
+
         {/* App Installation Flow */}
         <AppInstallFlow />
       </div>
