@@ -4,7 +4,7 @@
 "use client";
 
 import React from 'react';
-import ElfsightWidget from '@/components/common/ElfsightWidget'; // Corrected path
+import ElfsightWidget from '@/components/features/ElfsightWidget'; // Correct path to the component
 
 interface GoogleReviewsProps {
   appId?: string; // The Elfsight *widget* ID for Google Reviews

@@ -61,6 +61,8 @@ const GoogleReviewsSection: React.FC = () => {
                 <ElfsightWidget 
                   widgetId="f4fdffed-81de-4d5d-b688-2da302faebbe"
                   className="w-full h-full"
+                  wrapperClassName="google-reviews-wrapper"
+                  fallbackMessage="Loading Google Reviews..."
                 />
               </div>
             </div>

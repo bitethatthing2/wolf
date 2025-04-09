@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
-import { Download, Bell, ShoppingBag, Store } from "lucide-react"
+import { Download, Bell, ShoppingBag, Store, ShoppingCart } from "lucide-react"
 import { LocationSwitcher } from "@/components/features/location-switcher"
 import { motion } from "framer-motion"
 import { useLocation } from "@/contexts/LocationContext";
@@ -104,17 +104,12 @@ export default function HomePage() {
         {/* Single Order Button */}
         <div className="flex justify-center mt-8"> 
           <Button 
-            className="flex items-center justify-center gap-2 py-3 px-6 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-black font-bold text-base rounded-md w-full max-w-[250px]"
+            asChild={false} 
+            className="flex items-center justify-center gap-2 py-3 px-6 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-black font-bold text-base rounded-md w-full max-w-[250px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0 [&_svg]:transition-colors"
             onClick={() => window.location.href = '/order'}
           >
-            <div className="w-6 h-6 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1">
-              <Image 
-                src={theme === 'dark' ? "/order-online-icon-light.png" : "/order-online-icon-dark.png"}
-                alt="Order Online"
-                width={16}
-                height={16}
-                className="w-4 h-4"
-              />
+            <div className="w-7 h-7 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1">
+              <ShoppingCart className="h-2.5 w-2.5 text-black dark:text-white" />
             </div>
             <span>Order Online</span>
           </Button>

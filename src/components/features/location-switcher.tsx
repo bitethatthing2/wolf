@@ -5,61 +5,43 @@ import Image from "next/image"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocation } from "@/contexts/LocationContext"
+import { Flower2, Apple } from 'lucide-react';
 
 interface LocationSwitcherProps {
   className?: string
 }
 
 export function LocationSwitcher({ className }: LocationSwitcherProps) {
-  const { resolvedTheme, theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
   const { selectedLocation, setSelectedLocation } = useLocation()
-  
-  // Ensure component is mounted before accessing theme
+  const { theme, setTheme, resolvedTheme } = useTheme()
+
+  // Ensure component state matches context on mount or when context changes
   useEffect(() => {
-    setMounted(true)
-    
-    // Sync theme with location on initial load
-    if (selectedLocation === 'portland' && theme !== 'dark') {
-      setTheme('dark')
-    } else if (selectedLocation === 'salem' && theme !== 'light') {
-      setTheme('light')
+    const expectedTheme = selectedLocation === 'portland' ? 'dark' : 'light';
+    if (theme !== expectedTheme) {
+      setTheme(expectedTheme);
     }
-  }, [])
-  
-  // If not mounted yet, return a placeholder to prevent layout shift
-  if (!mounted) {
-    return <div className={`flex flex-col items-center space-y-4 ${className}`}>
-      <div className="mt-6 flex justify-center items-center">
-        <div className="relative w-96 h-96 opacity-0">
-          Loading...
-        </div>
-      </div>
-    </div>
-  }
-  
-  // Get current image based on both location and theme
+  }, [selectedLocation, theme, setTheme]);
+
   const isDarkMode = theme === 'dark' || resolvedTheme === 'dark'
   
   let currentImage: string;
   if (selectedLocation === 'portland') {
-    // Portland always uses white wolf (dark theme)
     currentImage = '/wolf-light-white.png';
   } else {
-    // Salem uses black wolf for light theme, white wolf for dark theme
     currentImage = isDarkMode ? '/wolf-light-white.png' : '/wolf-icon-black.png';
   }
   
+  // Function to toggle location AND theme
   const toggleLocation = () => {
     const newLocation = selectedLocation === 'portland' ? 'salem' : 'portland'
     setSelectedLocation(newLocation)
-    
-    // Toggle theme when location changes
     setTheme(newLocation === 'portland' ? 'dark' : 'light')
   }
   
   return (
     <div className={`flex flex-col items-center space-y-4 ${className}`}>
+      {/* Image Animation Section - KEEP THIS */}
       <div className="mt-6 flex justify-center items-center">
         <div className="relative w-96 h-96"> 
           <AnimatePresence mode="wait">
@@ -84,22 +66,32 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
         </div>
       </div>
       
+      {/* --- Toggle Section with Simple Text Labels START --- */}
       <div className="flex items-center space-x-4">
+        {/* PDX Text Label */}
         <span 
-          className={`text-lg font-bold cursor-pointer ${selectedLocation === 'portland' ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}
+          className={`text-lg font-bold cursor-pointer ${selectedLocation === 'portland' 
+            ? 'text-black dark:text-white' // Use theme's primary text color when active
+            : 'text-gray-500 dark:text-gray-400' // Use dimmer color when inactive
+          }`}
           onClick={() => {
             setSelectedLocation('portland')
-            setTheme('dark')
+            setTheme('dark') // Ensure theme syncs on direct click
           }}
         >
-          Portland
+          PDX
         </span>
         
+        {/* Toggle Button */}
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`relative inline-flex h-8 w-14 items-center rounded-full ${selectedLocation === 'salem' ? 'bg-black dark:bg-white' : 'bg-gray-300 dark:bg-gray-600'}`}
-          onClick={toggleLocation}
+          // Increased track size
+          className={`relative inline-flex h-10 w-20 items-center rounded-full ${selectedLocation === 'salem' 
+            ? 'bg-black dark:bg-white' // Salem (light) active: Black track (light) / White track (dark)
+            : 'bg-gray-300 dark:bg-gray-600' // Portland (dark) active: Gray track (light) / Dark Gray track (dark)
+          }`}
+          onClick={toggleLocation} // Use the combined toggle function
           aria-label={`Switch location to ${selectedLocation === 'portland' ? 'Salem' : 'Portland'}`}
           title={`Switch location to ${selectedLocation === 'portland' ? 'Salem' : 'Portland'}`}
         >
@@ -112,36 +104,52 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
               mass: 0.5
             }} 
             animate={{ 
-              translateX: selectedLocation === 'salem' ? '1.5rem' : '0.25rem',
+              // Adjusted translation distance for wider track and bigger ball
+              translateX: selectedLocation === 'salem' ? '2.5rem' : '0.25rem',
               scale: selectedLocation === 'salem' ? 1.1 : 1
             }}
-            className="flex h-7 w-7 rounded-full bg-white dark:bg-white items-center justify-center"
+            // Increased ball size, always white background
+            className="flex h-9 w-9 rounded-full bg-white items-center justify-center shadow"
           >
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
+              // Set background only, image has its own colors
+              className={`flex items-center justify-center w-full h-full rounded-full 
+                ${selectedLocation === 'portland' 
+                  ? 'bg-black' // Dark theme active: Black BG
+                  : 'bg-white'} // Light theme active: White BG
+              `}
             >
+              {/* Reverted back to using Image component with conditional source */}
               <Image
-                src={'/wolf-icon-black.png'}
+                src={selectedLocation === 'portland' ? '/wolf-light-white.png' : '/wolf-icon-black.png'}
                 alt="Location Toggle Icon"
-                width={20} 
-                height={20}
-                className="object-contain w-full h-full" 
+                // Increased size
+                width={28} 
+                height={28}
+                className="object-contain w-7 h-7" // Increased size
               />
             </motion.div>
           </motion.span>
         </motion.button>
         
+        {/* SALEM Text Label */}
         <span 
-          className={`text-lg font-bold cursor-pointer ${selectedLocation === 'salem' ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}
+          className={`text-lg font-bold cursor-pointer ${selectedLocation === 'salem' 
+            ? 'text-black dark:text-white' // Use theme's primary text color when active
+            : 'text-gray-500 dark:text-gray-400' // Use dimmer color when inactive
+          }`}
           onClick={() => {
             setSelectedLocation('salem')
-            setTheme('light')
+            setTheme('light') // Ensure theme syncs on direct click
           }}
         >
           Salem
         </span>
       </div>
+      {/* --- Toggle Section END --- */}
+
     </div>
   )
 }

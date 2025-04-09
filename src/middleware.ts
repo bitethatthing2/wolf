@@ -8,15 +8,15 @@ export function middleware(request: NextRequest) {
   // Add CSP header
   const cspHeader = `
     default-src 'self' https://*.elfsight.com https://static.elfsight.com https://*.googleusercontent.com https://*.instagram.com https://*.cdninstagram.com https://*.gstatic.com https://*.firebase.googleapis.com https://maps.googleapis.com https://www.google.com;
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.elfsight.com https://static.elfsight.com https://*.elfsightcdn.com https://universe-static.elfsightcdn.com https://core.service.elfsight.com https://*.gstatic.com https://*.googleapis.com https://*.firebase.googleapis.com https://*.google.com https://g.doubleclick.net https://maps.googleapis.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.elfsight.com https://static.elfsight.com https://*.elfsightcdn.com https://universe-static.elfsightcdn.com https://core.service.elfsight.com https://apps.elfsight.com https://service.elfsight.com https://*.gstatic.com https://*.googleapis.com https://*.firebase.googleapis.com https://*.google.com https://g.doubleclick.net https://maps.googleapis.com;
     style-src 'self' 'unsafe-inline' https://*.elfsight.com https://fonts.googleapis.com https://*.gstatic.com https://*.google.com;
-    img-src 'self' data: https://*.googleusercontent.com https://*.instagram.com https://*.cdninstagram.com https://*.elfsight.com https://*.elfsightcdn.com https://lh3.googleusercontent.com https://phosphor.utils.elfsightcdn.com https://*.service.elfsight.com https://*.googleapis.com https://*.ggpht.com https://*.google.com https://maps.gstatic.com blob:;
+    img-src 'self' data: https://*.googleusercontent.com https://*.instagram.com https://*.cdninstagram.com https://*.fbcdn.net https://*.elfsight.com https://*.elfsightcdn.com https://lh3.googleusercontent.com https://phosphor.utils.elfsightcdn.com https://*.service.elfsight.com https://*.googleapis.com https://*.ggpht.com https://*.google.com https://maps.gstatic.com blob:;
     font-src 'self' data: https://fonts.gstatic.com https://*.elfsight.com https://*.elfsightcdn.com;
-    media-src 'self' https://video.wixstatic.com https://*.elfsight.com https://*.elfsightcdn.com blob:;
-    connect-src 'self' https://*.elfsight.com https://widget-data.service.elfsight.com https://*.service.elfsight.com https://*.googleapis.com https://*.instagram.com https://*.gstatic.com https://*.firebase.googleapis.com https://lh3.googleusercontent.com https://scontent.cdninstagram.com https://core.service.elfsight.com https://maps.googleapis.com https://www.google.com https://g.doubleclick.net https://accounts.google.com;
-    frame-src 'self' https://*.elfsight.com https://core.service.elfsight.com https://*.google.com https://g.doubleclick.net https://accounts.google.com https://www.gstatic.com https://maps.googleapis.com https://www.google.com/maps/;
+    media-src 'self' https://video.wixstatic.com https://*.elfsight.com https://*.elfsightcdn.com https://*.cdninstagram.com https://*.fbcdn.net blob:;
+    connect-src 'self' https://*.elfsight.com https://widget-data.service.elfsight.com https://*.service.elfsight.com https://*.googleapis.com https://*.instagram.com https://*.gstatic.com https://*.firebase.googleapis.com https://lh3.googleusercontent.com https://*.cdninstagram.com https://core.service.elfsight.com https://maps.googleapis.com https://www.google.com https://g.doubleclick.net https://accounts.google.com https://graph.instagram.com https://api.instagram.com;
+    frame-src 'self' https://*.elfsight.com https://core.service.elfsight.com https://*.google.com https://g.doubleclick.net https://accounts.google.com https://www.gstatic.com https://maps.googleapis.com https://www.google.com/maps/ https://*.instagram.com;
     worker-src 'self' blob:;
-    child-src 'self' blob: https://*.google.com https://maps.googleapis.com;
+    child-src 'self' blob: https://*.google.com https://maps.googleapis.com https://*.instagram.com;
     frame-ancestors 'self' https://*.netlify.app https://*.magnificent-churros-3c51ed.netlify.app;
     object-src 'none';
     base-uri 'self';

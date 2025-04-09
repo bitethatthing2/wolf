@@ -57,13 +57,15 @@ export default function ClientScripts() {
       
       {/* REMOVED Google Maps Fix Scripts - they were causing conflicts */}
       
-      {/* Add Elfsight Platform Script */}
-      <Script 
-        src="https://static.elfsight.com/platform/platform.js" 
-        strategy="lazyOnload"
-        onError={(e) => {
+      {/* Elfsight Platform Script - load at root level for proper initialization */}
+      <Script
+        src="https://static.elfsight.com/platform/platform.js"
+        strategy="beforeInteractive"
+        id="elfsight-platform-script"
+        onLoad={() => {
+          // Mark as loaded in the global scope
           if (typeof window !== 'undefined') {
-            window.elfsightLoadFailed = true;
+            (window as any).elfsightScriptLoaded = true;
           }
         }}
       />

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import Image from "next/image"
+import Image from 'next/image';
 import { useState, useEffect } from "react"; 
 import { useTheme } from "next-themes"
 import { 
@@ -35,31 +35,29 @@ export function MobileNav() {
     setIsMounted(true);
   }, []);
   
-  const menuIconSrc = resolvedTheme === 'dark' 
-    ? '/main-menu-icon-white.png' 
-    : '/main-menu-icon-black.png'
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button 
-          variant="default" 
-          size="icon" 
+        <Button
+          variant="default"
+          size="icon"
           className="md:hidden"
         >
-          {/* Update placeholder size */}
-          {!isMounted && <div className="h-8 w-8" />}
-          {isMounted && (
-            <Image 
-              key={menuIconSrc} // Add key for smooth transitions if src changes
-              src={menuIconSrc} 
-              alt="Menu"
-              width={24} // Logical size (can keep or increase, visual is controlled by className)
-              height={24} // Logical size
-              // Increase visual size again
-              className="h-8 w-8" 
-            />
-          )}
+          {/* Inner rounded square with opposite background */}
+          <div className="bg-white dark:bg-black rounded-sm p-1 flex items-center justify-center w-8 h-8">
+            {/* Use actual Image component with theme-based src */}
+            {isMounted && (
+              <Image
+                key={resolvedTheme} // Add key for potential theme transitions
+                src={resolvedTheme === 'dark' ? '/main-menu-icon-black.png' : '/main-menu-icon-white copy.png'}
+                alt="Menu"
+                width={24} // Logical base width
+                height={24} // Logical base height
+                className="w-6 h-6" // Visual size inside the container
+              />
+            )}
+            {!isMounted && <div className="w-6 h-6" />} {/* Placeholder for initial render */}
+          </div>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">

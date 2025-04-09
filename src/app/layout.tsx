@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/contexts/theme-context"; // Corrected import pa
 import { LocationProvider } from "@/contexts/LocationContext"; // Import LocationProvider
 import { Toaster } from "@/components/ui/toaster";
 import ClientScripts from "@/components/layout/ClientScripts";
+import FramerMotionFixes from "@/components/layout/FramerMotionFixes";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -56,6 +57,7 @@ export default function RootLayout({
             <Toaster />
           </LocationProvider>
         </ThemeProvider>
+        <FramerMotionFixes />
         <ClientScripts />
       </body>
     </html>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Download, ChevronRight } from "lucide-react";
+import { Download, ChevronRight, Bell } from "lucide-react";
 import { useTheme } from "next-themes";
 
 type DeviceType = "ios" | "android" | "desktop" | "unknown";
@@ -165,9 +165,9 @@ const AppInstallFlow = () => {
                 </div>
               ) : (
                 <>
-                  {/* Increase wrapper size */}
-                  <div className="w-8 h-8 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1"> 
-                    <Download className="w-4 h-4 text-black dark:text-white" /> 
+                  {/* Theme-aware icon: white bg/black icon on light, black bg/white icon on dark */}
+                  <div className="w-7 h-7 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1">
+                    <Download className="w-2.5 h-2.5 text-black dark:text-white" />
                   </div>
                   Install App
                 </>
@@ -179,29 +179,23 @@ const AppInstallFlow = () => {
               className={targetButtonStyle}
               onClick={handleInstallClick}
             >
-              {/* Increase wrapper size */}
-              <div className="w-8 h-8 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1"> 
-                <Download className="w-4 h-4 text-black dark:text-white" /> 
+              {/* Theme-aware icon: white bg/black icon on light, black bg/white icon on dark */}
+              <div className="w-7 h-7 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1">
+                <Download className="w-2.5 h-2.5 text-black dark:text-white" />
               </div>
               Install App
             </Button>
           )}
+          {/* Apply consistent styling to the Notifications button container and add Bell icon */}
           <div 
-            className={`${targetButtonStyle} cursor-pointer`} 
+            className={`${targetButtonStyle} cursor-pointer flex items-center justify-center gap-2 py-3 px-6`}
             onClick={handleNotificationsClick}
-            role="button" 
-            tabIndex={0} 
-            onKeyDown={(e) => e.key === 'Enter' || e.key === ' ' ? handleNotificationsClick() : null}
           >
-             <div className="rounded-full w-8 h-8 flex items-center justify-center overflow-hidden bg-white dark:bg-black mr-1">
-              <Image 
-                alt="Enable Notifications"
-                src={isDarkTheme ? "/enable-notifications-light-screen.png" : "/enable-notifications-dark.png"}
-                width={20} 
-                height={20} 
-                className="w-5 h-5"
-              />
+            {/* Theme-aware icon: white bg/black icon on light, black bg/white icon on dark */}
+            <div className="w-7 h-7 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1">
+              <Bell className="w-5 h-5 text-black dark:text-white" /> {/* Kept w-5 h-5 for Bell based on last change */}
             </div>
+            {/* Replace img with text */}
             <span>Enable Notifications</span>
           </div>
         </div>

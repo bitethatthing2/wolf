@@ -5,7 +5,6 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { BackButton } from "@/components/back-button"
 import { MobileNav } from "@/components/mobile-nav"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { useTheme } from "next-themes"
 
 export function SiteHeader() {
@@ -66,7 +65,6 @@ export function SiteHeader() {
               Contact
             </Link>
           </nav>
-          <ThemeToggle />
           <MobileNav />
         </div>
       </div>
