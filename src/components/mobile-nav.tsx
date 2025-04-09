@@ -43,20 +43,22 @@ export function MobileNav() {
           size="icon"
           className="md:hidden"
         >
-          {/* Inner rounded square with opposite background */}
-          <div className="bg-white dark:bg-black rounded-sm p-1 flex items-center justify-center w-8 h-8">
+           {/* Inner rounded square: black in light mode, white in dark mode */}
+          <div className="bg-black dark:bg-white rounded-sm p-1 flex items-center justify-center w-10 h-10">
             {/* Use actual Image component with theme-based src */}
             {isMounted && (
               <Image
                 key={resolvedTheme} // Add key for potential theme transitions
-                src={resolvedTheme === 'dark' ? '/main-menu-icon-black.png' : '/main-menu-icon-white copy.png'}
+                // Use white icon copy on white BG (dark mode), black icon on black BG (light mode)
+                src={resolvedTheme === 'dark' ? '/main-menu-icon-white copy.png' : '/main-menu-icon-black.png'}
                 alt="Menu"
-                width={24} // Logical base width
-                height={24} // Logical base height
-                className="w-6 h-6" // Visual size inside the container
+                // Increased size
+                width={32} // Logical base width
+                height={32} // Logical base height
+                className="w-8 h-8" // Visual size inside the container
               />
             )}
-            {!isMounted && <div className="w-6 h-6" />} {/* Placeholder for initial render */}
+            {!isMounted && <div className="w-8 h-8" />} {/* Placeholder for initial render - Increased size */}
           </div>
         </Button>
       </SheetTrigger>

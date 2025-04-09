@@ -121,9 +121,9 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
                   : 'bg-white'} // Light theme active: White BG
               `}
             >
-              {/* Reverted back to using Image component with conditional source */}
+              {/* Using menu icons instead of wolf icons */}
               <Image
-                src={selectedLocation === 'portland' ? '/wolf-light-white.png' : '/wolf-icon-black.png'}
+                src={selectedLocation === 'portland' ? '/main-menu-icon-black.png' : '/main-menu-icon-white copy.png'}
                 alt="Location Toggle Icon"
                 // Increased size
                 width={28} 
