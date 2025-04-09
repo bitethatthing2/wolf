@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Download, ChevronRight, Bell } from "lucide-react";
 import { useTheme } from "next-themes";
+import AndroidLogoIcon from "@/components/icons/AndroidLogoIcon";
+import AppleLogoIcon from "@/components/icons/AppleLogoIcon";
 
 type DeviceType = "ios" | "android" | "desktop" | "unknown";
 
@@ -115,25 +117,9 @@ const AppInstallFlow = () => {
                 <div className="flex items-center justify-center w-full">
                   <div className="flex items-center justify-center gap-3">
                     <div className="rounded-full w-8 h-8 flex items-center justify-center overflow-hidden bg-white dark:bg-black"> 
-                      {isDarkTheme ? (
-                        <Image 
-                          src="/android-installation-guide-white.png.png"
-                          alt="Android Install"
-                          width={20}
-                          height={20}
-                          className="w-5 h-5"
-                          priority
-                        />
-                      ) : (
-                        <Image 
-                          src="/android_installation_guide-black.png"
-                          alt="Android Install"
-                          width={20}
-                          height={20}
-                          className="w-5 h-5"
-                          priority
-                        />
-                      )}
+                      <AndroidLogoIcon 
+                        className="w-5 h-5 text-black dark:text-white"
+                      />
                     </div>
                     <span>Install on Android</span>
                   </div>
@@ -141,25 +127,9 @@ const AppInstallFlow = () => {
               ) : deviceType === "ios" ? (
                 <div className="flex items-center justify-center w-full">
                   <div className="rounded-full w-8 h-8 flex items-center justify-center overflow-hidden bg-white dark:bg-black mr-2"> 
-                    {isDarkTheme ? (
-                      <Image 
-                        src="/apple_icon_install_white.png"
-                        alt="iOS Install"
-                        width={20}
-                        height={20}
-                        className="w-5 h-5"
-                        priority
-                      />
-                    ) : (
-                      <Image 
-                        src="/ios_pwa_install-black.png"
-                        alt="iOS Install"
-                        width={20}
-                        height={20}
-                        className="w-5 h-5"
-                        priority
-                      />
-                    )}
+                    <AppleLogoIcon 
+                      className="w-5 h-5 text-black dark:text-white"
+                    />
                   </div>
                   <span>Install on iOS</span>
                 </div>
@@ -251,7 +221,17 @@ const AppInstallFlow = () => {
 
   return (
     <div className="my-8 p-4 border border-border rounded-lg bg-card text-card-foreground shadow-sm w-full max-w-lg mx-auto flex flex-col items-center">
-      <h3 className="text-xl font-semibold mb-4 text-center text-black dark:text-white">Get the App</h3>
+      {/* Updated Heading */} 
+      <h3 className="text-xl font-semibold mb-4 text-center text-black dark:text-white">
+        Stay Connected with Side Hustle Bar
+      </h3>
+      
+      {/* Updated Descriptive Paragraph */}
+      <p className="text-sm text-muted-foreground text-center mb-4">
+        Install the Side Hustle Bar app and stay plugged into the action! Enable notifications to join our pack and get the first word on events, specials, and exclusives.
+      </p>
+
+      {/* Render install/notification steps */} 
       {renderContent()}
     </div>
   );
