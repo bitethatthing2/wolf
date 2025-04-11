@@ -1,7 +1,7 @@
 {
   "name": "Side Hustle Bar",
   "short_name": "Side Hustle",
-  "description": "Side Hustle Bar - Food, Drinks, and Events",
+  "description": "Side Hustle Bar offers an exciting sports bar experience with great food, drinks, and entertainment in Portland and Salem.",
   "icons": [
     {
       "src": "/icons/splash_screens/icon.png",
@@ -14,6 +14,17 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
     }
   ],
   "start_url": "/",
@@ -44,5 +55,25 @@
       "url": "/events/"
     }
   ],
-  "splash_pages": null
+  "splash_pages": null,
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-home.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Side Hustle Bar - Mobile Home"
+    },
+    {
+      "src": "/screenshots/desktop-home.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Side Hustle Bar - Desktop Home"
+    }
+  ],
+  "categories": ["food", "entertainment", "sports", "nightlife"],
+  "dir": "ltr",
+  "lang": "en-US",
+  "iarc_rating_id": ""
 }

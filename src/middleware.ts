@@ -2,6 +2,24 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
+  // Special handling for Elfsight API requests to fix CORS issues
+  if (request.nextUrl.pathname.includes('/api/elfsight') || 
+      request.headers.get('referer')?.includes('elfsight.com') ||
+      request.headers.get('origin')?.includes('elfsight.com')) {
+    
+    // Return a modified response with CORS headers for Elfsight
+    const response = NextResponse.next();
+    
+    // Set CORS headers specifically for Elfsight
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Access-Control-Max-Age', '86400');
+    
+    return response;
+  }
+  
   // Handle specific endpoints that are causing 404 errors
   if (request.nextUrl.pathname === '/current-url/' || request.nextUrl.pathname === '/.identity') {
     // Return an empty 200 response for these endpoints

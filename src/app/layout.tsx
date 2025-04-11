@@ -7,6 +7,7 @@ import { LocationProvider } from "@/contexts/LocationContext";
 import { Toaster } from "@/components/ui/toaster";
 import ClientScripts from "@/components/layout/ClientScripts";
 import ClientComponentsWrapper from "@/components/layout/ClientComponentsWrapper";
+import Script from "next/script";
 
 // Optimize font loading with display: swap for better performance
 const fontSans = FontSans({
@@ -18,8 +19,8 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Side Hustle Bar",
-  description: "High-Energy Sports Bar • Restaurant • Nightclub",
+  title: "Side Hustle Bar | High-Energy Sports Bar • Restaurant • Nightclub",
+  description: "Side Hustle Bar offers an exciting sports bar experience with great food, drinks, and entertainment. Visit us in Portland and Salem for the ultimate sports viewing, dining, and nightlife experience.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -64,6 +65,34 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Manually add viewport meta tag to ensure it's included */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes" />
+        
+        {/* Manually add title and description to ensure they're included */}
+        <title>Side Hustle Bar | High-Energy Sports Bar • Restaurant • Nightclub</title>
+        <meta name="description" content="Side Hustle Bar offers an exciting sports bar experience with great food, drinks, and entertainment. Visit us in Portland and Salem for the ultimate sports viewing, dining, and nightlife experience." />
+        
+        {/* PWA meta tags */}
+        <meta name="theme-color" content="#000000" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Side Hustle Bar" />
+        <meta name="application-name" content="Side Hustle Bar" />
+        
+        {/* Apple touch icon - placed in head for proper accessibility */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        
+        {/* Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        
+        {/* Service Worker Registration */}
+        <Script 
+          src="/service-worker-registration.js"
+          strategy="afterInteractive"
+          id="service-worker-registration"
+        />
+        
         <ClientScripts />
       </head>
       <body
