@@ -8,6 +8,31 @@ This document provides an overview of the push notification system implemented i
 2. **Fixed Service Worker Registration** - Enabled registration in all environments, not just production
 3. **Updated Supabase Connection** - Connected to the correct Supabase project URL
 4. **Improved Documentation** - Added comprehensive documentation for the notification system
+5. **Enhanced Installation Flow** - Updated AppInstallFlow component to register service worker
+
+### Service Worker Structure
+
+The application uses a multi-layered service worker approach:
+
+1. **sw.js** - The main service worker that handles:
+   - Service worker registration
+   - Caching strategy for offline support
+   - Import of Firebase Messaging service worker
+   - Navigation preload for performance
+
+2. **firebase-messaging-sw.js** - Handles Firebase Cloud Messaging:
+   - Push notification reception
+   - Background message processing
+   - Notification display with deduplication
+
+3. **service-worker-init.js** - Initializes service worker registration
+   - Used as a script in the page's HTML
+   - Registers the service worker
+   - Sets up update handling
+
+4. **service-worker-fix.js** - Provides fixes for service worker:
+   - Navigation preload enhancements
+   - Error handling improvements
 
 ## System Overview
 

@@ -43,6 +43,34 @@ const AppInstallFlow = () => {
       setDeferredPrompt(e);
     });
     
+    // Register service worker for notifications
+    if ('serviceWorker' in navigator) {
+      // Check if we're in a secure context or localhost
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1';
+      
+      // Only register in production (HTTPS) or if explicitly enabled in development
+      if (window.location.protocol === 'https:' || 
+          isLocalhost || 
+          process.env.NODE_ENV === 'production') {
+        
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(registration => {
+            console.log('Service Worker registered successfully with scope:', registration.scope);
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+            
+            // Log more detailed error for localhost issues
+            if (isLocalhost) {
+              console.info('Note: For local development, you can:\n1. Use HTTPS with a local certificate\n2. Test in production\n3. Use Chrome with --unsafely-treat-insecure-origin-as-secure flag');
+            }
+          });
+      } else {
+        console.log('Service Worker registration skipped - requires HTTPS except on localhost');
+      }
+    }
+    
     return () => {
       window.removeEventListener('beforeinstallprompt', () => {});
     };

@@ -168,7 +168,7 @@ The installation process leverages service workers for:
 // Service worker registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js').then(
+    navigator.serviceWorker.register('/sw.js').then(
       function(registration) {
         console.log('Service Worker registered successfully');
         
