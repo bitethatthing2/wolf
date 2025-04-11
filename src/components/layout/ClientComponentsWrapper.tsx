@@ -117,16 +117,14 @@ export default function ClientComponentsWrapper({ children }: ClientComponentsWr
       <div suppressHydrationWarning>
         {/* Main content - opacity controlled by client-side state */}
         <div 
-          className="transition-opacity duration-300"
-          style={{ opacity: initialized ? 1 : 0 }}
+          className={`transition-opacity duration-300 ${initialized ? 'opacity-100' : 'opacity-0'}`}
         >
           {children}
         </div>
         
         {/* Loading indicator - only visible before initialization */}
         <div 
-          className="min-h-screen flex items-center justify-center fixed inset-0 z-50 transition-opacity duration-300 pointer-events-none"
-          style={{ opacity: initialized ? 0 : 1 }}
+          className={`min-h-screen flex items-center justify-center fixed inset-0 z-50 transition-opacity duration-300 pointer-events-none ${initialized ? 'opacity-0' : 'opacity-100'}`}
         >
           <span>Loading...</span>
         </div>

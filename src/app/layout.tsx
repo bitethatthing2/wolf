@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    apple: "/icons/icons/icon-192x192.png",
+    apple: "/icons/splash_screens/icon.png",
   },
   // Add PWA metadata
   other: {

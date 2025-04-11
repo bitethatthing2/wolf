@@ -1,7 +1,19 @@
 'use client';
 
 import { useRouter as useNextRouter, usePathname } from 'next/navigation';
-import { BasePayload } from '@/types';
+
+// Define BasePayload interface locally instead of importing from @/types
+interface BasePayload {
+  notification: {
+    title: string;
+    body: string;
+    [key: string]: any;
+  };
+  data?: {
+    [key: string]: string;
+  };
+  [key: string]: any;
+}
 
 /**
  * Custom router utility for handling navigation and notification routing
@@ -159,8 +171,8 @@ export function createPlatformPayloads(basePayload: BasePayload, token?: string)
     webpush: {
       notification: {
         ...notification,
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-72x72.png',
+        icon: '/icons/splash_screens/icon.png',
+        badge: '/icons/splash_screens/icon.png',
         vibrate: [100, 50, 100],
         requireInteraction: true,
         tag: deduplicationKey, // Tag for web notification deduplication

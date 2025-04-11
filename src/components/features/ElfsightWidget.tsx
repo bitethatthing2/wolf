@@ -22,6 +22,8 @@ const ElfsightWidget = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetClass = `elfsight-app-${widgetId}`;
   const [isReady, setIsReady] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 5;
   
   // Use a separate effect for script loading to avoid render cycle interference
   useEffect(() => {
@@ -101,12 +103,46 @@ const ElfsightWidget = ({
     let cleanupTimer: NodeJS.Timeout | null = null;
     
     const initWidget = () => {
+      // Check for both newer and older Elfsight API
       if (window.elfsight && typeof window.elfsight.reinit === 'function') {
         try {
           window.elfsight.reinit();
           if (initTimer) clearInterval(initTimer);
+          
+          // Monitor for specific widget errors
+          const errorHandler = (event: ErrorEvent) => {
+            if (event.message && 
+                (event.message.includes("WIDGET_NOT_FOUND") || 
+                 event.message.includes("can`t be initialized"))) {
+              console.warn(`Widget ID "${widgetId}" not found or cannot be initialized. Please verify your widget ID.`);
+              // Prevent default error behavior to avoid error in the console
+              event.preventDefault();
+            }
+          };
+          
+          // Add error handler for a short time to catch initialization errors
+          window.addEventListener('error', errorHandler);
+          setTimeout(() => {
+            window.removeEventListener('error', errorHandler);
+          }, 5000);
+          
         } catch (error) {
           console.error("Error initializing Elfsight widget:", error);
+          setRetryCount(prev => prev + 1);
+          
+          // After max retries, stop trying
+          if (retryCount >= maxRetries && initTimer) {
+            clearInterval(initTimer);
+          }
+        }
+      } else if (window.eapps && typeof window.eapps.initWidgetsFromBuffer === 'function') {
+        // Fallback to legacy API
+        try {
+          window.eapps.initWidgetsFromBuffer();
+          if (initTimer) clearInterval(initTimer);
+        } catch (error) {
+          console.error("Error initializing Elfsight widget with legacy API:", error);
+          setRetryCount(prev => prev + 1);
         }
       }
     };
@@ -128,7 +164,7 @@ const ElfsightWidget = ({
       if (initTimer) clearInterval(initTimer);
       if (cleanupTimer) clearTimeout(cleanupTimer);
     };
-  }, [isReady]);
+  }, [isReady, widgetId]);
 
   return (
     <div className={wrapperClassName}>
@@ -142,16 +178,27 @@ const ElfsightWidget = ({
       {!isReady && fallbackMessage && (
         <div className="text-center py-4">{fallbackMessage}</div>
       )}
-      <div ref={containerRef} className={`${widgetClass} ${className}`}></div>
+      <div 
+        ref={containerRef} 
+        className={`${widgetClass} ${className}`}
+        data-elfsight-app-lazy
+      ></div>
     </div>
   );
 };
 
-// Add TypeScript declaration for the Elfsight global
+// Add TypeScript declaration for the Elfsight globals
 declare global {
   interface Window {
-    elfsight: {
+    elfsight?: {
       reinit: () => void;
+    };
+    eapps?: {
+      initWidgetsFromBuffer: () => void;
+      Platform?: {
+        initialized: boolean;
+      };
+      AppsManager?: any;
     };
   }
 }

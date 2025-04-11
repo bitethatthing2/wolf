@@ -19,14 +19,13 @@ self.addEventListener('activate', function(event) {
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
-// Basic Firebase app configuration
-// These placeholders will be replaced by the actual config values from Netlify environment variables
-// This happens via the client.ts script which sends the config through postMessage
+// Basic Firebase app configuration with fallback values for development
+// These will be updated by the client-side script via postMessage 
 const firebaseConfig = {
-  apiKey: "PLACEHOLDER_KEY", // Will be replaced at runtime with injected config from Netlify
-  projectId: "PLACEHOLDER_PROJECT_ID",
-  messagingSenderId: "PLACEHOLDER_SENDER_ID",
-  appId: "PLACEHOLDER_APP_ID",
+  apiKey: "AIzaSyBF8nfh2gYZnRh1U6vgP-XMfP9KCu6TKBQ",
+  projectId: "new1-f04b3",
+  messagingSenderId: "1036893806199",
+  appId: "1:1036893806199:web:5f6b3f8d18d30eda1bffcb",
 };
 
 // Initialize Firebase

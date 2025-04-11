@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { useEffect } from "react";
 import { applyFramerMotionFixes } from "@/lib/framer-motion-fix";
+import SplashScreens from "./SplashScreens";
 
 /**
  * ClientScripts component for loading critical, initialization, and third-party scripts
@@ -34,6 +35,9 @@ export default function ClientScripts() {
 
   return (
     <>
+      {/* Splash Screens for iOS and Android devices */}
+      <SplashScreens />
+      
       {/* Critical and high-priority scripts that should load very early */}
       <Script
         id="polyfill-init"
@@ -121,10 +125,13 @@ export default function ClientScripts() {
           console.log('Elfsight platform script loaded successfully');
           
           // Try to initialize Elfsight if it's already in the DOM
-          if (window.elfsight && typeof window.elfsight.reinit === 'function') {
+          if (typeof window !== 'undefined' && window.elfsight && typeof window.elfsight.reinit === 'function') {
             setTimeout(() => {
               try {
-                window.elfsight.reinit();
+                // Add additional type safety check before calling reinit
+                if (window.elfsight && typeof window.elfsight.reinit === 'function') {
+                  window.elfsight.reinit();
+                }
               } catch (err) {
                 console.error('Error initializing Elfsight after load:', err);
               }
@@ -133,25 +140,50 @@ export default function ClientScripts() {
         }}
       />
       
-      {/* Script for Firebase initialization if needed */}
+      {/* Environment configuration script that loads before anything else */}
+      <Script 
+        id="env-config" 
+        strategy="beforeInteractive"
+        src="/env-config.js"
+      />
+
+      {/* Script for Firebase initialization */}
       <Script id="firebase-env-init" strategy="afterInteractive">
         {`
-          // Make the Firebase configuration available globally
-          window.firebaseConfig = {
-            apiKey: "${process.env.NEXT_PUBLIC_FIREBASE_API_KEY || ''}",
-            authDomain: "${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || ''}",
-            projectId: "${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || ''}",
-            storageBucket: "${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || ''}",
-            messagingSenderId: "${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || ''}",
-            appId: "${process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''}",
+          // Make the Firebase configuration available globally with hardcoded fallbacks
+          window.firebaseConfig = window.firebaseConfig || {
+            apiKey: "${process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyBF8nfh2gYZnRh1U6vgP-XMfP9KCu6TKBQ'}",
+            projectId: "${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'new1-f04b3'}",
+            messagingSenderId: "${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '1036893806199'}",
+            appId: "${process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:1036893806199:web:5f6b3f8d18d30eda1bffcb'}",
           };
           
-          // Store environment variables for access in other scripts
+          // Ensure window.__ENV exists and has Firebase config
           window.__ENV = window.__ENV || {};
-          window.__ENV.NEXT_PUBLIC_FIREBASE_API_KEY = "${process.env.NEXT_PUBLIC_FIREBASE_API_KEY || ''}";
-          window.__ENV.NEXT_PUBLIC_FIREBASE_PROJECT_ID = "${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || ''}";
-          window.__ENV.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = "${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || ''}";
-          window.__ENV.NEXT_PUBLIC_FIREBASE_APP_ID = "${process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''}";
+          
+          // Set Firebase config vars if not already set by env-config.js
+          if (!window.__ENV.NEXT_PUBLIC_FIREBASE_API_KEY) {
+            window.__ENV.NEXT_PUBLIC_FIREBASE_API_KEY = "${process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyBF8nfh2gYZnRh1U6vgP-XMfP9KCu6TKBQ'}";
+          }
+          
+          if (!window.__ENV.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
+            window.__ENV.NEXT_PUBLIC_FIREBASE_PROJECT_ID = "${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'new1-f04b3'}";
+          }
+          
+          if (!window.__ENV.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID) {
+            window.__ENV.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = "${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '1036893806199'}";
+          }
+          
+          if (!window.__ENV.NEXT_PUBLIC_FIREBASE_APP_ID) {
+            window.__ENV.NEXT_PUBLIC_FIREBASE_APP_ID = "${process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:1036893806199:web:5f6b3f8d18d30eda1bffcb'}";
+          }
+          
+          // Log Firebase configuration for debugging
+          console.log('[Firebase Init] Configuration loaded:', {
+            apiKey: window.__ENV.NEXT_PUBLIC_FIREBASE_API_KEY ? 'Set' : 'Missing',
+            projectId: window.__ENV.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+            messagingSenderId: window.__ENV.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+          });
         `}
       </Script>
       
