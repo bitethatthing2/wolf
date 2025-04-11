@@ -129,6 +129,7 @@ export function createPlatformPayloads(basePayload: BasePayload, token?: string)
         priority: 'high',
         visibility: 'public',
         tag: deduplicationKey, // Use tag for Android notification grouping/deduplication
+        icon: '@drawable/android_notification_drawer', // Reference to the Android notification drawer icon
         ...notification
       },
       // Add direct boot notification support for Android
@@ -190,9 +191,10 @@ export function createPlatformPayloads(basePayload: BasePayload, token?: string)
   
   // Add token if provided
   if (token) {
-    androidPayload.token = token;
-    iosPayload.token = token;
-    webPayload.token = token;
+    // Use type assertion to add token property
+    (androidPayload as any).token = token;
+    (iosPayload as any).token = token;
+    (webPayload as any).token = token;
   }
   
   return {

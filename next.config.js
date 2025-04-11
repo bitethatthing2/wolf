@@ -114,6 +114,27 @@ if (process.env.NODE_ENV === 'production') {
       publicExcludes: ['firebase-messaging-sw.js', 'service-worker-fix.js', 'manifest.json'],
       workboxOptions: {
         disableDevLogs: true,
+        // Custom runtime caching rules for Elfsight
+        runtimeCaching: [
+          {
+            // Don't cache Elfsight API requests - prevents CORS errors
+            urlPattern: /^https:\/\/(api|widget-data)\..*\.elfsight\.com\/.*/i,
+            handler: 'NetworkOnly',
+            options: {
+              // No caching for Elfsight API requests
+              networkTimeoutSeconds: 10
+            }
+          },
+          {
+            // Don't cache Instagram API requests - prevents CORS errors
+            urlPattern: /^https:\/\/.*\.(cdninstagram|instagram)\.com\/.*/i,
+            handler: 'NetworkOnly',
+            options: {
+              // No caching for Instagram API requests
+              networkTimeoutSeconds: 10
+            }
+          }
+        ],
         exclude: [
           '_redirects',
           '**/_redirects',
@@ -124,8 +145,12 @@ if (process.env.NODE_ENV === 'production') {
           /firebase-messaging-sw\.js$/,
           /service-worker-fix\.js$/,
           /\.DS_Store/,
-          /\.git/
-        ]
+          /\.git/,
+          // Also exclude Elfsight and Instagram URLs
+          /elfsight\.com/,
+          /elfsightcdn\.com/,
+          /cdninstagram\.com/,
+          /instagram\.com/
       }
     })(nextConfig);
   } catch (e) {

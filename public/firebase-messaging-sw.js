@@ -217,12 +217,12 @@ messaging.onBackgroundMessage((payload) => {
   // Use the correct icon paths
   const notificationOptions = {
     body: displayBody,
-    // Use larger icon for Android and apple icon for others
+    // Use Android notification drawer icon for Android and standard icon for others
     icon: isAndroid ? 
-      `${baseUrl}/icons/icons/icon-192x192.png` : 
-      `${baseUrl}/icons/icons/icon-192x192.png`,
+      `${baseUrl}/drawable/android_notification_drawer.png` : 
+      `${baseUrl}/icons/splash_screens/icon.png`,
     // Use larger badge icon for better visibility in status bar
-    badge: `${baseUrl}/icons/icons/icon-72x72.png`,
+    badge: `${baseUrl}/icons/splash_screens/icon.png`,
     data: { 
       url: displayLink,
       ...payload.data,
@@ -240,7 +240,7 @@ messaging.onBackgroundMessage((payload) => {
       {
         action: 'open',
         title: 'View',
-        icon: `${baseUrl}/icons/icons/icon-72x72.png`
+        icon: `${baseUrl}/icons/splash_screens/icon.png`
       }
     ]
   };
