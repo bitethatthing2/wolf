@@ -34,17 +34,15 @@ export default function OrderPage() {
                     <Image 
                       src="/doordash_icon-light.png" 
                       alt="DoorDash Logo Light"
-                      layout="fill"
-                      objectFit="contain"
-                      className="dark:hidden" // Hide in dark mode
+                      fill
+                      className="object-contain dark:hidden" // Hide in dark mode
                     />
                     {/* Dark Mode Icon (Updated filename) */}
                     <Image 
                       src="/darkdoordash_icon.png" 
                       alt="DoorDash Logo Dark"
-                      layout="fill"
-                      objectFit="contain"
-                      className="hidden dark:block" // Show only in dark mode
+                      fill
+                      className="object-contain hidden dark:block" // Show only in dark mode
                     />
                   </div>
                 </div>
@@ -67,17 +65,15 @@ export default function OrderPage() {
                     <Image 
                       src="/postmates-black-icon.png" 
                       alt="Postmates Logo Light"
-                      layout="fill"
-                      objectFit="contain"
-                      className="dark:hidden" // Hide in dark mode
+                      fill
+                      className="object-contain dark:hidden" // Hide in dark mode
                     />
                     {/* Dark Mode Icon (Updated filename) */}
                     <Image 
                       src="/postmates-icon-white.png" 
                       alt="Postmates Logo Dark"
-                      layout="fill"
-                      objectFit="contain"
-                      className="hidden dark:block" // Show only in dark mode
+                      fill
+                      className="object-contain hidden dark:block" // Show only in dark mode
                     />
                   </div>
                 </div>
@@ -101,17 +97,15 @@ export default function OrderPage() {
                     <Image 
                       src="/uber eats.png" // Light theme icon
                       alt="Uber Eats Logo Light"
-                      layout="fill"
-                      objectFit="contain"
-                      className="dark:hidden" // Hide in dark mode
+                      fill
+                      className="object-contain dark:hidden" // Hide in dark mode
                     />
                     {/* Dark Mode Icon */}
                     <Image 
                       src="/uber_eats-dark.png" // Dark theme icon
                       alt="Uber Eats Logo Dark"
-                      layout="fill"
-                      objectFit="contain"
-                      className="hidden dark:block" // Show only in dark mode
+                      fill
+                      className="object-contain hidden dark:block" // Show only in dark mode
                     />
                   </div>
                 </div>

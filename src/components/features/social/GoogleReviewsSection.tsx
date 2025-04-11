@@ -50,7 +50,7 @@ const GoogleReviewsSection: React.FC = () => {
               </div>
             </div>
             <p className={`text-center text-sm sm:text-base ${isDark ? 'text-gray-300' : 'text-gray-700'} max-w-2xl mx-auto`}>
-              See what our satisfied customers have to say about their experience at Hustle Hard
+              See what our satisfied customers have to say about their experience at Side Hustle Bar
             </p>
           </div>
           

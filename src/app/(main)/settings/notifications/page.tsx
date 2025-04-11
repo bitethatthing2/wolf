@@ -98,7 +98,7 @@ export default function NotificationSettingsPage() {
       </div>
       
       <p className="text-muted-foreground mb-8">
-        Manage your notification preferences and stay updated with the latest from Hustle Hard.
+        Manage your notification preferences and stay updated with the latest from Side Hustle Bar.
       </p>
       
       <div className="grid gap-8">

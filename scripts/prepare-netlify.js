@@ -21,7 +21,9 @@ async function main() {
     const criticalFiles = [
       'firebase-messaging-sw.js',
       'manifest.json',
-      'favicon.ico'
+      'favicon.ico',
+      'service-worker-fix.js',
+      'service-worker-init.js'
     ];
     
     for (const file of criticalFiles) {

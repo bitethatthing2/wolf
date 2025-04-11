@@ -1,15 +1,16 @@
 import { initializeApp, getApps, FirebaseApp, getApp } from "firebase/app";
 import { getMessaging, getToken, isSupported, onMessage, MessagePayload } from "firebase/messaging";
 
-// **IMPORTANT**: Load Firebase config from environment variables
+// **IMPORTANT**: Load Firebase config from Netlify environment variables
+// All client-side env vars must use NEXT_PUBLIC_ prefix and should be configured in Netlify dashboard
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.apiKey,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || process.env.authDomain,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || process.env.STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || process.env.MESSAGING_SENDER_ID || process.env.SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || process.env.appId,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || process.env.MEASURMENT_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Helper function to check if device is iOS
@@ -58,7 +59,31 @@ const messaging = async () => {
 const processedNotifications = new Set<string>();
 
 // For debugging and coordination with SW
-const CLIENT_VERSION = '2.0.1'; // Updated version
+const CLIENT_VERSION = '2.1.0'; // Updated version to match SW version
+
+// Send Firebase config to Service Worker
+export const sendConfigToServiceWorker = async (swRegistration: ServiceWorkerRegistration) => {
+  try {
+    // Only send necessary parts of config for security
+    const swConfig = {
+      messagingSenderId: firebaseConfig.messagingSenderId,
+      projectId: firebaseConfig.projectId,
+      apiKey: firebaseConfig.apiKey,
+      appId: firebaseConfig.appId
+    };
+
+    console.log(`[Client v${CLIENT_VERSION}] Sending config to Service Worker`);
+    swRegistration.active?.postMessage({
+      type: 'CONFIG_FIREBASE',
+      config: swConfig
+    });
+
+    return true;
+  } catch (err) {
+    console.error(`[Client v${CLIENT_VERSION}] Failed to send config to Service Worker:`, err);
+    return false;
+  }
+};
 
 // Fetch FCM token
 export const fetchToken = async (swRegistration: ServiceWorkerRegistration | null) => {
@@ -68,12 +93,18 @@ export const fetchToken = async (swRegistration: ServiceWorkerRegistration | nul
     if (fcmMessaging && swRegistration) { // Ensure we have registration from PWA setup
       console.log(`[Client v${CLIENT_VERSION}] Messaging initialized, fetching token...`);
 
-      const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY || process.env.VAPID_PUBLIC_KEY;
+      // Send config to service worker first
+      if (swRegistration.active) {
+        await sendConfigToServiceWorker(swRegistration);
+      }
+
+      // Only use the NEXT_PUBLIC_ prefixed env var which should be configured in Netlify dashboard
+      const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY;
 
       console.log(`[Client v${CLIENT_VERSION}] Using VAPID key:`, vapidKey ? "[KEY_PRESENT]" : "[KEY_MISSING]");
 
       if (!vapidKey) {
-        console.error('VAPID key (NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY or VAPID_PUBLIC_KEY) is missing in environment variables.');
+        console.error('VAPID key (NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY) is missing in Netlify environment variables.');
         return null;
       }
 

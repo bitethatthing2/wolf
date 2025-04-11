@@ -20,7 +20,7 @@ interface NotificationTesterProps {
 export function NotificationTester({ className, adminMode = false }: NotificationTesterProps) {
   const { fcmToken, notificationsEnabled } = useFcmNotifications();
   
-  const [title, setTitle] = useState('Hustle Hard');
+  const [title, setTitle] = useState('Side Hustle Bar');
   const [message, setMessage] = useState('');
   const [link, setLink] = useState('/');
   const [platform, setPlatform] = useState('web');

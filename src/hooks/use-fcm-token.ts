@@ -7,7 +7,10 @@ import { useToast } from "@/hooks/use-toast";
 import { fetchToken, setupForegroundMessageHandler, isIOS } from "@/lib/firebase/client";
 
 // Hook version for debugging
-const HOOK_VERSION = '1.0.0';
+const HOOK_VERSION = '1.1.0';
+
+// Token refresh interval (7 days in milliseconds)
+const TOKEN_REFRESH_INTERVAL = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Hook to manage FCM token for push notifications
@@ -166,8 +169,20 @@ export const useFcmToken = () => {
       loadToken();
     }
     
-    // Clean up message handler on unmount
+    // Set up token refresh interval
+    const tokenRefreshInterval = setInterval(() => {
+      if (Notification.permission === "granted") {
+        console.log(`[useFcmToken v${HOOK_VERSION}] Refreshing FCM token on schedule`);
+        loadToken();
+      }
+    }, TOKEN_REFRESH_INTERVAL);
+    
+    // Clean up on unmount
     return () => {
+      // Clear token refresh interval
+      clearInterval(tokenRefreshInterval);
+      
+      // Clean up message handler
       if (messageHandlerRef.current && typeof messageHandlerRef.current === "function") {
         console.log(`[useFcmToken v${HOOK_VERSION}] Cleaning up message handler`);
         messageHandlerRef.current();

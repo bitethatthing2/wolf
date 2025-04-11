@@ -64,4 +64,24 @@
   NODE_VERSION = "18"
   NPM_VERSION = "9"
   NEXT_USE_NETLIFY_EDGE = "true"
-  # Environment variables should be added through the Netlify dashboard
+  # IMPORTANT: All sensitive environment variables (API keys, secrets, etc.)
+  # should be added through the Netlify dashboard UI
+  # Client-side vars must use NEXT_PUBLIC_ prefix
+  # DO NOT add sensitive values directly in this file
+
+# Explicitly configure service worker files
+[[headers]]
+  for = "/firebase-messaging-sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/service-worker-fix.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/service-worker-init.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

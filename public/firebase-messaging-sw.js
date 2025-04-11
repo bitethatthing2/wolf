@@ -20,13 +20,13 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
 // Basic Firebase app configuration
-// Note: This is a minimal config needed for FCM in the service worker
-// The actual config will be injected at runtime
+// These placeholders will be replaced by the actual config values from Netlify environment variables
+// This happens via the client.ts script which sends the config through postMessage
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", // Will be replaced at runtime with injected config
-  projectId: "YOUR_PROJECT_ID",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "PLACEHOLDER_KEY", // Will be replaced at runtime with injected config from Netlify
+  projectId: "PLACEHOLDER_PROJECT_ID",
+  messagingSenderId: "PLACEHOLDER_SENDER_ID",
+  appId: "PLACEHOLDER_APP_ID",
 };
 
 // Initialize Firebase
@@ -51,12 +51,113 @@ function isValidImageUrl(url) {
   }
 }
 
-// Track processed notification IDs to prevent duplicates
-const processedNotifications = new Set();
+// Track processed notification IDs to prevent duplicates with enhanced persistence
+let processedNotifications = new Set();
 
 // Service worker version for debugging
-const SW_VERSION = '2.0.0';
+const SW_VERSION = '2.2.0';
 console.log(`[Firebase SW v${SW_VERSION}] Service Worker initializing...`);
+
+// Load processed notifications from IndexedDB to persist across service worker restarts
+async function loadProcessedNotifications() {
+  try {
+    const db = await openDatabase();
+    const store = db.transaction('notifications', 'readonly').objectStore('notifications');
+    const allItems = await store.getAll();
+    
+    processedNotifications = new Set(allItems.map(item => item.id));
+    console.log(`[SW v${SW_VERSION}] Loaded ${processedNotifications.size} processed notifications from IndexedDB`);
+  } catch (error) {
+    console.error(`[SW v${SW_VERSION}] Error loading processed notifications:`, error);
+    // Continue with empty set if loading fails
+    processedNotifications = new Set();
+  }
+}
+
+// Save a processed notification ID to IndexedDB
+async function saveProcessedNotification(id) {
+  try {
+    const db = await openDatabase();
+    const tx = db.transaction('notifications', 'readwrite');
+    const store = tx.objectStore('notifications');
+    
+    // Add with expiration timestamp (24 hours)
+    const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+    await store.put({ id, expiresAt });
+    
+    console.log(`[SW v${SW_VERSION}] Saved notification ${id} to IndexedDB`);
+  } catch (error) {
+    console.error(`[SW v${SW_VERSION}] Error saving processed notification:`, error);
+  }
+}
+
+// Open IndexedDB for notification tracking
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('NotificationsDB', 1);
+    
+    request.onupgradeneeded = event => {
+      const db = event.target.result;
+      // Create object store with id as key
+      if (!db.objectStoreNames.contains('notifications')) {
+        const store = db.createObjectStore('notifications', { keyPath: 'id' });
+        store.createIndex('expiresAt', 'expiresAt');
+        console.log(`[SW v${SW_VERSION}] Created notifications object store`);
+      }
+    };
+    
+    request.onsuccess = event => resolve(event.target.result);
+    request.onerror = event => {
+      console.error(`[SW v${SW_VERSION}] IndexedDB error:`, event.target.error);
+      reject(event.target.error);
+    };
+  });
+}
+
+// Clean up expired notification IDs
+async function cleanupExpiredNotifications() {
+  try {
+    const db = await openDatabase();
+    const tx = db.transaction('notifications', 'readwrite');
+    const store = tx.objectStore('notifications');
+    const index = store.index('expiresAt');
+    
+    const now = Date.now();
+    const range = IDBKeyRange.upperBound(now);
+    
+    const request = index.openCursor(range);
+    let deletedCount = 0;
+    
+    request.onsuccess = event => {
+      const cursor = event.target.result;
+      if (cursor) {
+        // Delete expired notification
+        store.delete(cursor.primaryKey);
+        deletedCount++;
+        cursor.continue();
+      } else if (deletedCount > 0) {
+        console.log(`[SW v${SW_VERSION}] Deleted ${deletedCount} expired notifications`);
+      }
+    };
+  } catch (error) {
+    console.error(`[SW v${SW_VERSION}] Error cleaning up expired notifications:`, error);
+  }
+}
+
+// Load processed notifications on initialization
+loadProcessedNotifications().then(() => {
+  // Clean up expired notifications after loading
+  cleanupExpiredNotifications();
+});
+
+// Set up a message handler to receive messages from client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CONFIG_FIREBASE') {
+    // Update Firebase config from client
+    Object.assign(firebaseConfig, event.data.config);
+    console.log(`[SW v${SW_VERSION}] Received updated Firebase config from client`);
+  }
+});
 
 // Set a timeout for clearing the processed notifications set to avoid memory leaks
 setTimeout(() => {
@@ -69,7 +170,16 @@ messaging.onBackgroundMessage((payload) => {
   console.log(`[SW v${SW_VERSION}] Received background message`, payload);
   
   // Extract notification ID to prevent duplicates
-  const notificationId = payload.messageId || payload.collapseKey || Date.now().toString();
+  // Use a combination of messageId, collapseKey, and title/body hash for better deduplication
+  const notificationTitle = payload.notification?.title || payload.data?.title || "";
+  const notificationBody = payload.notification?.body || payload.data?.body || "";
+  const contentHash = `${notificationTitle}:${notificationBody}`.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  
+  const notificationId = payload.messageId || payload.collapseKey || 
+                         `${contentHash}_${Date.now().toString()}`;
   
   // Skip if we've already processed this notification
   if (processedNotifications.has(notificationId)) {
@@ -83,26 +193,31 @@ messaging.onBackgroundMessage((payload) => {
   const isAndroid = /Android/.test(userAgent);
   console.log(`[SW v${SW_VERSION}] Device detection - iOS: ${isIOS}, Android: ${isAndroid}, UA: ${userAgent.substring(0, 50)}...`);
   
-  // Add to processed set
+  // Add to processed set and persist to IndexedDB
   processedNotifications.add(notificationId);
+  saveProcessedNotification(notificationId);
   console.log(`[SW v${SW_VERSION}] Added notification ${notificationId} to processed set. Total: ${processedNotifications.size}`);
   
-  // Clear old notification IDs (keep set small)
-  if (processedNotifications.size > 20) {
-    const oldestId = processedNotifications.values().next().value;
-    processedNotifications.delete(oldestId);
-    console.log(`[SW v${SW_VERSION}] Removed oldest notification ${oldestId} from processed set`);
+  // Check for duplicate content in recent notifications (last 5 minutes)
+  if (payload.data?.deduplicationKey) {
+    const deduplicationKey = payload.data.deduplicationKey;
+    if (processedNotifications.has(deduplicationKey)) {
+      console.log(`[SW v${SW_VERSION}] Skipping notification with duplicate content key ${deduplicationKey}`);
+      return;
+    }
+    processedNotifications.add(deduplicationKey);
+    saveProcessedNotification(deduplicationKey);
   }
   
-  // Extract notification data
-  const title = payload.notification?.title || payload.data?.title || "Hustle Hard Update";
-  const body = payload.notification?.body || payload.data?.body || "Check out what's new!";
-  const link = payload.fcmOptions?.link || payload.data?.url || '/';
-  const image = payload.data?.image || payload.notification?.image;
+  // Extract notification data for display
+  const displayTitle = payload.notification?.title || payload.data?.title || "Side Hustle Bar Update";
+  const displayBody = payload.notification?.body || payload.data?.body || "Check out what's new!";
+  const displayLink = payload.fcmOptions?.link || payload.data?.url || '/';
+  const displayImage = payload.data?.image || payload.notification?.image;
   
   // Use the correct icon paths
   const notificationOptions = {
-    body,
+    body: displayBody,
     // Use larger icon for Android and apple icon for others
     icon: isAndroid ? 
       `${baseUrl}/icons/icons/icon-192x192.png` : 
@@ -110,7 +225,7 @@ messaging.onBackgroundMessage((payload) => {
     // Use larger badge icon for better visibility in status bar
     badge: `${baseUrl}/icons/icons/icon-72x72.png`,
     data: { 
-      url: link,
+      url: displayLink,
       ...payload.data,
       // Store notification ID to prevent duplicates later
       notificationId,
@@ -132,13 +247,13 @@ messaging.onBackgroundMessage((payload) => {
   };
 
   // Add image if valid
-  if (isValidImageUrl(image)) {
-    notificationOptions.image = image;
-    console.log(`[SW v${SW_VERSION}] Adding image to notification:`, image);
+  if (isValidImageUrl(displayImage)) {
+    notificationOptions.image = displayImage;
+    console.log(`[SW v${SW_VERSION}] Adding image to notification:`, displayImage);
   }
 
   console.log(`[SW v${SW_VERSION}] Creating notification with options:`, notificationOptions);
-  return self.registration.showNotification(title, notificationOptions);
+  return self.registration.showNotification(displayTitle, notificationOptions);
 });
 
 // Handle notification clicks

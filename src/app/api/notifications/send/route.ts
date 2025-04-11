@@ -122,20 +122,31 @@ export async function POST(request: Request) {
     // Send to all registered devices
     if (sendToAll) {
       try {
-        // Get all active subscriptions from Supabase
+        // Get all active subscriptions from Supabase with platform filtering
         const supabase = getSupabaseClient();
-        const subscriptions = await getActiveSubscriptions(supabase);
+        // Clean up old subscriptions first (older than 90 days)
+        await cleanupOldSubscriptions(supabase, 90);
+        
+        // Get active subscriptions with platform filtering if specified
+        const maxAge = 60; // Only get subscriptions active in the last 60 days
+        const subscriptions = await getActiveSubscriptions(supabase, platform as any, maxAge);
         
         if (subscriptions.length === 0) {
           return NextResponse.json(
-            { error: "No active subscriptions found" },
+            { error: `No active subscriptions found${platform ? ` for platform ${platform}` : ''}` },
             { status: 404 }
           );
         }
 
-        console.log(`Sending notifications to ${subscriptions.length} devices`);
+        console.log(`Sending notifications to ${subscriptions.length} devices${platform ? ` for ${platform}` : ''}`);
         
-        // Send to each device with platform detection
+        // Group tokens by platform for batch sending
+        const androidTokens: string[] = [];
+        const iosTokens: string[] = [];
+        const webTokens: string[] = [];
+        const platformMap = new Map<string, string>(); // Map token to platform for reporting
+        
+        // Categorize tokens by platform
         for (const subscription of subscriptions) {
           const deviceToken = subscription.endpoint;
           const userAgent = subscription.user_agent?.toLowerCase() || '';
@@ -144,38 +155,173 @@ export async function POST(request: Request) {
           let devicePlatform = "web"; // Default to web
           if (userAgent.includes("android")) {
             devicePlatform = "android";
+            androidTokens.push(deviceToken);
           } else if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
             devicePlatform = "ios";
+            iosTokens.push(deviceToken);
+          } else {
+            webTokens.push(deviceToken);
           }
           
-          // Skip if we're targeting a specific platform and this device doesn't match
-          if (platform && platform !== "all" && platform !== devicePlatform) {
-            continue;
-          }
+          platformMap.set(deviceToken, devicePlatform);
+        }
+        
+        // Process android tokens in batches
+        if (androidTokens.length > 0 && (!platform || platform === "all" || platform === "android")) {
+          console.log(`Sending to ${androidTokens.length} Android devices`);
           
-          try {
-            if (devicePlatform === "android") {
-              await messaging.send({...androidPayload, token: deviceToken});
-            } else if (devicePlatform === "ios") {
-              await messaging.send({...iosPayload, token: deviceToken});
-            } else {
-              await messaging.send({...webPayload, token: deviceToken});
+          // Process in batches of 500 (FCM limit)
+          for (let i = 0; i < androidTokens.length; i += 500) {
+            const batch = androidTokens.slice(i, i + 500);
+            try {
+              // Use multicast for efficiency
+              const response = await messaging.sendMulticast({
+                ...androidPayload,
+                tokens: batch
+              });
+              
+              // Update results
+              results.sent += response.successCount;
+              results.failed += response.failureCount;
+              
+              // Process individual results if available
+              if (response.responses) {
+                response.responses.forEach((resp, index) => {
+                  const token = batch[index];
+                  if (resp.success) {
+                    results.details.push({
+                      token: token.substring(0, 10) + "...",
+                      platform: "android",
+                      status: "success"
+                    });
+                  } else {
+                    results.details.push({
+                      token: token.substring(0, 10) + "...",
+                      platform: "android",
+                      status: "failed",
+                      error: resp.error?.message || "Unknown error"
+                    });
+                  }
+                });
+              }
+            } catch (error: any) {
+              console.error(`Error sending Android batch:`, error);
+              results.failed += batch.length;
+              batch.forEach(token => {
+                results.details.push({
+                  token: token.substring(0, 10) + "...",
+                  platform: "android",
+                  status: "failed",
+                  error: error.message
+                });
+              });
             }
-            
-            results.sent++;
-            results.details.push({ 
-              token: deviceToken.substring(0, 10) + "...", 
-              platform: devicePlatform,
-              status: "success" 
-            });
-          } catch (error: any) {
-            results.failed++;
-            results.details.push({ 
-              token: deviceToken.substring(0, 10) + "...", 
-              platform: devicePlatform,
-              status: "failed",
-              error: error.message 
-            });
+          }
+        }
+        
+        // Process iOS tokens in batches
+        if (iosTokens.length > 0 && (!platform || platform === "all" || platform === "ios")) {
+          console.log(`Sending to ${iosTokens.length} iOS devices`);
+          
+          // Process in batches of 500 (FCM limit)
+          for (let i = 0; i < iosTokens.length; i += 500) {
+            const batch = iosTokens.slice(i, i + 500);
+            try {
+              // Use multicast for efficiency
+              const response = await messaging.sendMulticast({
+                ...iosPayload,
+                tokens: batch
+              });
+              
+              // Update results
+              results.sent += response.successCount;
+              results.failed += response.failureCount;
+              
+              // Process individual results if available
+              if (response.responses) {
+                response.responses.forEach((resp, index) => {
+                  const token = batch[index];
+                  if (resp.success) {
+                    results.details.push({
+                      token: token.substring(0, 10) + "...",
+                      platform: "ios",
+                      status: "success"
+                    });
+                  } else {
+                    results.details.push({
+                      token: token.substring(0, 10) + "...",
+                      platform: "ios",
+                      status: "failed",
+                      error: resp.error?.message || "Unknown error"
+                    });
+                  }
+                });
+              }
+            } catch (error: any) {
+              console.error(`Error sending iOS batch:`, error);
+              results.failed += batch.length;
+              batch.forEach(token => {
+                results.details.push({
+                  token: token.substring(0, 10) + "...",
+                  platform: "ios",
+                  status: "failed",
+                  error: error.message
+                });
+              });
+            }
+          }
+        }
+        
+        // Process web tokens in batches
+        if (webTokens.length > 0 && (!platform || platform === "all" || platform === "web")) {
+          console.log(`Sending to ${webTokens.length} Web devices`);
+          
+          // Process in batches of 500 (FCM limit)
+          for (let i = 0; i < webTokens.length; i += 500) {
+            const batch = webTokens.slice(i, i + 500);
+            try {
+              // Use multicast for efficiency
+              const response = await messaging.sendMulticast({
+                ...webPayload,
+                tokens: batch
+              });
+              
+              // Update results
+              results.sent += response.successCount;
+              results.failed += response.failureCount;
+              
+              // Process individual results if available
+              if (response.responses) {
+                response.responses.forEach((resp, index) => {
+                  const token = batch[index];
+                  if (resp.success) {
+                    results.details.push({
+                      token: token.substring(0, 10) + "...",
+                      platform: "web",
+                      status: "success"
+                    });
+                  } else {
+                    results.details.push({
+                      token: token.substring(0, 10) + "...",
+                      platform: "web",
+                      status: "failed",
+                      error: resp.error?.message || "Unknown error"
+                    });
+                  }
+                });
+              }
+            } catch (error: any) {
+              console.error(`Error sending Web batch:`, error);
+              results.failed += batch.length;
+              batch.forEach(token => {
+                results.details.push({
+                  token: token.substring(0, 10) + "...",
+                  platform: "web",
+                  status: "failed",
+                  error: error.message
+                });
+              });
+            }
           }
         }
         

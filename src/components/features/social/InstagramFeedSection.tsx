@@ -65,8 +65,8 @@ const InstagramFeedSection: React.FC = () => {
         <div className={`w-full overflow-hidden rounded-xl ${isDark ? 'border border-white/10' : 'border border-black/10'} shadow-lg`}>
           <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-lg`}>
             {/* Instagram Embed */}
-            <div className="min-h-[550px] pt-6 sm:pt-0 flex justify-center"> 
-              <InstagramEmbed className="w-full max-w-xl mx-auto" />
+            <div className="min-h-[550px] pt-6 sm:pt-0 flex justify-center w-full overflow-x-auto"> 
+              <InstagramEmbed className="w-full max-w-xl mx-auto flex-shrink-0" />
             </div>
           </div>
         </div>

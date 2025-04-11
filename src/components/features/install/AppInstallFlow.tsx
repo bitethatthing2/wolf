@@ -163,11 +163,23 @@ const AppInstallFlow = () => {
           >
             {/* Theme-aware icon: white bg/black icon on light, black bg/white icon on dark */}
             <div className="w-7 h-7 rounded-full bg-white dark:bg-black flex items-center justify-center mr-1">
-              <Bell className="w-5 h-5 text-black dark:text-white" /> {/* Kept w-5 h-5 for Bell based on last change */}
+              <Bell className="w-5 h-5 text-black dark:text-white" />
             </div>
             {/* Replace img with text */}
             <span>Enable Notifications</span>
           </div>
+          
+          {/* Add helpful "View Installation Instructions" link */}
+          {deviceType === "android" || deviceType === "ios" ? (
+            <div className="mt-2 text-center">
+              <a 
+                href={deviceType === "ios" ? "/instructions/ios" : "/instructions/android"} 
+                className="text-sm text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white underline underline-offset-2"
+              >
+                View detailed installation instructions
+              </a>
+            </div>
+          ) : null}
         </div>
       );
     } else if (installStep === 1 && deviceType === "ios") {
@@ -181,7 +193,6 @@ const AppInstallFlow = () => {
             alt="Add to Home Screen Instructions"
             width={300}
             height={150}
-            layout="intrinsic"
             priority
           />
           <Button 
@@ -191,13 +202,77 @@ const AppInstallFlow = () => {
           >
             Next <ChevronRight className="ml-2" />
           </Button>
+          
+          <a 
+            href="/instructions/ios" 
+            className="text-sm text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white underline underline-offset-2"
+          >
+            View full instructions
+          </a>
         </div>
       );
     } else if (installStep === 2 && deviceType === "ios") {
       return (
         <div className="flex flex-col items-center w-full max-w-md gap-4">
           <p className="text-center text-black dark:text-white">
-            Success! You can now launch Hustle Hard from your home screen.
+            Success! You can now launch Side Hustle Bar from your home screen.
+          </p>
+          <Image 
+            src="/app_icon_large.png" 
+            alt="App Icon"
+            width={120}
+            height={120}
+            priority
+          />
+          <Button 
+            variant="default" 
+            className={targetButtonStyle} 
+            onClick={handleReset}
+          >
+            Done
+          </Button>
+        </div>
+      );
+    } else if (installStep === 1 && deviceType === "android") {
+      return (
+        <div className="flex flex-col items-center w-full max-w-md gap-4">
+          <div className="text-center text-black dark:text-white space-y-3">
+            <p className="font-medium">Install Side Hustle Bar:</p>
+            <ol className="text-left text-sm space-y-2 list-decimal pl-5">
+              <li>Tap the menu icon (⋮) in Chrome's top right corner</li>
+              <li>Select "Install app" from the menu</li>
+              <li>Tap "Install" on the prompt that appears</li>
+            </ol>
+          </div>
+          
+          <div className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-center">
+            <div className="flex flex-col items-center space-y-1">
+              <div className="text-2xl">⋮</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Menu</div>
+            </div>
+          </div>
+          
+          <Button 
+            variant="default" 
+            className={targetButtonStyle} 
+            onClick={handleNextStep}
+          >
+            Next <ChevronRight className="ml-2" />
+          </Button>
+          
+          <a 
+            href="/instructions/android" 
+            className="text-sm text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white underline underline-offset-2"
+          >
+            View full instructions
+          </a>
+        </div>
+      );
+    } else if (installStep === 2 && deviceType === "android") {
+      return (
+        <div className="flex flex-col items-center w-full max-w-md gap-4">
+          <p className="text-center text-black dark:text-white">
+            Success! You can now launch Side Hustle Bar from your home screen.
           </p>
           <Image 
             src="/app_icon_large.png" 
@@ -230,6 +305,45 @@ const AppInstallFlow = () => {
       <p className="text-sm text-muted-foreground text-center mb-4">
         Install the Side Hustle Bar app and stay plugged into the action! Enable notifications to join our pack and get the first word on events, specials, and exclusives.
       </p>
+      
+      {/* Added benefit points */}
+      <div className="w-full mb-6">
+        <h4 className="text-md font-medium mb-2 text-center text-black dark:text-white">Why install the app?</h4>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+          <li className="flex items-start gap-2">
+            <div className="rounded-full w-5 h-5 flex-shrink-0 bg-black dark:bg-white flex items-center justify-center mt-0.5">
+              <svg className="w-3 h-3 text-white dark:text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-gray-700 dark:text-gray-300">Works offline - no internet needed</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <div className="rounded-full w-5 h-5 flex-shrink-0 bg-black dark:bg-white flex items-center justify-center mt-0.5">
+              <svg className="w-3 h-3 text-white dark:text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-gray-700 dark:text-gray-300">Faster loading - like a native app</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <div className="rounded-full w-5 h-5 flex-shrink-0 bg-black dark:bg-white flex items-center justify-center mt-0.5">
+              <svg className="w-3 h-3 text-white dark:text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-gray-700 dark:text-gray-300">Home screen icon for easy access</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <div className="rounded-full w-5 h-5 flex-shrink-0 bg-black dark:bg-white flex items-center justify-center mt-0.5">
+              <svg className="w-3 h-3 text-white dark:text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-gray-700 dark:text-gray-300">Get event & special offer notifications</span>
+          </li>
+        </ul>
+      </div>
 
       {/* Render install/notification steps */} 
       {renderContent()}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter as useNextRouter, usePathname } from 'next/navigation';
+import { BasePayload } from '@/types';
 
 /**
  * Custom router utility for handling navigation and notification routing
@@ -75,75 +76,135 @@ export function getNotificationUrl(notification: {
 }
 
 /**
- * Utility function to create platform-specific notification payloads
- * @param basePayload - The base notification payload
- * @param token - The FCM token
- * @returns Platform-specific payloads
+ * Creates platform-specific notification payloads
+ * @param basePayload The base notification payload
+ * @param token The FCM token
+ * @returns Object containing Android, iOS, and Web specific payloads
  */
-export function createPlatformPayloads(basePayload: {
-  notification: { title: string; body: string; };
-  data: { link: string; };
-}, token: string) {
-  return {
+export function createPlatformPayloads(basePayload: BasePayload, token?: string) {
+  // Common payload properties
+  const notification = basePayload.notification;
+  const data = basePayload.data || {};
+  
+  // Generate a deduplication key based on content hash and timestamp
+  // This helps prevent duplicate notifications across platforms
+  const timestamp = Date.now();
+  const contentStr = `${notification?.title || ''}:${notification?.body || ''}:${data.link || ''}`;
+  const contentHash = contentStr.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  
+  const deduplicationKey = `dedup_${contentHash}_${Math.floor(timestamp / (5 * 60 * 1000))}`; // 5-minute window
+  
+  // Add title and body to data for service worker access
+  if (notification) {
+    data.title = notification.title;
+    data.body = notification.body;
+    data.deduplicationKey = deduplicationKey;
+    data.timestamp = timestamp.toString();
+  }
+  
+  // Android specific payload
+  const androidPayload = {
+    ...basePayload,
     android: {
-      token,
-      notification: basePayload.notification,
-      data: basePayload.data,
-      android: {
-        notification: {
-          icon: "notification_icon", // Custom icon name in Android resources
-          color: "#000000", // Custom color for Android (changed to black)
-          channelId: "default", // Android notification channel
-          priority: "high" as const, // High priority for Android
-          clickAction: "FLUTTER_NOTIFICATION_CLICK", // Standard action for handling clicks
-        },
-        priority: "high" as const,
+      priority: 'high',
+      notification: {
+        sound: 'default',
+        defaultSound: true,
+        channelId: 'default',
+        priority: 'high',
+        visibility: 'public',
+        tag: deduplicationKey, // Use tag for Android notification grouping/deduplication
+        ...notification
       },
+      // Add direct boot notification support for Android
+      directBootOk: true
     },
-    ios: {
-      token,
-      notification: basePayload.notification,
-      data: basePayload.data,
-      apns: {
-        headers: {
-          "apns-priority": "10", // High priority
-        },
-        payload: {
-          aps: {
-            alert: {
-              title: basePayload.notification.title,
-              body: basePayload.notification.body,
-            },
-            sound: "default",
-            badge: 1,
-            "mutable-content": 1,
-            "content-available": 1,
-            category: "NEW_MESSAGE", // iOS notification category
-          },
-        },
-      },
-    },
-    web: {
-      token,
-      notification: basePayload.notification,
-      data: basePayload.data,
-      webpush: {
-        notification: {
-          icon: "/only_these/android-icon-96x96.png", // Web notification icon
-          badge: "/only_these/android-icon-96x96.png", // Web notification badge
-          vibrate: [100, 50, 100], // Vibration pattern
-          actions: [
-            {
-              action: "open_url",
-              title: "View",
-            },
-          ],
-          requireInteraction: true, // Notification won't auto-dismiss
-        },
-        fcmOptions: {
-          link: basePayload.data.link,
-        },
-      },
-    }
+    data
   };
+  
+  // iOS specific payload with enhanced settings
+  const iosPayload = {
+    ...basePayload,
+    apns: {
+      payload: {
+        aps: {
+          alert: {
+            title: notification?.title,
+            body: notification?.body,
+          },
+          sound: 'default',
+          badge: 1,
+          'content-available': 1,
+          'mutable-content': 1,
+          'thread-id': deduplicationKey // Thread ID for iOS notification grouping
+        }
+      },
+      headers: {
+        'apns-priority': '10', // High priority
+        'apns-collapse-id': deduplicationKey // Collapse ID for iOS notification deduplication
+      },
+      fcmOptions: {
+        imageUrl: data.image
+      }
+    },
+    data
+  };
+  
+  // Web specific payload with enhanced settings
+  const webPayload = {
+    ...basePayload,
+    webpush: {
+      notification: {
+        ...notification,
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-72x72.png',
+        vibrate: [100, 50, 100],
+        requireInteraction: true,
+        tag: deduplicationKey, // Tag for web notification deduplication
+        renotify: false // Don't notify again if using same tag
+      },
+      fcmOptions: {
+        link: data.link || '/'
+      },
+      headers: {
+        TTL: '86400' // 24 hours TTL for web push
+      }
+    },
+    data
+  };
+  
+  // Add token if provided
+  if (token) {
+    androidPayload.token = token;
+    iosPayload.token = token;
+    webPayload.token = token;
+  }
+  
+  return {
+    android: androidPayload,
+    ios: iosPayload,
+    web: webPayload
+  };
+}
+
+/**
+ * Determines device platform from user agent string
+ * @param userAgent The user agent string
+ * @returns The platform: 'ios', 'android', or 'web'
+ */
+export function getPlatformFromUserAgent(userAgent: string): 'ios' | 'android' | 'web' {
+  const ua = userAgent.toLowerCase();
+  
+  if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
+    return 'ios';
+  }
+  
+  if (ua.includes('android')) {
+    return 'android';
+  }
+  
+  return 'web';
 }

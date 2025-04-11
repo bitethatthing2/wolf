@@ -382,9 +382,15 @@ export async function unregisterFromPushNotifications(token: string, supabase: a
 /**
  * Get all active notification subscriptions
  * @param supabase The Supabase client
+ * @param platform Optional platform filter ('ios', 'android', 'web')
+ * @param maxAge Optional maximum age in days for active subscriptions
  * @returns Array of active subscriptions or empty array if there was an error
  */
-export async function getActiveSubscriptions(supabase: any): Promise<NotificationSubscription[]> {
+export async function getActiveSubscriptions(
+  supabase: any, 
+  platform?: 'ios' | 'android' | 'web' | 'all',
+  maxAge?: number
+): Promise<NotificationSubscription[]> {
   try {
     if (!supabase) {
       console.error('Supabase client not initialized');
@@ -392,21 +398,81 @@ export async function getActiveSubscriptions(supabase: any): Promise<Notificatio
     }
 
     console.log("Fetching active subscriptions...");
-    const { data, error } = await supabase
+    let query = supabase
       .from('notification_subscriptions')
       .select('*')
-      .order('last_active', { ascending: false });
+    
+    // Filter by platform if specified
+    if (platform && platform !== 'all') {
+      if (platform === 'ios') {
+        query = query.ilike('user_agent', '%iphone%').or('user_agent.ilike=%ipad%');
+      } else if (platform === 'android') {
+        query = query.ilike('user_agent', '%android%');
+      } else if (platform === 'web') {
+        query = query.not.ilike('user_agent', '%android%')
+                    .not.ilike('user_agent', '%iphone%')
+                    .not.ilike('user_agent', '%ipad%');
+      }
+    }
+    
+    // Filter by age if specified
+    if (maxAge && maxAge > 0) {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - maxAge);
+      query = query.gte('last_active', cutoffDate.toISOString());
+    }
+    
+    // Execute query and order by last active
+    const { data, error } = await query.order('last_active', { ascending: false });
 
     if (error) {
       console.error('Error getting subscriptions:', error);
       return [];
     }
 
-    console.log("Active subscriptions retrieved:", data);
+    console.log(`Retrieved ${data.length} active subscriptions${platform ? ` for ${platform}` : ''}`);
     return data;
   } catch (error) {
     console.error('Error getting subscriptions:', error);
     return [];
+  }
+}
+
+/**
+ * Clean up old notification subscriptions
+ * @param supabase The Supabase client
+ * @param olderThanDays Remove subscriptions older than this many days
+ * @returns Number of deleted subscriptions
+ */
+export async function cleanupOldSubscriptions(supabase: any, olderThanDays: number = 90): Promise<number> {
+  try {
+    if (!supabase) {
+      console.error('Supabase client not initialized');
+      return 0;
+    }
+    
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+    
+    console.log(`Cleaning up subscriptions older than ${olderThanDays} days (${cutoffDate.toISOString()})`);
+    
+    const { data, error } = await supabase
+      .from('notification_subscriptions')
+      .delete()
+      .lt('last_active', cutoffDate.toISOString())
+      .select('id');
+      
+    if (error) {
+      console.error('Error cleaning up old subscriptions:', error);
+      return 0;
+    }
+    
+    const deletedCount = data?.length || 0;
+    console.log(`Deleted ${deletedCount} old subscription(s)`);
+    return deletedCount;
+  } catch (error) {
+    console.error('Error cleaning up old subscriptions:', error);
+    return 0;
   }
 }
 

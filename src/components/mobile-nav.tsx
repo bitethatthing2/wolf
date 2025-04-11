@@ -72,7 +72,7 @@ export function MobileNav() {
                 asChild
               >
                 <Link href="/" onClick={() => setOpen(false)}>
-                  Hustle Hard
+                  Side Hustle Bar
                 </Link>
               </Button>
             </SheetTitle>

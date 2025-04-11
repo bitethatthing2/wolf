@@ -15,7 +15,7 @@ export function SiteFooter() { // Changed export name slightly for clarity
 
         {/* Left Section: Copyright */}
         <div className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-          {currentYear} Hustle Hard. All Rights Reserved.
+          {currentYear} Side Hustle Bar. All Rights Reserved.
           {/* Optional: Add link to privacy policy or terms */}
         </div>
 

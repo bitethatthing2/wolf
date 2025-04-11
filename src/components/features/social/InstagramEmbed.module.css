@@ -1,6 +1,8 @@
 .instagramContainer {
   margin: 0 auto;
   max-width: 540px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .instagramMedia {

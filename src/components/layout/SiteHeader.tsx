@@ -30,7 +30,7 @@ export function SiteHeader() {
               <Image 
                 key={logoSrc} 
                 src={logoSrc} 
-                alt="Hustle Hard" 
+                alt="Side Hustle Bar" 
                 width={225} 
                 height={60} 
                 className="h-12 w-auto"

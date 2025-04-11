@@ -1,92 +1,115 @@
 "use client";
 
 import Script from "next/script";
+import { useEffect } from "react";
+import { applyFramerMotionFixes } from "@/lib/framer-motion-fix";
 
 export default function ClientScripts() {
+  // Apply Framer Motion fixes when the component mounts
+  useEffect(() => {
+    // Apply the fixes when the component mounts
+    applyFramerMotionFixes();
+  }, []);
+
   return (
     <>
-      {/* Add Passive Event Listeners Fix - highest priority */}
+      {/* Polyfill Initialization - highest priority to fix errors */}
+      <Script
+        id="polyfill-init"
+        strategy="beforeInteractive"
+        src="/polyfill-init.js"
+      />
+      
+      {/* Navigation Error Fix - highest priority */}
+      <Script 
+        src="/navigation-error-fix.js"
+        strategy="beforeInteractive"
+        id="navigation-error-fix"
+      />
+      
+      {/* Polyfill for require - needed for certain libraries */}
+      <Script
+        id="require-polyfill"
+        strategy="beforeInteractive"
+        src="/require-polyfill.js"
+      />
+      
+      {/* Add Passive Event Listeners Fix - high priority */}
       <Script 
         src="/passive-events-fix.js"
         strategy="beforeInteractive"
         id="passive-events-fix"
       />
-      {/* Add Framer Motion Timing Fix - highest priority */}
-      {/* <Script 
-        src="/framer-timing-fix.js"
-        strategy="beforeInteractive"
-        id="framer-timing-fix"
-      /> */}
-      {/* Add Require Polyfill - highest priority to prevent animation errors */}
-      {/* <Script 
-        src="/require-polyfill.js"
-        strategy="beforeInteractive"
-        id="require-polyfill"
-      /> */}
-      {/* Add Direct Animation Fix Script - highest priority */}
-      {/* <Script 
-        src="/direct-animation-fix.js"
-        strategy="beforeInteractive"
-      /> */}
-      {/* Add Animation Frame Fix Script */}
-      {/* <Script 
+      
+      {/* Animation and performance fixes */}
+      <Script
+        id="animation-frame-fix"
+        strategy="afterInteractive"
         src="/animation-frame-fix.js"
-        strategy="beforeInteractive"
-      /> */}
-      {/* Add Performance Timing Fix Script */}
-      {/* <Script 
-        src="/performance-timing-fix.js"
-        strategy="beforeInteractive"
-      /> */}
-      {/* Add Google Maps Iframe Fix Script */}
-      {/* <Script 
-        src="/google-maps-iframe-fix.js"
-        strategy="beforeInteractive"
-        id="google-maps-iframe-fix"
-      /> */}
-      {/* Add Elfsight Fix Script */}
-      {/* <Script 
-        src="/elfsight-fix.js"
-        strategy="beforeInteractive"
-      /> */}
-      {/* Add Elfsight Platform Fix Script */}
-      {/* <Script 
-        src="/elfsight-platform-fix.js"
-        strategy="beforeInteractive"
-      /> */}
+      />
       
-      {/* REMOVED Google Maps Fix Scripts - they were causing conflicts */}
+      {/* PWA installation helper */}
+      <Script
+        id="pwa-install-helper"
+        strategy="afterInteractive"
+        src="/pwa-install-helper.js"
+      />
       
-      {/* Elfsight Platform Script - load at root level for proper initialization */}
+      {/* Service worker init - only in production */}
+      {process.env.NODE_ENV === 'production' && (
+        <Script
+          id="service-worker-init"
+          strategy="afterInteractive"
+          src="/service-worker-init.js"
+        />
+      )}
+      
+      {/* Instagram Widget Script - required for Instagram integration */}
       <Script
         src="https://static.elfsight.com/platform/platform.js"
-        strategy="beforeInteractive"
-        id="elfsight-platform-script"
-        onLoad={() => {
-          // Mark as loaded in the global scope
-          if (typeof window !== 'undefined') {
-            (window as any).elfsightScriptLoaded = true;
-          }
-        }}
-      />
-
-      {/* Include Google Reviews platform script */}
-      <Script
-        src="https://widgets.sociablekit.com/google-reviews/widget.js"
         strategy="lazyOnload"
-        async
+        id="elfsight-platform-script"
+        crossOrigin="anonymous"
       />
       
-      {/* Add Service Worker Initialization */}
-      {/* <Script 
-        src="/service-worker-init.js"
-        strategy="afterInteractive"
-      /> */}
-      {/* Add PWA Installation Helper */}
-      {/* <Script 
-        src="/pwa-install-helper.js"
-        strategy="afterInteractive"
-      /> */}
+      {/* Meta tag for referrer policy to help with CORS */}
+      <Script id="referrer-policy">
+        {`
+          const meta = document.createElement('meta');
+          meta.name = 'referrer';
+          meta.content = 'no-referrer-when-downgrade';
+          document.head.appendChild(meta);
+        `}
+      </Script>
+      
+      {/* Next.js error component initialization - critical fix */}
+      <Script id="nextjs-error-component-init" strategy="beforeInteractive">
+        {`
+          // Ensure required error components exist to prevent "missing required error components" error
+          window.onRecoverableError = window.onRecoverableError || function(error) {
+            console.warn('[Init] Recoverable error:', error);
+          };
+          
+          window.onCaughtError = window.onCaughtError || function(error) {
+            console.error('[Init] Caught error:', error);
+          };
+          
+          window.callServer = window.callServer || async function() {
+            return Promise.resolve(null);
+          };
+          
+          window.shouldRenderRootLevelErrorOverlay = false;
+          
+          // Initialize server data if not present
+          window.initialServerDataBuffer = window.initialServerDataBuffer || [];
+          window.initialServerDataWriter = window.initialServerDataWriter || function() {};
+          window.initialServerDataLoaded = window.initialServerDataLoaded || true;
+          window.initialServerDataFlushed = window.initialServerDataFlushed || true;
+          
+          // Track initialization
+          window.__NEXT_INIT_TIMESTAMP = Date.now();
+        `}
+      </Script>
     </>
   );
 }

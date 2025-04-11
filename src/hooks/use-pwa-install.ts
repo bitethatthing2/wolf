@@ -65,7 +65,7 @@ export const usePwaInstall = () => {
       
       toast({
         title: "App Installed",
-        description: "Hustle Hard has been successfully installed on your device!",
+        description: "Side Hustle Bar has been successfully installed on your device!",
         duration: 5000,
       });
       

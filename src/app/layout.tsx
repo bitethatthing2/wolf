@@ -2,11 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { ThemeProvider } from "@/contexts/theme-context"; // Corrected import path
-import { LocationProvider } from "@/contexts/LocationContext"; // Import LocationProvider
+import { ThemeProvider } from "@/contexts/theme-context";
+import { LocationProvider } from "@/contexts/LocationContext";
 import { Toaster } from "@/components/ui/toaster";
 import ClientScripts from "@/components/layout/ClientScripts";
-import FramerMotionFixes from "@/components/layout/FramerMotionFixes";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -14,13 +13,13 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Hustle Hard",
+  title: "Side Hustle Bar",
   description: "High-Energy Sports Bar • Restaurant • Nightclub",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Hustle Hard",
+    title: "Side Hustle Bar",
   },
   icons: {
     icon: "/favicon.ico",
@@ -39,6 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ClientScripts />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
@@ -47,18 +49,15 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark" 
-          enableSystem={false} // Disable system theme detection
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
-          {/* Wrap children with LocationProvider */}
           <LocationProvider>
             {children}
             <Toaster />
           </LocationProvider>
         </ThemeProvider>
-        <FramerMotionFixes />
-        <ClientScripts />
       </body>
     </html>
   );

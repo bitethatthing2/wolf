@@ -99,7 +99,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
           Push Notifications
         </CardTitle>
         <CardDescription>
-          Get notified about special events, promotions, and updates from Hustle Hard.
+          Get notified about special events, promotions, and updates from Side Hustle Bar.
         </CardDescription>
       </CardHeader>
       
@@ -111,7 +111,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
             </p>
             <p className="text-xs text-muted-foreground">
               {notificationsEnabled 
-                ? 'You will receive updates from Hustle Hard' 
+                ? 'You will receive updates from Side Hustle Bar' 
                 : 'Enable to stay updated with the latest news'}
             </p>
           </div>

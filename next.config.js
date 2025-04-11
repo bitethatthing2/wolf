@@ -1,60 +1,17 @@
 /** @type {import('next').NextConfig} */
-const withPWA = require('@ducanh2912/next-pwa').default({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
-  reloadOnOnline: true,
-  swcMinify: true,
-  workboxOptions: {
-    disableDevLogs: true,
-    exclude: [
-      '_redirects',
-      '**/_redirects',
-      '/out/_redirects',
-      /\/_redirects$/,
-      /\.map$/,
-      /^manifest.*\.js$/,
-      /\.DS_Store/,
-      /\.git/
-    ],
-    runtimeCaching: [
-      {
-        urlPattern: /^https:\/\/magnificent-churros-3c51ed\.netlify\.app\/.*$/,
-        handler: 'NetworkFirst',
-        options: {
-          cacheName: 'app-cache',
-          expiration: {
-            maxEntries: 200,
-            maxAgeSeconds: 86400
-          }
-        }
-      },
-      {
-        urlPattern: /\.(png|jpg|jpeg|svg|gif|ico)$/,
-        handler: 'CacheFirst',
-        options: {
-          cacheName: 'image-cache',
-          expiration: {
-            maxEntries: 50,
-            maxAgeSeconds: 604800
-          }
-        }
-      }
-    ]
-  },
-});
 
+// Simple Next.js configuration without PWA for development
 const nextConfig = {
-  reactStrictMode: true,
+  // Keep original configuration
+  reactStrictMode: false, // Changed to false to prevent double rendering issues
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
+  
+  // Image optimization settings - critical for Instagram and Google integrations
   images: {
     unoptimized: true,
     dangerouslyAllowSVG: true,
@@ -89,19 +46,93 @@ const nextConfig = {
       },
     ],
   },
+  
+  // Add trailing slash for better static site compatibility
   trailingSlash: true,
-  webpack: (config, { isServer }) => {
+  
+  // Increase timeouts to prevent internal server errors
+  serverRuntimeConfig: {
+    // Will only be available on the server side
+    timeoutMs: 60000, // 60 seconds
+  },
+  
+  // Experimental features - fixed to use only supported options
+  experimental: {
+    // Only include supported experimental features
+    optimizeCss: true,
+    scrollRestoration: true,
+    serverMinification: true,
+    serverSourceMaps: false,
+  },
+  
+  // Webpack configuration for better performance and polyfills
+  webpack: (config, { isServer, dev }) => {
+    // Client-side specific configurations
     if (!isServer) {
+      // Add fallbacks for browser modules
       config.resolve.fallback = {
         ...config.resolve.fallback,
         '@emotion/is-prop-valid': require.resolve('@emotion/is-prop-valid'),
       };
+      
+      // Add our custom polyfills
+      const originalEntry = config.entry;
+      config.entry = async () => {
+        const entries = await originalEntry();
+        
+        // Add our polyfills to the main entry
+        if (entries['main.js']) {
+          entries['main.js'] = ['./src/polyfills/index.js', ...entries['main.js']];
+        }
+        
+        return entries;
+      };
     }
+    
     return config;
   },
-  /* experimental: {
-    prefetchInRender: true, // Removed due to incompatibility
-  }, */
+  
+  // Fix for client-side navigation "Failed to fetch" errors
+  onDemandEntries: {
+    // Keep pages in memory for longer to prevent "Failed to fetch" errors
+    maxInactiveAge: 60 * 60 * 1000, // 1 hour
+    pagesBufferLength: 5,
+  },
 };
 
-module.exports = process.env.NODE_ENV === 'production' ? withPWA(nextConfig) : nextConfig;
+// For production, we'll add the PWA configuration
+if (process.env.NODE_ENV === 'production') {
+  // This code will only run during the build process, not during development
+  try {
+    const withPWA = require('@ducanh2912/next-pwa').default;
+    module.exports = withPWA({
+      dest: 'public',
+      disable: false,
+      register: true,
+      skipWaiting: true,
+      // Exclude custom service workers
+      publicExcludes: ['firebase-messaging-sw.js', 'service-worker-fix.js', 'manifest.json'],
+      workboxOptions: {
+        disableDevLogs: true,
+        exclude: [
+          '_redirects',
+          '**/_redirects',
+          '/out/_redirects',
+          /\/_redirects$/,
+          /\.map$/,
+          /^manifest.*\.js$/,
+          /firebase-messaging-sw\.js$/,
+          /service-worker-fix\.js$/,
+          /\.DS_Store/,
+          /\.git/
+        ]
+      }
+    })(nextConfig);
+  } catch (e) {
+    console.warn('PWA plugin not available, using fallback config');
+    module.exports = nextConfig;
+  }
+} else {
+  // For development, just use the basic config
+  module.exports = nextConfig;
+}

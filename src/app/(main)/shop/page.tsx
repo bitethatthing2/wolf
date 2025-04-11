@@ -51,7 +51,7 @@ export default function ShopPage() {
       <div className="container py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">Shop</h1>
-          <p className="text-gray-600 dark:text-gray-400">Take a piece of Hustle Hard home with you</p>
+          <p className="text-gray-600 dark:text-gray-400">Take a piece of Side Hustle home with you</p>
         </div>
 
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,9 +83,15 @@ export default function ShopPage() {
                     ${product.price.toFixed(2)}
                   </span>
                   <Button 
-                    className="bg-white text-black dark:bg-black dark:text-white hover:bg-white/90 dark:hover:bg-black/90"
+                    variant="hustle"
+                    className="flex items-center justify-center gap-2"
                   >
-                    Add to Cart
+                    <div className="w-5 h-5 rounded-full bg-white dark:bg-black flex items-center justify-center">
+                      <svg className="w-3 h-3 text-black dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                    </div>
+                    Shop Now
                   </Button>
                 </div>
               </div>

@@ -135,7 +135,7 @@ export const useFcmNotifications = () => {
       
       toast({
         title: "Notifications Enabled",
-        description: "You will now receive notifications from Hustle Hard.",
+        description: "You will now receive notifications from Side Hustle Bar.",
       });
       
       // Setup foreground message handler
@@ -174,7 +174,7 @@ export const useFcmNotifications = () => {
         
         toast({
           title: "Notifications Disabled",
-          description: "You will no longer receive notifications from Hustle Hard.",
+          description: "You will no longer receive notifications from Side Hustle Bar.",
         });
         
         return true;
@@ -211,6 +211,26 @@ export const useFcmNotifications = () => {
       // Setup foreground message handler if notifications are enabled
       if (notificationsEnabled) {
         setupForegroundMessageHandler();
+        
+        // Send a welcome notification if needed
+        // We can use localStorage to make sure this only happens once per device
+        const hasShownWelcome = localStorage.getItem('sidehustle_welcome_shown');
+        if (!hasShownWelcome && 'Notification' in window) {
+          localStorage.setItem('sidehustle_welcome_shown', 'true');
+          
+          // Small delay to not overwhelm the user
+          setTimeout(() => {
+            try {
+              new Notification('Welcome to Side Hustle Bar!', {
+                body: 'You\'ll now receive updates about our latest events and specials.',
+                icon: '/wolf-icon-white.png',
+                silent: false
+              });
+            } catch (error) {
+              console.error('Error showing welcome notification:', error);
+            }
+          }, 2000);
+        }
       }
     };
     
