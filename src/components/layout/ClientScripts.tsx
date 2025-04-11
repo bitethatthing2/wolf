@@ -101,50 +101,7 @@ export default function ClientScripts() {
         src="/direct-animation-fix.js"
       />
       
-      {/* 3rd party integration scripts */}
-      <Script
-        src="/elfsight-fix.js"
-        strategy="beforeInteractive"
-        id="elfsight-fix-script"
-      />
-      
-      <Script
-        src="/elfsight-platform-fix.js"
-        strategy="beforeInteractive"
-        id="elfsight-platform-fix-script"
-      />
-      
-      <Script
-        src="https://static.elfsight.com/platform/platform.js"
-        strategy="lazyOnload"
-        id="elfsight-platform-script"
-        crossOrigin="anonymous"
-        onError={(e) => {
-          console.error('Error loading Elfsight platform script:', e);
-          
-          // Track this error in our global app state
-          if (typeof window !== 'undefined' && window.__wolfAppInit) {
-            window.__wolfAppInit.errors.push('Elfsight script loading error');
-          }
-        }}
-        onLoad={() => {
-          console.log('Elfsight platform script loaded successfully');
-          
-          // Try to initialize Elfsight if it's already in the DOM
-          if (typeof window !== 'undefined' && window.elfsight && typeof window.elfsight.reinit === 'function') {
-            setTimeout(() => {
-              try {
-                // Add additional type safety check before calling reinit
-                if (window.elfsight && typeof window.elfsight.reinit === 'function') {
-                  window.elfsight.reinit();
-                }
-              } catch (err) {
-                console.error('Error initializing Elfsight after load:', err);
-              }
-            }, 1000);
-          }
-        }}
-      />
+      {/* 3rd party integration scripts removed - we now use direct Instagram embed */}
       
       {/* Environment configuration script that loads before anything else */}
       <Script 

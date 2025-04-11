@@ -5,6 +5,14 @@
   overflow-x: hidden;
 }
 
+@media (max-width: 540px) {
+  .instagramContainer {
+    width: 100%;
+    min-width: unset;
+    max-width: 100%;
+  }
+}
+
 .instagramMedia {
   border: 0;
   border-radius: 3px;

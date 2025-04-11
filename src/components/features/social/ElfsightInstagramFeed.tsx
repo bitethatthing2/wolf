@@ -143,7 +143,7 @@ const ElfsightInstagramFeed: React.FC = () => {
               ) : (
                 <InstagramEmbed 
                   username="sidehustle_bar"
-                  className="w-full max-w-xl mx-auto"
+                  className="w-full max-w-full mx-auto px-0 sm:px-4"
                 />
               )}
             </div>

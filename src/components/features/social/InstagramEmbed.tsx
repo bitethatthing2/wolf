@@ -134,8 +134,8 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
             ? '0 0 1px 0 rgba(255,255,255,0.5),0 1px 10px 0 rgba(255,255,255,0.15)' 
             : '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)', 
           margin: '1px', 
-          maxWidth: '540px', 
-          minWidth: '326px', 
+          maxWidth: '100%', 
+          minWidth: 'auto', 
           padding: 0, 
           width: 'calc(100% - 2px)' 
         }}
@@ -322,7 +322,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
   // Loading placeholder
   if (!isLoaded && !hasError) {
     return (
-      <div className={`instagram-embed-loading ${className} min-h-[540px] flex flex-col items-center justify-center rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'} p-6`}>
+      <div className={`instagram-embed-loading ${className} min-h-[350px] sm:min-h-[450px] md:min-h-[540px] flex flex-col items-center justify-center rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'} p-4 sm:p-6`}>
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 animate-pulse mb-4 flex items-center justify-center">
           <Instagram className="h-6 w-6 text-white" />
         </div>
@@ -336,22 +336,22 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
   // Error state
   if (hasError) {
     return (
-      <div className={`instagram-embed-error ${className} min-h-[450px] flex flex-col items-center justify-center rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'} p-6`}>
-        <Instagram className={`h-10 w-10 mb-4 ${isDark ? 'text-white/60' : 'text-black/60'}`} />
-        <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+      <div className={`instagram-embed-error ${className} min-h-[300px] sm:min-h-[350px] md:min-h-[450px] flex flex-col items-center justify-center rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'} p-4 sm:p-6`}>
+        <Instagram className={`h-8 sm:h-10 w-8 sm:w-10 mb-3 sm:mb-4 ${isDark ? 'text-white/60' : 'text-black/60'}`} />
+        <h3 className={`text-base sm:text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
           Instagram Feed Error
         </h3>
-        <p className={`text-center mb-4 max-w-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+        <p className={`text-center mb-3 sm:mb-4 max-w-xs text-sm sm:text-base ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
           There was a problem loading our Instagram feed.
         </p>
         <a 
           href={`https://www.instagram.com/${username}/`}
           target="_blank"
           rel="noopener noreferrer"
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black'}`}
+          className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded text-sm sm:text-base ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black'}`}
         >
           <span>View on Instagram</span>
-          <ExternalLink className="h-4 w-4" />
+          <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
         </a>
       </div>
     );
@@ -361,19 +361,22 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className={`instagram-embed ${className} max-w-[540px] overflow-hidden mx-auto w-full`}
+      className={`instagram-embed ${className} max-w-[540px] sm:max-w-[440px] md:max-w-[540px] overflow-hidden mx-auto w-full`}
     >
-      {generateEmbed()}
-      <noscript>
-        <iframe 
-          src={`https://www.instagram.com/${username}/embed`}
-          width="100%" 
-          height="540" 
-          frameBorder="0" 
-          scrolling="no" 
-          allowTransparency={true}
-        ></iframe>
-      </noscript>
+      <div className="instagram-wrapper w-full h-auto aspect-auto">
+        {generateEmbed()}
+        <noscript>
+          <iframe 
+            src={`https://www.instagram.com/${username}/embed`}
+            width="100%" 
+            height="100%" 
+            frameBorder="0" 
+            scrolling="no" 
+            allowTransparency={true}
+            style={{ minHeight: '540px', aspectRatio: '1', maxHeight: '540px' }}
+          ></iframe>
+        </noscript>
+      </div>
     </div>
   );
 };
