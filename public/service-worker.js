@@ -65,11 +65,18 @@ self.addEventListener('install', (event) => {
         
         // Cache files individually to prevent one failure from breaking the whole process
         const cachePromises = PRECACHE_ASSETS.map(url => {
-          return cache.add(url).catch(error => {
-            console.error(`[Service Worker] Failed to cache ${url}:`, error);
-            // Continue despite the error
-            return Promise.resolve();
-          });
+          return fetch(url)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Request for ${url} returned status ${response.status}`);
+              }
+              return cache.put(url, response);
+            })
+            .catch(error => {
+              console.error(`[Service Worker] Failed to cache ${url}:`, error);
+              // Continue despite the error
+              return Promise.resolve();
+            });
         });
         
         return Promise.all(cachePromises);
