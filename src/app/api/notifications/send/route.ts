@@ -5,6 +5,27 @@ import { getActiveSubscriptions } from "@/lib/supabase/notification-service";
 import { createPlatformPayloads } from "@/lib/utils/notification-routing";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
+// Helper function to clean up old subscriptions
+async function cleanupOldSubscriptions(supabase: any, olderThanDays: number = 90) {
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+    
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .delete()
+      .lt('last_used', cutoffDate.toISOString());
+      
+    if (error) {
+      console.error("Error cleaning up old subscriptions:", error);
+    } else {
+      console.log(`Successfully cleaned up subscriptions older than ${olderThanDays} days`);
+    }
+  } catch (err) {
+    console.error("Failed to clean up old subscriptions:", err);
+  }
+}
+
 // Define result types
 type NotificationResult = {
   success: boolean;
@@ -22,45 +43,34 @@ export async function POST(request: Request) {
   // --- Initialize Firebase Admin SDK within the handler ---
   if (!getApps().length) {
     try {
-      // Import service account from the file
-      const serviceAccount = require("@/lib/firebase/service-account.json");
-      
-      initializeApp({
-        credential: cert(serviceAccount),
-        storageBucket: process.env.STORAGE_BUCKET,
-      });
-      console.log("Firebase Admin initialized within POST handler using service account file.");
-    } catch (error) {
-      console.error("Firebase Admin initialization error within POST handler:", error);
-      
-      // Try fallback to environment variables if service account file fails
-      try {
-        if (process.env.PRIVATE_KEY && process.env.PROJECT_ID && process.env.client_email) {
-          const privateKey = process.env.PRIVATE_KEY.replace(/\\n/g, "\n");
-          initializeApp({
-            credential: cert({
-              projectId: process.env.PROJECT_ID,
-              clientEmail: process.env.client_email,
-              privateKey: privateKey,
-            }),
-            storageBucket: process.env.STORAGE_BUCKET,
-          });
-          console.log("Firebase Admin initialized within POST handler using environment variables (fallback).");
-        } else {
-          console.error("Firebase Admin SDK credentials not available during API call.");
-          // Return an error immediately if creds are missing when the API is called
-          return NextResponse.json(
-            { error: "Server configuration error: Firebase Admin credentials missing." },
-            { status: 500 }
-          );
-        }
-      } catch (fallbackError) {
-        console.error("Firebase Admin initialization error with fallback method:", fallbackError);
+      // Use environment variables from Netlify
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY
+        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+        : undefined;
+
+      if (!privateKey || !process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL) {
+        console.error("Firebase Admin SDK credentials not available during API call.");
         return NextResponse.json(
-          { error: "Server configuration error: Failed to initialize Firebase Admin." },
+          { error: "Server configuration error: Firebase Admin credentials missing." },
           { status: 500 }
         );
       }
+
+      initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: privateKey,
+        }),
+        storageBucket: process.env.STORAGE_BUCKET,
+      });
+      console.log("Firebase Admin initialized within POST handler using environment variables.");
+    } catch (error) {
+      console.error("Firebase Admin initialization error:", error);
+      return NextResponse.json(
+        { error: "Server configuration error: Failed to initialize Firebase Admin." },
+        { status: 500 }
+      );
     }
   }
   // --- End Firebase Admin Initialization ---
