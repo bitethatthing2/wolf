@@ -55,16 +55,13 @@ const LocationSwitch: React.FC<LocationSwitchProps> = ({ className }) => {
       </div>
 
       {/* Display Map based on selection */}
-      <div className="w-full max-w-4xl mx-auto mb-6">
-        {selectedLocation === 'portland' ? (
-          <PortlandMap 
-            key={`portland-map-${isMounted ? 'mounted' : 'loading'}`}
-          />
-        ) : (
-          <SalemMap 
-            key={`salem-map-${isMounted ? 'mounted' : 'loading'}`}
-          />
-        )}
+      <div className="w-full max-w-4xl mx-auto mb-6 relative min-h-[450px]">
+        <div className={`absolute inset-0 transition-opacity duration-300 ${selectedLocation === 'portland' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
+          <PortlandMap />
+        </div>
+        <div className={`absolute inset-0 transition-opacity duration-300 ${selectedLocation === 'salem' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
+          <SalemMap />
+        </div>
       </div>
 
       {/* Display Direction Buttons */}

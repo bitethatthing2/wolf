@@ -12,12 +12,33 @@ import GoogleReviewsSection from '@/components/features/social/GoogleReviewsSect
 const LocationsPage = () => {
   const { selectedLocation, locationData } = useLocation();
   const { theme } = useTheme(); 
+  const [isMounted, setIsMounted] = React.useState(false);
   
-  const activeLocation = locationData[selectedLocation];
+  // Use memo to prevent re-renders
+  const socialComponents = React.useMemo(() => {
+    return (
+      <>
+        <div className="mt-12"> 
+          <ElfsightInstagramFeed />
+        </div>
 
-  if (!selectedLocation || !locationData) {
+        <div className="mt-12"> 
+          <GoogleReviewsSection />
+        </div>
+      </>
+    );
+  }, []);
+  
+  // Only run this effect once to set mounted state
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  if (!isMounted || !selectedLocation || !locationData) {
     return <div className="container mx-auto px-4 py-8 text-center text-white">Loading location data...</div>;
   }
+  
+  const activeLocation = locationData[selectedLocation];
 
   return (
     <div className="container mx-auto px-4 py-8 overflow-x-hidden mb-24">
@@ -31,21 +52,20 @@ const LocationsPage = () => {
           <LocationSwitch className="w-full" /> 
         </div>
         
-        <div className="mt-12"> 
-          <ElfsightInstagramFeed />
-        </div>
+        {/* Use memoized social components to prevent re-renders */}
+        {socialComponents}
 
-        <div className="mt-12"> 
-          <GoogleReviewsSection />
-        </div>
-
-        <h2 className="text-3xl font-bold text-white text-center mb-4">
+        <h2 className="text-3xl font-bold text-white text-center mb-4 mt-6">
           {activeLocation.name}
         </h2>
       </div>
       
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12">
-        <div className="flex flex-col gap-4 bg-black/30 p-6 rounded-lg border border-white/10">
+        {/* For the contact info and hours, use transition opacity to prevent jarring changes */}
+        <div 
+          className="flex flex-col gap-4 bg-black/30 p-6 rounded-lg border border-white/10 transition-all duration-300"
+          key={`contact-${selectedLocation}`}
+        >
           <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Contact Information</h3>
           
           <div className="flex items-center gap-3 mt-2">
@@ -63,7 +83,10 @@ const LocationsPage = () => {
           </p>
         </div>
         
-        <div className="flex flex-col gap-4 bg-black/30 p-6 rounded-lg border border-white/10">
+        <div 
+          className="flex flex-col gap-4 bg-black/30 p-6 rounded-lg border border-white/10 transition-all duration-300"
+          key={`hours-${selectedLocation}`}
+        >
           <div className="flex items-center gap-3 border-b border-white/10 pb-2">
             <Clock className="w-5 h-5 text-white/60" />
             <h3 className="text-xl font-semibold text-white">Hours of Operation</h3>
@@ -71,7 +94,7 @@ const LocationsPage = () => {
           
           <div className="space-y-2 mt-2">
             {Object.entries(activeLocation.hours).map(([day, time]: [string, string]) => (
-              <div key={day} className="flex justify-between items-center text-sm">
+              <div key={`${selectedLocation}-${day}`} className="flex justify-between items-center text-sm">
                 <span className="text-white/80 capitalize">{day}</span>
                 <span className="text-white font-medium">{String(time)}</span>
               </div>
