@@ -1,155 +1,168 @@
-"use client";
+'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { Instagram, ExternalLink } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
 import styles from './InstagramEmbed.module.css';
-import { Instagram, ExternalLink } from 'lucide-react';
 
 interface InstagramEmbedProps {
+  username?: string;
   className?: string;
 }
 
-const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ className = '' }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scriptLoaded = useRef(false);
+/**
+ * InstagramEmbed - A direct Instagram embed component that uses Instagram's official embed script
+ * rather than a third-party widget like Elfsight.
+ */
+const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ 
+  username = 'sidehustle_bar',
+  className = '' 
+}) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [scriptError, setScriptError] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    // Only load the script once
-    if (scriptLoaded.current) return;
-    
-    // Function to safely process embeds with error handling
-    const safelyProcessEmbeds = () => {
-      try {
-        if (window.instgrm && window.instgrm.Embeds && typeof window.instgrm.Embeds.process === 'function') {
-          window.instgrm.Embeds.process();
-        } else {
-          console.warn('Instagram Embeds object not available or malformed');
+    if (typeof window === 'undefined') return;
+
+    // Function to load and process Instagram embeds
+    const loadInstagramEmbed = () => {
+      // Skip if script is already loaded
+      if (document.getElementById('instagram-embed-script')) {
+        if (window.instgrm) {
+          try {
+            window.instgrm.Embeds.process();
+            setIsLoaded(true);
+          } catch (error) {
+            console.error('Error processing embeds:', error);
+            setHasError(true);
+          }
         }
-      } catch (error) {
-        console.error('Error processing Instagram embeds:', error);
-        // Continue execution, don't let the error break the page
+        return;
       }
+
+      // Create script element
+      const script = document.createElement('script');
+      script.id = 'instagram-embed-script';
+      script.src = 'https://www.instagram.com/embed.js';
+      script.async = true;
+      script.defer = true;
+      
+      // Set up load and error handlers
+      script.onload = () => {
+        if (window.instgrm) {
+          try {
+            // Process after a short delay for consistent behavior
+            setTimeout(() => {
+              window.instgrm.Embeds.process();
+              setIsLoaded(true);
+            }, 300);
+          } catch (error) {
+            console.error('Error processing Instagram embeds:', error);
+            setHasError(true);
+          }
+        } else {
+          console.warn('Instagram embed script loaded but instgrm object not found');
+          setHasError(true);
+        }
+      };
+      
+      script.onerror = () => {
+        console.error('Failed to load Instagram embed script');
+        setHasError(true);
+      };
+      
+      // Add script to document
+      document.body.appendChild(script);
     };
-    
-    // Function to load Instagram embed script with error handling
-    const loadInstagramScript = () => {
-      try {
-        // Create script element
-        const script = document.createElement('script');
-        script.src = 'https://www.instagram.com/embed.js';
-        script.async = true;
-        script.defer = true;
-        
-        // Set up error handling
-        script.onerror = (error) => {
-          console.error('Error loading Instagram embed script:', error);
-          // Mark as attempted so we don't try again
-          scriptLoaded.current = true;
-          setScriptError(true);
-        };
-        
-        // Process embeds when script loads
-        script.onload = () => {
-          scriptLoaded.current = true;
-          
-          // Add timeout to ensure script is fully initialized
-          setTimeout(() => {
-            safelyProcessEmbeds();
-          }, 500);
-        };
-        
-        // Add script to document
-        document.body.appendChild(script);
-      } catch (error) {
-        console.error('Error setting up Instagram embed script:', error);
-      }
-    };
-    
-    // Set up global error handler for Instagram's script
-    const errorHandler = (event: ErrorEvent) => {
-      if (event.filename && event.filename.includes('instagram.com')) {
-        console.warn('Caught Instagram script error:', event.message);
-        setScriptError(true);
+
+    // Global error handler
+    const handleError = (event: ErrorEvent) => {
+      if (event.message && (
+        event.message.includes('Instagram') || 
+        event.message.includes('instgrm') ||
+        (event.filename && event.filename.includes('instagram.com'))
+      )) {
+        console.warn('Caught Instagram-related error:', event.message);
+        setHasError(true);
         event.preventDefault();
-        return true; // Prevent error from bubbling up
       }
     };
+
+    // Add error listener
+    window.addEventListener('error', handleError);
     
-    window.addEventListener('error', errorHandler, true);
+    // Load Instagram embed
+    loadInstagramEmbed();
     
-    // Clean up error handler on unmount
+    // Fallback timer to check if embed loaded
+    const timer = setTimeout(() => {
+      if (!isLoaded) {
+        const embedPlaceholder = containerRef.current?.querySelector('.instagram-media');
+        const embedLoaded = containerRef.current?.querySelector('.instagram-media-rendered');
+        
+        if (!embedLoaded && embedPlaceholder) {
+          console.warn('Instagram embed failed to load within timeout');
+          setHasError(true);
+        }
+      }
+    }, 5000);
+    
+    // Cleanup
     return () => {
-      window.removeEventListener('error', errorHandler, true);
-      clearTimeout(fallbackTimer);
+      window.removeEventListener('error', handleError);
+      clearTimeout(timer);
     };
-    
-    // Load the script
-    loadInstagramScript();
-    
-    // Set up a fallback timer to attempt processing again
-    const fallbackTimer = setTimeout(() => {
-      if (window.instgrm) {
-        safelyProcessEmbeds();
-      } else {
-        // If still not available after timeout, mark as error
-        setScriptError(true);
-      }
-    }, 3000);
-  }, []);
+  }, [isLoaded]);
 
-  // Render fallback component if script fails to load
-  if (scriptError) {
+  // Generate the embed code with the correct username
+  const generateEmbed = () => {
+    const permalinkUrl = `https://www.instagram.com/${username}/?utm_source=ig_embed&utm_campaign=loading`;
+    
     return (
-      <div className={`${styles.instagramContainer} ${className} ${isDark ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg p-6 flex flex-col items-center justify-center min-h-[450px]`}>
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center mb-4">
-          <Instagram className="h-8 w-8 text-white" />
-        </div>
-        <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
-          Instagram Feed Unavailable
-        </h3>
-        <p className={`text-center mb-4 max-w-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-          We're having trouble loading our Instagram feed. Please visit our page directly.
-        </p>
-        <a 
-          href="https://www.instagram.com/sidehustle_bar/" 
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`flex items-center gap-2 px-4 py-2 rounded-md ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} transition-colors`}
-        >
-          <span>Visit @sidehustle_bar</span>
-          <ExternalLink className="h-4 w-4" />
-        </a>
-      </div>
-    );
-  }
-
-  // Render normal Instagram embed if no error
-  return (
-    <div ref={containerRef} className={`${styles.instagramContainer} ${className}`}>
       <blockquote 
-        className={`instagram-media ${styles.instagramMedia} ${isDark ? styles.instagramMediaDark : styles.instagramMediaLight}`}
-        data-instgrm-permalink="https://www.instagram.com/sidehustle_bar/"
-        data-instgrm-version="14"
+        className="instagram-media" 
+        data-instgrm-permalink={permalinkUrl}
+        data-instgrm-version="14" 
+        style={{ 
+          background: isDark ? '#121212' : '#FFF', 
+          border: 0, 
+          borderRadius: '3px', 
+          boxShadow: isDark 
+            ? '0 0 1px 0 rgba(255,255,255,0.5),0 1px 10px 0 rgba(255,255,255,0.15)' 
+            : '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)', 
+          margin: '1px', 
+          maxWidth: '540px', 
+          minWidth: '326px', 
+          padding: 0, 
+          width: 'calc(100% - 2px)' 
+        }}
       >
-        <div className={styles.contentPadding}>
+        <div style={{ padding: '16px' }}>
           <a 
-            href="https://www.instagram.com/sidehustle_bar/" 
-            className={`${styles.profileLink} ${isDark ? styles.profileLinkDark : styles.profileLinkLight}`}
+            href={permalinkUrl}
+            style={{ 
+              background: isDark ? '#121212' : '#FFFFFF', 
+              lineHeight: 0, 
+              padding: '0 0', 
+              textAlign: 'center', 
+              textDecoration: 'none', 
+              width: '100%' 
+            }} 
             target="_blank"
             rel="noopener noreferrer"
           >
-            <div className={styles.profileContainer}>
-              <div className={`${styles.profileImagePlaceholder} ${isDark ? styles.profileImagePlaceholderDark : styles.profileImagePlaceholderLight}`}></div>
-              <div className={styles.profileInfo}>
-                <div className={`${styles.profileInfoBar} ${isDark ? styles.profileInfoBarDark : styles.profileInfoBarLight}`}></div>
-                <div className={`${styles.profileInfoBarSmall} ${isDark ? styles.profileInfoBarDark : styles.profileInfoBarLight}`}></div>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              <div style={{ backgroundColor: isDark ? '#333' : '#F4F4F4', borderRadius: '50%', flexGrow: 0, height: '40px', marginRight: '14px', width: '40px' }}></div>
+              <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center' }}>
+                <div style={{ backgroundColor: isDark ? '#333' : '#F4F4F4', borderRadius: '4px', flexGrow: 0, height: '14px', marginBottom: '6px', width: '100px' }}></div>
+                <div style={{ backgroundColor: isDark ? '#333' : '#F4F4F4', borderRadius: '4px', flexGrow: 0, height: '14px', width: '60px' }}></div>
               </div>
             </div>
-            <div className={styles.paddingVertical}></div>
-            <div className={styles.logoContainer}>
+            <div style={{ padding: '19% 0' }}></div>
+            <div style={{ display: 'block', height: '50px', margin: '0 auto 12px', width: '50px' }}>
               <svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlnsXlink="https://www.w3.org/1999/xlink">
                 <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
                   <g transform="translate(-511.000000, -20.000000)" fill={isDark ? "#FFFFFF" : "#000000"}>
@@ -160,45 +173,207 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ className = '' }) => {
                 </g>
               </svg>
             </div>
-            <div className={styles.paddingTop}>
-              <div className={`${styles.viewProfileText} ${isDark ? styles.viewProfileTextDark : styles.viewProfileTextLight}`}>
+            <div style={{ paddingTop: '8px' }}>
+              <div style={{ 
+                color: isDark ? '#CCCCCC' : '#3897f0', 
+                fontFamily: 'Arial,sans-serif', 
+                fontSize: '14px', 
+                fontStyle: 'normal', 
+                fontWeight: 550, 
+                lineHeight: '18px' 
+              }}>
                 View this profile on Instagram
               </div>
             </div>
-            <div className={styles.paddingVerticalLarge}></div>
-            <div className={styles.iconRow}>
-              <div className={styles.iconContainer}>
-                <div className={`${styles.iconDot} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
-                <div className={`${styles.iconLine} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
-                <div className={`${styles.iconDotOffset} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
+            <div style={{ padding: '12.5% 0' }}></div>
+            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '14px', alignItems: 'center' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{ 
+                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
+                  borderRadius: '50%', 
+                  height: '12.5px', 
+                  width: '12.5px', 
+                  transform: 'translateX(0px) translateY(7px)' 
+                }}></div>
+                <div style={{ 
+                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
+                  height: '12.5px', 
+                  transform: 'rotate(-45deg) translateX(3px) translateY(1px)', 
+                  width: '12.5px', 
+                  flexGrow: 0, 
+                  marginRight: '14px', 
+                  marginLeft: '2px' 
+                }}></div>
+                <div style={{ 
+                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
+                  borderRadius: '50%', 
+                  height: '12.5px', 
+                  width: '12.5px', 
+                  transform: 'translateX(9px) translateY(-18px)' 
+                }}></div>
               </div>
-              <div className={styles.iconContainerRight}>
-                <div className={`${styles.iconCircle} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
-                <div className={`${styles.iconTriangle} ${isDark ? styles.iconTriangleDark : styles.iconTriangleLight}`}></div>
+              <div style={{ marginLeft: '8px' }}>
+                <div style={{ 
+                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
+                  borderRadius: '50%', 
+                  flexGrow: 0, 
+                  height: '20px', 
+                  width: '20px' 
+                }}></div>
+                <div style={{ 
+                  width: 0, 
+                  height: 0, 
+                  borderTop: '2px solid transparent', 
+                  borderLeft: isDark ? '6px solid #333' : '6px solid #f4f4f4', 
+                  borderBottom: '2px solid transparent', 
+                  transform: 'translateX(16px) translateY(-4px) rotate(30deg)' 
+                }}></div>
               </div>
-              <div className={styles.autoMargin}>
-                <div className={`${styles.iconTopTriangle} ${isDark ? styles.iconTopTriangleDark : styles.iconTopTriangleLight}`}></div>
-                <div className={`${styles.iconRect} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
-                <div className={`${styles.iconLeftTriangle} ${isDark ? styles.iconLeftTriangleDark : styles.iconLeftTriangleLight}`}></div>
+              <div style={{ marginLeft: 'auto' }}>
+                <div style={{ 
+                  width: 0, 
+                  borderTop: isDark ? '8px solid #333' : '8px solid #F4F4F4', 
+                  borderRight: '8px solid transparent', 
+                  transform: 'translateY(16px)' 
+                }}></div>
+                <div style={{ 
+                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
+                  flexGrow: 0, 
+                  height: '12px', 
+                  width: '16px', 
+                  transform: 'translateY(-4px)' 
+                }}></div>
+                <div style={{ 
+                  width: 0, 
+                  height: 0, 
+                  borderTop: isDark ? '8px solid #333' : '8px solid #F4F4F4', 
+                  borderLeft: '8px solid transparent', 
+                  transform: 'translateY(-4px) translateX(8px)' 
+                }}></div>
               </div>
             </div>
-            <div className={styles.captionContainer}>
-              <div className={`${styles.captionLine} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
-              <div className={`${styles.captionLineSmall} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
+            <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center', marginBottom: '24px' }}>
+              <div style={{ 
+                backgroundColor: isDark ? '#333' : '#F4F4F4', 
+                borderRadius: '4px', 
+                flexGrow: 0, 
+                height: '14px', 
+                marginBottom: '6px', 
+                width: '224px' 
+              }}></div>
+              <div style={{ 
+                backgroundColor: isDark ? '#333' : '#F4F4F4', 
+                borderRadius: '4px', 
+                flexGrow: 0, 
+                height: '14px', 
+                width: '144px' 
+              }}></div>
             </div>
           </a>
-          <p className={styles.footerText}>
-            <a
-              href="https://www.instagram.com/sidehustle_bar/"
-              className={styles.footerLink}
+          <p style={{ 
+            color: '#c9c8cd', 
+            fontFamily: 'Arial,sans-serif', 
+            fontSize: '14px', 
+            lineHeight: '17px', 
+            marginBottom: 0, 
+            marginTop: '8px', 
+            overflow: 'hidden', 
+            padding: '8px 0 7px', 
+            textAlign: 'center', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap' 
+          }}>
+            <a 
+              href={permalinkUrl}
+              style={{ 
+                color: '#c9c8cd', 
+                fontFamily: 'Arial,sans-serif', 
+                fontSize: '14px', 
+                fontStyle: 'normal', 
+                fontWeight: 'normal', 
+                lineHeight: '17px' 
+              }} 
               target="_blank"
               rel="noopener noreferrer"
             >
-              @sidehustle_bar
-            </a>
+              SIDE HUSTLE BAR
+            </a> (@
+            <a 
+              href={permalinkUrl}
+              style={{ 
+                color: '#c9c8cd', 
+                fontFamily: 'Arial,sans-serif', 
+                fontSize: '14px', 
+                fontStyle: 'normal', 
+                fontWeight: 'normal', 
+                lineHeight: '17px' 
+              }} 
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {username}
+            </a>) • Instagram photos and videos
           </p>
         </div>
       </blockquote>
+    );
+  };
+
+  // Loading placeholder
+  if (!isLoaded && !hasError) {
+    return (
+      <div className={`instagram-embed-loading ${className} min-h-[540px] flex flex-col items-center justify-center rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'} p-6`}>
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 animate-pulse mb-4 flex items-center justify-center">
+          <Instagram className="h-6 w-6 text-white" />
+        </div>
+        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          Loading Instagram feed...
+        </p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (hasError) {
+    return (
+      <div className={`instagram-embed-error ${className} min-h-[450px] flex flex-col items-center justify-center rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'} p-6`}>
+        <Instagram className={`h-10 w-10 mb-4 ${isDark ? 'text-white/60' : 'text-black/60'}`} />
+        <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+          Instagram Feed Error
+        </h3>
+        <p className={`text-center mb-4 max-w-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+          There was a problem loading our Instagram feed.
+        </p>
+        <a 
+          href={`https://www.instagram.com/${username}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black'}`}
+        >
+          <span>View on Instagram</span>
+          <ExternalLink className="h-4 w-4" />
+        </a>
+      </div>
+    );
+  }
+
+  // Normal render with embed
+  return (
+    <div 
+      ref={containerRef} 
+      className={`instagram-embed ${className} max-w-[540px] overflow-hidden mx-auto w-full`}
+    >
+      {generateEmbed()}
+      <noscript>
+        <iframe 
+          src={`https://www.instagram.com/${username}/embed`}
+          width="100%" 
+          height="540" 
+          frameBorder="0" 
+          scrolling="no" 
+          allowTransparency={true}
+        ></iframe>
+      </noscript>
     </div>
   );
 };

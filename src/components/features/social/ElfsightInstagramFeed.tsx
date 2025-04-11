@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Instagram, ExternalLink } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
 import dynamic from 'next/dynamic';
+import InstagramEmbed from './InstagramEmbed';
 
 // Add type declaration for window.__ENV
 declare global {
@@ -135,15 +136,14 @@ const ElfsightInstagramFeed: React.FC = () => {
         
         <div className={`w-full overflow-hidden rounded-xl ${isDark ? 'border border-white/10' : 'border border-black/10'} shadow-lg`}>
           <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-lg`}>
-            {/* Use our new reliable Instagram Feed component */}
+            {/* Use the direct Instagram embed component */}
             <div className="min-h-[550px] pt-6 sm:pt-0 flex justify-center w-full overflow-x-hidden"> 
               {hasError ? (
                 <InstagramErrorFallback />
               ) : (
-                <SideHustleInstagramFeed 
-                  widgetId={INSTAGRAM_WIDGET_ID}
+                <InstagramEmbed 
+                  username="sidehustle_bar"
                   className="w-full max-w-xl mx-auto"
-                  title=""
                 />
               )}
             </div>
