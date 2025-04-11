@@ -8,9 +8,13 @@ import { Toaster } from "@/components/ui/toaster";
 import ClientScripts from "@/components/layout/ClientScripts";
 import ClientComponentsWrapper from "@/components/layout/ClientComponentsWrapper";
 
+// Optimize font loading with display: swap for better performance
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+  preload: true,
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -24,7 +28,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    apple: "/icons/splash_screens/icon.png",
+    apple: [
+      { url: "/icons/splash_screens/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+    ],
+    shortcut: ["/favicon.ico"],
   },
   // Add PWA metadata
   other: {
@@ -42,8 +50,10 @@ export const viewport: Viewport = {
   themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Allow users to zoom for accessibility
+  minimumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
