@@ -109,6 +109,12 @@ export default function ClientScripts() {
       />
       
       <Script
+        src="/elfsight-platform-fix.js"
+        strategy="beforeInteractive"
+        id="elfsight-platform-fix-script"
+      />
+      
+      <Script
         src="https://static.elfsight.com/platform/platform.js"
         strategy="lazyOnload"
         id="elfsight-platform-script"

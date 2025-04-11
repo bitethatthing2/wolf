@@ -33,7 +33,7 @@ exports.handler = async function(event, context) {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept'
       },
       body: ''
     };
@@ -124,6 +124,9 @@ exports.handler = async function(event, context) {
       headers: {
         'Content-Type': contentType,
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept',
+        'Access-Control-Max-Age': '86400',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'X-Proxied-By': 'Netlify Function'
       },

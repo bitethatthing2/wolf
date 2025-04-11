@@ -16,7 +16,8 @@
     console.log('Applying enhanced Elfsight platform fixes for production environment');
 
     // Check if proxy is enabled via environment variable
-    const isProxyEnabled = window.__ENV && window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED === 'true';
+    // IMPORTANT: Force proxy to be enabled by default to avoid CORS issues
+    const isProxyEnabled = window.__ENV ? (window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED === 'true') : true;
     console.log(`Elfsight CORS proxy ${isProxyEnabled ? 'enabled' : 'disabled'}`);
 
     // Fix for redirect and preaching errors

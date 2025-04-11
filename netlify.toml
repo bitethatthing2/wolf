@@ -71,6 +71,7 @@
   
   # Configuration for Instagram and Elfsight integration
   INSTAGRAM_WIDGET_ID = "4118f1f5-d59f-496f-8439-e8e0232a0fef"
+  GOOGLE_REVIEWS_WIDGET_ID = "f4fdffed-81de-4d5d-b688-2da302faebbe"
   ELFSIGHT_CORS_PROXY_ENABLED = "true"
 
 # Add special headers for Elfsight integration

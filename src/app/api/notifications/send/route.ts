@@ -199,9 +199,14 @@ export async function POST(request: Request) {
             const batch = androidTokens.slice(i, i + 500);
             try {
               // Use multicast for efficiency
+              // Create properly typed multicast message
               const response = await messaging.sendMulticast({
                 ...androidPayload,
-                tokens: batch
+                tokens: batch,
+                android: {
+                  ...androidPayload.android,
+                  priority: "high" as "high" // Ensure correct type
+                }
               });
               
               // Update results
@@ -254,7 +259,9 @@ export async function POST(request: Request) {
               // Use multicast for efficiency
               const response = await messaging.sendMulticast({
                 ...iosPayload,
-                tokens: batch
+                tokens: batch,
+                // Ensure any potential troublesome fields are properly typed
+                apns: iosPayload.apns
               });
               
               // Update results
@@ -307,7 +314,9 @@ export async function POST(request: Request) {
               // Use multicast for efficiency
               const response = await messaging.sendMulticast({
                 ...webPayload,
-                tokens: batch
+                tokens: batch,
+                // Ensure webpush is properly typed
+                webpush: webPayload.webpush
               });
               
               // Update results
@@ -364,7 +373,7 @@ export async function POST(request: Request) {
     if (!platform || platform === "all") {
       // Try sending to all platforms for this token
       try {
-        await messaging.send({...androidPayload, token});
+        await messaging.send({...androidPayload, token: token});
         results.sent++;
         results.details.push({ platform: "android", status: "success" });
       } catch (error: any) {
@@ -377,7 +386,7 @@ export async function POST(request: Request) {
       }
       
       try {
-        await messaging.send({...iosPayload, token});
+        await messaging.send({...iosPayload, token: token});
         results.sent++;
         results.details.push({ platform: "ios", status: "success" });
       } catch (error: any) {
@@ -390,7 +399,7 @@ export async function POST(request: Request) {
       }
       
       try {
-        await messaging.send({...webPayload, token});
+        await messaging.send({...webPayload, token: token});
         results.sent++;
         results.details.push({ platform: "web", status: "success" });
       } catch (error: any) {
@@ -409,12 +418,12 @@ export async function POST(request: Request) {
       try {
         let response;
         if (platform === "android") {
-          response = await messaging.send({...androidPayload, token});
+          response = await messaging.send({...androidPayload, token: token});
         } else if (platform === "ios") {
-          response = await messaging.send({...iosPayload, token});
+          response = await messaging.send({...iosPayload, token: token});
         } else {
           // Default to web
-          response = await messaging.send({...webPayload, token});
+          response = await messaging.send({...webPayload, token: token});
         }
         
         results.sent = 1;

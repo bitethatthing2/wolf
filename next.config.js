@@ -150,8 +150,9 @@ if (process.env.NODE_ENV === 'production') {
           /elfsight\.com/,
           /elfsightcdn\.com/,
           /cdninstagram\.com/,
-          /instagram\.com/
-      }
+          /instagram\.com/,
+        ],
+      },
     })(nextConfig);
   } catch (e) {
     console.warn('PWA plugin not available, using fallback config');

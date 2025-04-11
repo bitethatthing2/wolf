@@ -110,9 +110,14 @@ const ElfsightWidget = ({
           document.head.appendChild(metaReferrer);
         }
         
+        // Force CORS proxy to be enabled
+        if (window.__ENV && typeof window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED === 'undefined') {
+          window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED = 'true';
+        }
+        
         // Create and append the script
         const script = document.createElement('script');
-        script.src = "https://static.elfsight.com/platform/platform.js"; 
+        script.src = "https://static.elfsight.com/platform/platform.js?_cb=" + Date.now(); 
         script.async = true;
         script.defer = true;
         script.crossOrigin = "anonymous";
@@ -120,6 +125,14 @@ const ElfsightWidget = ({
         // Add attributes to prevent caching issues
         script.setAttribute('data-no-optimize', 'true');
         script.setAttribute('data-elfsight-script-id', Date.now().toString());
+        
+        // Add referrer meta tag to help with CORS
+        const referrerMeta = document.createElement('meta');
+        referrerMeta.name = 'referrer';
+        referrerMeta.content = 'no-referrer-when-downgrade';
+        if (!document.querySelector('meta[name="referrer"]')) {
+          document.head.appendChild(referrerMeta);
+        }
         
         // Set up onload handler before appending to avoid race conditions
         script.onload = () => {

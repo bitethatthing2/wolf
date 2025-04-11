@@ -18,7 +18,7 @@ const ElfsightWidget = dynamic(
 const INSTAGRAM_WIDGET_ID = 
   (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID) || 
   (typeof window !== 'undefined' && window.__ENV?.INSTAGRAM_WIDGET_ID) || 
-  "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct widget ID from the provided embed code
+  "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct widget ID from Elfsight
 
 // Loading placeholder component
 const InstagramLoadingPlaceholder = () => {

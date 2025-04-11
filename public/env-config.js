@@ -34,7 +34,10 @@
         NEXT_PUBLIC_FIREBASE_PROJECT_ID: "new1-f04b3",
         NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "1036893806199",
         NEXT_PUBLIC_FIREBASE_APP_ID: "1:1036893806199:web:5f6b3f8d18d30eda1bffcb",
-        NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY: "BPAbU0G8rhAKE7ay5RepQ7N3V_CsdCKvmflQm0FncBbx4CHL0IfmGvdbdYUN90Vjn50JB7T9jzj268KhYJ34ikU"
+        NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY: "BPAbU0G8rhAKE7ay5RepQ7N3V_CsdCKvmflQm0FncBbx4CHL0IfmGvdbdYUN90Vjn50JB7T9jzj268KhYJ34ikU",
+        INSTAGRAM_WIDGET_ID: "4118f1f5-d59f-496f-8439-e8e0232a0fef", // Instagram feed widget ID
+        GOOGLE_REVIEWS_WIDGET_ID: "f4fdffed-81de-4d5d-b688-2da302faebbe", // Google reviews widget ID
+        ELFSIGHT_CORS_PROXY_ENABLED: "true" // Enable CORS proxy by default
       };
     } catch (err) {
       console.error('[ENV Config] Error loading environment variables:', err);

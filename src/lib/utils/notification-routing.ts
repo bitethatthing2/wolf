@@ -121,13 +121,13 @@ export function createPlatformPayloads(basePayload: BasePayload, token?: string)
   const androidPayload = {
     ...basePayload,
     android: {
-      priority: 'high',
+      priority: "high" as "high", // Type-safe priority value
       notification: {
         sound: 'default',
         defaultSound: true,
         channelId: 'default',
-        priority: 'high',
-        visibility: 'public',
+        priority: "high" as "high", // Use type assertion to match expected enum
+        visibility: 'public' as 'public', // Use type assertion for visibility enum
         tag: deduplicationKey, // Use tag for Android notification grouping/deduplication
         icon: '@drawable/android_notification_drawer', // Reference to the Android notification drawer icon
         ...notification
