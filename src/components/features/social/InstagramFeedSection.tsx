@@ -5,9 +5,12 @@ import { Instagram } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
 import dynamic from 'next/dynamic';
 
-// Dynamically import InstagramEmbed with no SSR to prevent Suspense errors
+// Dynamically import InstagramEmbed with no SSR and error handling
 const InstagramEmbed = dynamic(
-  () => import('@/components/features/social/InstagramEmbed'),
+  () => import('@/components/features/social/InstagramEmbed').catch(err => {
+    console.error("Error loading InstagramEmbed component:", err);
+    return () => <InstagramErrorFallback />;
+  }),
   { ssr: false, loading: () => <InstagramLoadingPlaceholder /> }
 );
 
@@ -26,13 +29,60 @@ const InstagramLoadingPlaceholder = () => {
   );
 };
 
+// Error fallback component
+const InstagramErrorFallback = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
+  return (
+    <div className={`min-h-[450px] flex flex-col items-center justify-center rounded-lg p-6 ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+      <Instagram className={`h-10 w-10 mb-4 ${isDark ? 'text-white/60' : 'text-black/60'}`} />
+      <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+        Instagram Feed Error
+      </h3>
+      <p className={`text-center mb-4 max-w-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+        There was a problem loading our Instagram feed.
+      </p>
+      <a 
+        href="https://www.instagram.com/sidehustle_bar/" 
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black'}`}
+      >
+        View on Instagram
+      </a>
+    </div>
+  );
+};
+
 const InstagramFeedSection: React.FC = () => {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [hasError, setHasError] = useState(false);
   
   useEffect(() => {
     // Only set mounted to true in the client
     setMounted(true);
+    
+    // Set up error boundary for Instagram-related errors
+    const handleError = (event: ErrorEvent) => {
+      if (event.message && (
+        event.message.includes('Instagram') || 
+        event.message.includes('instgrm') || 
+        (event.filename && event.filename.includes('instagram.com'))
+      )) {
+        console.warn('Caught Instagram-related error:', event.message);
+        setHasError(true);
+        event.preventDefault();
+        return true;
+      }
+    };
+    
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
   }, []);
   
   // If not mounted yet, return null to avoid flash of unstyled content
@@ -64,9 +114,13 @@ const InstagramFeedSection: React.FC = () => {
         
         <div className={`w-full overflow-hidden rounded-xl ${isDark ? 'border border-white/10' : 'border border-black/10'} shadow-lg`}>
           <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-lg`}>
-            {/* Instagram Embed */}
+            {/* Instagram Embed with error fallback */}
             <div className="min-h-[550px] pt-6 sm:pt-0 flex justify-center w-full overflow-x-auto"> 
-              <InstagramEmbed className="w-full max-w-xl mx-auto flex-shrink-0" />
+              {hasError ? (
+                <InstagramErrorFallback />
+              ) : (
+                <InstagramEmbed className="w-full max-w-xl mx-auto flex-shrink-0" />
+              )}
             </div>
           </div>
         </div>

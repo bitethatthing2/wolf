@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/contexts/theme-context';
 import styles from './InstagramEmbed.module.css';
+import { Instagram, ExternalLink } from 'lucide-react';
 
 interface InstagramEmbedProps {
   className?: string;
@@ -13,36 +14,119 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ className = '' }) => {
   const scriptLoaded = useRef(false);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [scriptError, setScriptError] = useState(false);
 
   useEffect(() => {
     // Only load the script once
     if (scriptLoaded.current) return;
     
-    // Function to load Instagram embed script
-    const loadInstagramScript = () => {
-      const script = document.createElement('script');
-      script.src = 'https://www.instagram.com/embed.js';
-      script.async = true;
-      script.defer = true;
-      
-      script.onload = () => {
-        scriptLoaded.current = true;
-        // Process any embeds that might be on the page
-        if (window.instgrm) {
+    // Function to safely process embeds with error handling
+    const safelyProcessEmbeds = () => {
+      try {
+        if (window.instgrm && window.instgrm.Embeds && typeof window.instgrm.Embeds.process === 'function') {
           window.instgrm.Embeds.process();
+        } else {
+          console.warn('Instagram Embeds object not available or malformed');
         }
-      };
-      
-      document.body.appendChild(script);
+      } catch (error) {
+        console.error('Error processing Instagram embeds:', error);
+        // Continue execution, don't let the error break the page
+      }
     };
     
+    // Function to load Instagram embed script with error handling
+    const loadInstagramScript = () => {
+      try {
+        // Create script element
+        const script = document.createElement('script');
+        script.src = 'https://www.instagram.com/embed.js';
+        script.async = true;
+        script.defer = true;
+        
+        // Set up error handling
+        script.onerror = (error) => {
+          console.error('Error loading Instagram embed script:', error);
+          // Mark as attempted so we don't try again
+          scriptLoaded.current = true;
+          setScriptError(true);
+        };
+        
+        // Process embeds when script loads
+        script.onload = () => {
+          scriptLoaded.current = true;
+          
+          // Add timeout to ensure script is fully initialized
+          setTimeout(() => {
+            safelyProcessEmbeds();
+          }, 500);
+        };
+        
+        // Add script to document
+        document.body.appendChild(script);
+      } catch (error) {
+        console.error('Error setting up Instagram embed script:', error);
+      }
+    };
+    
+    // Set up global error handler for Instagram's script
+    const errorHandler = (event: ErrorEvent) => {
+      if (event.filename && event.filename.includes('instagram.com')) {
+        console.warn('Caught Instagram script error:', event.message);
+        setScriptError(true);
+        event.preventDefault();
+        return true; // Prevent error from bubbling up
+      }
+    };
+    
+    window.addEventListener('error', errorHandler, true);
+    
+    // Clean up error handler on unmount
+    return () => {
+      window.removeEventListener('error', errorHandler, true);
+      clearTimeout(fallbackTimer);
+    };
+    
+    // Load the script
     loadInstagramScript();
     
-    return () => {
-      // Cleanup if needed
-    };
+    // Set up a fallback timer to attempt processing again
+    const fallbackTimer = setTimeout(() => {
+      if (window.instgrm) {
+        safelyProcessEmbeds();
+      } else {
+        // If still not available after timeout, mark as error
+        setScriptError(true);
+      }
+    }, 3000);
   }, []);
 
+  // Render fallback component if script fails to load
+  if (scriptError) {
+    return (
+      <div className={`${styles.instagramContainer} ${className} ${isDark ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg p-6 flex flex-col items-center justify-center min-h-[450px]`}>
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center mb-4">
+          <Instagram className="h-8 w-8 text-white" />
+        </div>
+        <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+          Instagram Feed Unavailable
+        </h3>
+        <p className={`text-center mb-4 max-w-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+          We're having trouble loading our Instagram feed. Please visit our page directly.
+        </p>
+        <a 
+          href="https://www.instagram.com/sidehustle_bar/" 
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center gap-2 px-4 py-2 rounded-md ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} transition-colors`}
+        >
+          <span>Visit @sidehustle_bar</span>
+          <ExternalLink className="h-4 w-4" />
+        </a>
+      </div>
+    );
+  }
+
+  // Render normal Instagram embed if no error
   return (
     <div ref={containerRef} className={`${styles.instagramContainer} ${className}`}>
       <blockquote 
