@@ -14,9 +14,11 @@ const ElfsightWidget = dynamic(
   { ssr: false, loading: () => <InstagramLoadingPlaceholder /> }
 );
 
-// Current Elfsight Instagram widget ID
-// Previous ID "4df74eb3-4b36-44fa-b224-464a47ebb6b7" was causing WIDGET_NOT_FOUND error
-const INSTAGRAM_WIDGET_ID = "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct widget ID from the provided embed code
+// Get the Instagram widget ID from environment variables or fallback to hardcoded value
+const INSTAGRAM_WIDGET_ID = 
+  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID) || 
+  (typeof window !== 'undefined' && window.__ENV?.INSTAGRAM_WIDGET_ID) || 
+  "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct widget ID from the provided embed code
 
 // Loading placeholder component
 const InstagramLoadingPlaceholder = () => {

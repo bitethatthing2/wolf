@@ -26,6 +26,60 @@ const ElfsightWidget = ({
   const maxRetries = 5;
   
   // Use a separate effect for script loading to avoid render cycle interference
+  // Track memory usage and cleanup
+  useEffect(() => {
+    let memoryInterval: NodeJS.Timeout | null = null;
+    const widgetMemoryKey = `elfsight_widget_mem_${widgetId}`;
+    
+    // Monitor memory usage of the widget
+    const checkMemoryUsage = () => {
+      if (!window.performance || !window.performance.memory) return;
+      
+      try {
+        const memory = (window.performance as any).memory;
+        const usedHeapSizeMB = Math.round(memory.usedJSHeapSize / (1024 * 1024));
+        const totalHeapSizeMB = Math.round(memory.totalJSHeapSize / (1024 * 1024));
+        const heapLimitMB = Math.round(memory.jsHeapSizeLimit / (1024 * 1024));
+        
+        // Store memory usage for this widget
+        window[widgetMemoryKey] = {
+          timestamp: Date.now(),
+          usedHeapSizeMB,
+          totalHeapSizeMB,
+          heapLimitMB,
+          usagePercentage: Math.round((usedHeapSizeMB / heapLimitMB) * 100)
+        };
+        
+        // If memory usage is too high (over 80%), try to clean up
+        if ((usedHeapSizeMB / heapLimitMB) > 0.8) {
+          console.warn(`High memory usage detected (${usedHeapSizeMB}MB / ${heapLimitMB}MB). Attempting cleanup.`);
+          
+          // Force garbage collection if available (only in dev tools)
+          if (typeof window.gc === 'function') {
+            window.gc();
+          }
+          
+          // Attempt to free resources
+          if (window.eapps && window.eapps.AppsManager) {
+            console.log('Reinitializing Elfsight widgets to free memory');
+            window.eapps.AppsManager.initWidgetsFromBuffer();
+          }
+        }
+      } catch (e) {
+        console.error('Error checking memory usage:', e);
+      }
+    };
+    
+    // Check memory usage periodically
+    memoryInterval = setInterval(checkMemoryUsage, 30000); // Every 30 seconds
+    
+    return () => {
+      if (memoryInterval) {
+        clearInterval(memoryInterval);
+      }
+    };
+  }, [widgetId]);
+
   useEffect(() => {
     // Function to load the Elfsight script safely
     const loadElfsightScript = () => {
@@ -36,7 +90,7 @@ const ElfsightWidget = ({
       }
       
       // Check if the script already exists in the document
-      const existingScript = document.querySelector('script[src="https://static.elfsight.com/platform/platform.js"]');
+      const existingScript = document.querySelector('script[src*="static.elfsight.com/platform/platform.js"]');
       
       if (existingScript) {
         // Script exists, mark as loaded
@@ -58,21 +112,37 @@ const ElfsightWidget = ({
         
         // Create and append the script
         const script = document.createElement('script');
-        script.src = "https://static.elfsight.com/platform/platform.js";
+        script.src = "https://static.elfsight.com/platform/platform.js"; 
         script.async = true;
         script.defer = true;
         script.crossOrigin = "anonymous";
+        
+        // Add attributes to prevent caching issues
+        script.setAttribute('data-no-optimize', 'true');
+        script.setAttribute('data-elfsight-script-id', Date.now().toString());
         
         // Set up onload handler before appending to avoid race conditions
         script.onload = () => {
           globalScriptLoaded = true;
           setIsReady(true);
+          console.log('Elfsight platform script loaded successfully from component');
         };
         
         script.onerror = (error) => {
           console.error("Failed to load Elfsight script:", error);
           // Still mark as ready to avoid blocking the UI
           setIsReady(true);
+          
+          // Try again with a cache-busting URL if it failed
+          setTimeout(() => {
+            const retryScript = document.createElement('script');
+            retryScript.src = `https://static.elfsight.com/platform/platform.js?_cb=${Date.now()}`;
+            retryScript.async = true;
+            retryScript.defer = true;
+            retryScript.crossOrigin = "anonymous";
+            retryScript.setAttribute('data-retry', 'true');
+            document.body.appendChild(retryScript);
+          }, 2000);
         };
         
         // Append the script to the document
@@ -187,7 +257,7 @@ const ElfsightWidget = ({
   );
 };
 
-// Add TypeScript declaration for the Elfsight globals
+// Add TypeScript declaration for the Elfsight globals and memory monitoring
 declare global {
   interface Window {
     elfsight?: {
@@ -200,6 +270,18 @@ declare global {
       };
       AppsManager?: any;
     };
+    gc?: () => void; // For garbage collection (only available in dev tools)
+    __ENV?: {
+      [key: string]: string;
+    };
+    performance?: {
+      memory?: {
+        jsHeapSizeLimit: number;
+        totalJSHeapSize: number; 
+        usedJSHeapSize: number;
+      }
+    };
+    [key: string]: any; // For dynamic memory tracking keys
   }
 }
 

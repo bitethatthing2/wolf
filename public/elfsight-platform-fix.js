@@ -5,8 +5,9 @@
  * 2. Fixes initialization failures
  * 3. Adds retry mechanism for failed widget loads
  * 4. Ensures proper lazy loading of widgets
+ * 5. Uses CORS proxy for Elfsight API requests to prevent CORS errors
  * 
- * Updated version: 2.2.0
+ * Updated version: 2.3.0
  */
 
 (function() {
@@ -14,16 +15,24 @@
   document.addEventListener('DOMContentLoaded', function() {
     console.log('Applying enhanced Elfsight platform fixes for production environment');
 
+    // Check if proxy is enabled via environment variable
+    const isProxyEnabled = window.__ENV && window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED === 'true';
+    console.log(`Elfsight CORS proxy ${isProxyEnabled ? 'enabled' : 'disabled'}`);
+
     // Fix for redirect and preaching errors
     const originalFetch = window.fetch;
     
-    // Override fetch to handle redirect issues
+    // Override fetch to handle redirect issues and use proxy for Elfsight requests
     window.fetch = function(url, options) {
       // Check if this is an Elfsight API call
-      if (typeof url === 'string' && url.includes('elfsight.com/api')) {
+      if (typeof url === 'string' && 
+         (url.includes('elfsight.com/api') || 
+          url.includes('widget-data.service.elfsight.com') ||
+          url.includes('apps-api.elfsight.com'))) {
+          
         // Add cache-busting parameter to avoid redirect caching issues
         const separator = url.includes('?') ? '&' : '?';
-        url = url + separator + '_cb=' + Date.now();
+        const cacheBustedUrl = url + separator + '_cb=' + Date.now();
         
         // Add additional headers to prevent caching
         options = options || {};
@@ -31,8 +40,29 @@
         options.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
         options.headers['Pragma'] = 'no-cache';
         
-        // Handle potential CORS issues
-        return originalFetch(url, options)
+        // If proxy is enabled, use our Netlify function to proxy the request
+        if (isProxyEnabled) {
+          const proxyUrl = `/.netlify/functions/elfsight-proxy?url=${encodeURIComponent(cacheBustedUrl)}`;
+          console.log(`Proxying Elfsight request via Netlify function: ${url}`);
+          
+          return originalFetch(proxyUrl, options)
+            .then(response => {
+              if (!response.ok) {
+                console.warn(`Proxy request failed (${response.status}), falling back to direct request`);
+                // If proxy fails, fall back to direct request
+                return originalFetch(cacheBustedUrl, options);
+              }
+              return response;
+            })
+            .catch(error => {
+              console.error('Proxy request error:', error);
+              // Fall back to direct request
+              return originalFetch(cacheBustedUrl, options);
+            });
+        }
+        
+        // If proxy is disabled, handle CORS issues manually
+        return originalFetch(cacheBustedUrl, options)
           .then(response => {
             // Check for redirect responses
             if (response.status === 301 || response.status === 302 || response.status === 307 || response.status === 308) {

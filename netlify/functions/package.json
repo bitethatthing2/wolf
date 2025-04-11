@@ -1,0 +1,9 @@
+{
+  "name": "elfsight-proxy-function",
+  "version": "1.0.0",
+  "description": "Netlify function to proxy Elfsight API requests and solve CORS issues",
+  "main": "elfsight-proxy.js",
+  "dependencies": {
+    "node-fetch": "^2.6.9"
+  }
+}
