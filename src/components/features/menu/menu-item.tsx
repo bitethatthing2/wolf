@@ -104,8 +104,9 @@ export function MenuItem({ item, className }: MenuItemProps) {
                   src={item.image}
                   alt={item.name}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   unoptimized
+                  sizes="(max-width: 768px) 100vw, 400px"
                 />
               </div>
             )}

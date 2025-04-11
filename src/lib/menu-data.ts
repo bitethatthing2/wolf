@@ -222,18 +222,21 @@ export const menuData: FullMenu = {
           price: '$8.00',
           description: 'Fresh tortilla chips served with house-made guacamole',
           icon: foodIcons.chipsGuac,
+          image: '/chips_guac.png'
         },
         {
           name: 'BASKET OF FRIES',
           price: '$7.00',
           description: 'Crispy golden fries seasoned with our special blend',
           icon: foodIcons.fries,
+          image: '/basket_fry.png'
         },
         {
           name: 'BASKET OF TOTS',
           price: '$7.00',
           description: 'Crispy tater tots, perfectly seasoned',
           icon: foodIcons.tots,
+          image: '/basket_tots.png'
         },
       ],
     },
