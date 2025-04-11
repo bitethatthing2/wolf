@@ -117,21 +117,31 @@ if (process.env.NODE_ENV === 'production') {
         // Custom runtime caching rules for Elfsight
         runtimeCaching: [
           {
-            // Don't cache Elfsight API requests - prevents CORS errors
+            // Cache Elfsight API requests with NetworkFirst strategy
             urlPattern: /^https:\/\/(api|widget-data)\..*\.elfsight\.com\/.*/i,
-            handler: 'NetworkOnly',
+            handler: 'NetworkFirst',
             options: {
-              // No caching for Elfsight API requests
-              networkTimeoutSeconds: 10
+              // Timeout for Elfsight API requests
+              networkTimeoutSeconds: 10,
+              cacheName: 'elfsight-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              }
             }
           },
           {
-            // Don't cache Instagram API requests - prevents CORS errors
+            // Cache Instagram API requests with NetworkFirst strategy
             urlPattern: /^https:\/\/.*\.(cdninstagram|instagram)\.com\/.*/i,
-            handler: 'NetworkOnly',
+            handler: 'NetworkFirst',
             options: {
-              // No caching for Instagram API requests
-              networkTimeoutSeconds: 10
+              // Timeout for Instagram API requests
+              networkTimeoutSeconds: 10,
+              cacheName: 'instagram-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              }
             }
           }
         ],
