@@ -23,20 +23,10 @@ const PRECACHE_ASSETS = [
 
 // External domains to exclude from caching (to prevent CORS issues)
 const EXTERNAL_DOMAINS = [
-  // Elfsight and Instagram
-  'elfsight.com',
-  'elfsightcdn.com',
-  'static.elfsight.com',
-  'universe-static.elfsightcdn.com',
-  'static.elfsightcdn.com',
-  'apps-api.elfsight.com',
-  'apps.elfsight.com',
-  'service.elfsight.com',
-  'core.service.elfsight.com',
+  // Instagram domains
   'instagram.com',
   'cdninstagram.com',
   'api.instagram.com',
-  'widget-data.service.elfsight.com',
   
   // Google services 
   'google.com',
@@ -44,6 +34,7 @@ const EXTERNAL_DOMAINS = [
   'gstatic.com',
   'maps.google.com',
   'maps.googleapis.com',
+  'lh3.googleusercontent.com',
   
   // Other third-party services
   'youtube.com',
