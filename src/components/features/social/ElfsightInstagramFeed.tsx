@@ -28,7 +28,7 @@ const SideHustleInstagramFeed = dynamic(
 const INSTAGRAM_WIDGET_ID = 
   (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID) || 
   (typeof window !== 'undefined' && window.__ENV?.INSTAGRAM_WIDGET_ID) || 
-  "d5d202f9-e550-40ce-9547-516139df71ad"; // Correct widget ID from Elfsight
+  "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct Instagram feed widget ID
 
 // Loading placeholder component
 const InstagramLoadingPlaceholder = () => {

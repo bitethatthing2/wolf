@@ -30,6 +30,18 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
     shortcut: ["/favicon.ico"],
+    apple: [
+      {
+        url: "/apple-icon.png",
+        sizes: "180x180",
+        type: "image/png"
+      },
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png"
+      }
+    ],
   },
   // Add PWA metadata
   other: {
@@ -37,20 +49,19 @@ export const metadata: Metadata = {
     "apple-mobile-web-app-title": "Side Hustle Bar",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "theme-color": "#000000",
     "msapplication-TileColor": "#000000",
     "msapplication-tap-highlight": "no",
   }
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   // Allow users to zoom for accessibility
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
+  // Important: Remove themeColor since we're using a more compatible method in the head
 };
 
 export default function RootLayout({
@@ -61,8 +72,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Apple Touch Icon - placed at the very top of head for better detection */}
-        <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
+        {/* Apple Touch Icons (multiple formats for maximum compatibility) */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         
         {/* Manually add viewport meta tag to ensure it's included */}
         <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes" />
@@ -71,20 +84,21 @@ export default function RootLayout({
         <title>Side Hustle Bar | High-Energy Sports Bar • Restaurant • Nightclub</title>
         <meta name="description" content="Side Hustle Bar offers an exciting sports bar experience with great food, drinks, and entertainment. Visit us in Portland and Salem for the ultimate sports viewing, dining, and nightlife experience." />
         
-        {/* PWA meta tags */}
-        <meta name="theme-color" content="#000000" />
+        {/* PWA meta tags - cross-browser compatible */}
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Side Hustle Bar" />
         <meta name="application-name" content="Side Hustle Bar" />
         
-        {/* Manifest */}
-        <link rel="manifest" href="/manifest.json" />
-        
-        {/* Theme color with broader browser support */}
+        {/* Theme colors using color-scheme meta tag (better cross-browser support) */}
+        <meta name="color-scheme" content="dark light" />
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-navbutton-color" content="#000000" />
+        <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://static.elfsight.com https://*.instagram.com data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.elfsight.com" />
+        
+        {/* Manifest */}
+        <link rel="manifest" href="/manifest.json" />
         
         {/* Service Worker Registration */}
         <Script 
