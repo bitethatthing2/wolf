@@ -3,8 +3,15 @@
  * This script registers the service worker for PWA functionality
  */
 
-// Only register the service worker in production and if the browser supports it
-if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+// Check if we're in development mode
+const isDevelopment = 
+  typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || 
+   window.location.hostname === '127.0.0.1' || 
+   window.location.hostname.includes('.local'));
+
+// Only register the service worker in production
+if ('serviceWorker' in navigator && !isDevelopment) {
   window.addEventListener('load', function() {
     // Register the service worker
     navigator.serviceWorker.register('/service-worker.js')
@@ -39,6 +46,14 @@ if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
       }
     });
   });
+} else if (isDevelopment && 'serviceWorker' in navigator) {
+  // In development, log a message instead of trying to register
+  console.log('%c🛠️ Service Worker disabled in development mode', 'background: #222; color: #bada55; padding: 2px 4px; border-radius: 2px;');
+  console.log('Service workers require HTTPS or localhost with special configuration.');
+  console.log('For local development, you can:');
+  console.log('1. Test in production');
+  console.log('2. Use Chrome with --unsafely-treat-insecure-origin-as-secure flag');
+  console.log('3. Configure a local HTTPS server');
 }
 
 // Add to home screen functionality

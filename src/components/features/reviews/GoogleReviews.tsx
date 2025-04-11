@@ -4,7 +4,20 @@
 "use client";
 
 import React from 'react';
-import ElfsightWidget from '@/components/features/ElfsightWidget'; // Correct path to the component
+import dynamic from 'next/dynamic';
+
+// Import the reliable SideHustleGoogleReviews component with no SSR
+const SideHustleGoogleReviews = dynamic(
+  () => import('./SideHustleGoogleReviews'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full p-6 flex justify-center items-center">
+        <div className="animate-pulse text-gray-500">Loading Google Reviews...</div>
+      </div>
+    )
+  }
+);
 
 interface GoogleReviewsProps {
   appId?: string; // The Elfsight *widget* ID for Google Reviews
@@ -17,11 +30,10 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({
   className = "" 
 }) => {
   return (
-    <ElfsightWidget
+    <SideHustleGoogleReviews
       widgetId={appId}
       className={className}
-      wrapperClassName="my-8" // Add some margin around the reviews widget
-      fallbackMessage="Loading Google Reviews..."
+      title=""
     />
   );
 };

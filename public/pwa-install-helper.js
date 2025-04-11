@@ -4,7 +4,7 @@
  */
 
 // Store the install prompt event for later use
-let deferredPrompt;
+let pwaInstallPrompt;
 let installButtonId = 'install-pwa-button'; // Default ID for install button
 
 // Check if the app is already installed
@@ -27,7 +27,7 @@ const updateInstallUI = () => {
     window.dispatchEvent(new CustomEvent('pwaStatusChange', { 
       detail: { installed: true } 
     }));
-  } else if (deferredPrompt) {
+  } else if (pwaInstallPrompt) {
     // Show install buttons if prompt is available
     installButtons.forEach(button => {
       if (button) {
@@ -68,16 +68,16 @@ const triggerInstallPrompt = (event) => {
     event.preventDefault();
   }
   
-  if (!deferredPrompt) {
+  if (!pwaInstallPrompt) {
     console.log('No installation prompt available');
     return;
   }
   
   // Show the install prompt
-  deferredPrompt.prompt();
+  pwaInstallPrompt.prompt();
   
   // Wait for the user to respond to the prompt
-  deferredPrompt.userChoice.then((choiceResult) => {
+  pwaInstallPrompt.userChoice.then((choiceResult) => {
     if (choiceResult.outcome === 'accepted') {
       console.log('User accepted the PWA installation');
       
@@ -93,7 +93,7 @@ const triggerInstallPrompt = (event) => {
     }
     
     // Clear the saved prompt as it can't be used again
-    deferredPrompt = null;
+    pwaInstallPrompt = null;
     
     // Update UI
     updateInstallUI();
@@ -116,7 +116,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   // e.preventDefault();
   
   // Store the event for later use
-  deferredPrompt = e;
+  pwaInstallPrompt = e;
   
   // Update UI
   updateInstallUI();
@@ -128,7 +128,7 @@ window.addEventListener('appinstalled', (evt) => {
   console.log('PWA was installed');
   
   // Clear the prompt
-  deferredPrompt = null;
+  pwaInstallPrompt = null;
   
   // Update UI
   updateInstallUI();

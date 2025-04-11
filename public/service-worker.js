@@ -1,7 +1,12 @@
 /**
  * Side Hustle Bar Service Worker
- * This is the main service worker file that handles caching and offline functionality
+ * This service worker handles caching and offline functionality
  */
+
+// Check if we're in development mode
+const isDevelopment = self.location.hostname === 'localhost' || 
+                      self.location.hostname === '127.0.0.1' || 
+                      self.location.hostname.includes('.local');
 
 // Service worker version for cache management
 const SW_VERSION = '1.0.0';
@@ -17,8 +22,29 @@ const PRECACHE_ASSETS = [
   '/icons/splash_screens/icon.png'
 ];
 
+// Elfsight domains to exclude from caching
+const ELFSIGHT_DOMAINS = [
+  'elfsight.com',
+  'elfsightcdn.com',
+  'instagram.com',
+  'cdninstagram.com',
+  'widget-data.service.elfsight.com'
+];
+
 // Install event - precache critical assets
 self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Installing new service worker...');
+  
+  // Skip waiting to activate new service worker immediately
+  self.skipWaiting();
+  
+  // In development, don't cache anything
+  if (isDevelopment) {
+    console.log('[Service Worker] Development mode - skipping cache setup');
+    return;
+  }
+  
+  // In production, cache essential files
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -27,7 +53,6 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('[Service Worker] Installation complete');
-        return self.skipWaiting();
       })
       .catch((error) => {
         console.error('[Service Worker] Precaching failed:', error);
@@ -37,6 +62,18 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activating new service worker...');
+  
+  // Claim clients immediately
+  event.waitUntil(self.clients.claim());
+  
+  // In development, don't do cache cleanup
+  if (isDevelopment) {
+    console.log('[Service Worker] Development mode - skipping cache cleanup');
+    return;
+  }
+  
+  // In production, clean up old caches
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -57,19 +94,12 @@ self.addEventListener('activate', (event) => {
           return self.registration.navigationPreload.enable();
         }
       })
-      .then(() => {
-        // Claim clients so the SW is in control immediately
-        return self.clients.claim();
-      })
   );
 });
 
 // Special handling for Elfsight API requests
 const isElfsightRequest = (url) => {
-  return url.hostname.includes('elfsight.com') || 
-         url.hostname.includes('elfsightcdn.com') || 
-         url.hostname.includes('instagram.com') || 
-         url.hostname.includes('cdninstagram.com');
+  return ELFSIGHT_DOMAINS.some(domain => url.hostname.includes(domain));
 };
 
 // Fetch event - handle network requests with cache fallback
@@ -83,29 +113,14 @@ self.addEventListener('fetch', (event) => {
   
   // Special handling for Elfsight and Instagram requests
   if (isElfsightRequest(url)) {
-    // For Elfsight/Instagram requests, use network with long timeout
-    // and don't cache to avoid CORS issues
-    event.respondWith(
-      fetch(event.request, { 
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          'Origin': self.location.origin,
-          'Referer': self.location.origin
-        }
-      })
-      .catch(error => {
-        console.error('[Service Worker] Elfsight fetch failed:', error);
-        // Return a minimal response to prevent UI blocking
-        return new Response(
-          JSON.stringify({ error: 'Failed to fetch from Elfsight/Instagram' }),
-          { 
-            status: 503,
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-      })
-    );
+    // For Elfsight/Instagram requests, bypass the service worker completely
+    // This prevents CORS issues and workbox errors
+    return;
+  }
+  
+  // In development, don't intercept any requests
+  if (isDevelopment) {
+    // Just let the browser handle all requests normally
     return;
   }
   
@@ -202,49 +217,44 @@ self.addEventListener('fetch', (event) => {
               console.error('[Service Worker] Network fetch failed:', error);
             });
             
-          // Return cached response immediately
           return cachedResponse;
         }
         
-        // If not in cache, fetch from network and cache
+        // If not in cache, fetch from network
         return fetch(event.request)
           .then((networkResponse) => {
-            // Cache the fetched response
-            if (networkResponse.ok) {
-              const responseToCache = networkResponse.clone();
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache);
-                })
-                .catch((error) => {
-                  console.error('[Service Worker] Caching failed:', error);
-                });
-            }
+            // Cache the response for future use
+            const responseToCache = networkResponse.clone();
             
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                // Only cache successful responses
+                if (networkResponse.status === 200) {
+                  cache.put(event.request, responseToCache);
+                }
+              })
+              .catch((error) => {
+                console.error('[Service Worker] Cache put failed:', error);
+              });
+              
             return networkResponse;
           })
           .catch((error) => {
-            console.error('[Service Worker] Fetch failed:', error);
+            console.error('[Service Worker] Network fetch failed:', error);
             
-            // For image requests, return a placeholder
+            // For image requests, return a fallback image
             if (event.request.destination === 'image') {
-              return new Response(
-                `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-                  <rect width="100" height="100" fill="#eee"/>
-                  <text x="50%" y="50%" font-family="sans-serif" font-size="12" text-anchor="middle" dominant-baseline="middle" fill="#999">Offline</text>
-                </svg>`,
-                {
-                  status: 503,
-                  headers: { 'Content-Type': 'image/svg+xml' }
-                }
-              );
+              return caches.match('/icons/splash_screens/icon.png');
             }
             
-            // For other requests, just propagate the error
-            throw error;
+            // For other assets, return a simple response
+            return new Response('Network error occurred', {
+              status: 408,
+              headers: { 'Content-Type': 'text/plain' }
+            });
           });
       })
-  );
+    );
 });
 
 // Handle messages from clients

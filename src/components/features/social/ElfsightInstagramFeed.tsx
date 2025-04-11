@@ -5,10 +5,20 @@ import { Instagram, ExternalLink } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
 import dynamic from 'next/dynamic';
 
-// Dynamically import ElfsightWidget with no SSR to prevent issues
-const ElfsightWidget = dynamic(
-  () => import('@/components/features/ElfsightWidget').catch(err => {
-    console.error("Error loading ElfsightWidget component:", err);
+// Add type declaration for window.__ENV
+declare global {
+  interface Window {
+    __ENV?: {
+      INSTAGRAM_WIDGET_ID?: string;
+      [key: string]: string | undefined;
+    };
+  }
+}
+
+// Dynamically import SideHustleInstagramFeed with no SSR
+const SideHustleInstagramFeed = dynamic(
+  () => import('@/components/features/SideHustleInstagramFeed').catch(err => {
+    console.error("Error loading SideHustleInstagramFeed component:", err);
     return () => <InstagramErrorFallback />;
   }),
   { ssr: false, loading: () => <InstagramLoadingPlaceholder /> }
@@ -18,7 +28,7 @@ const ElfsightWidget = dynamic(
 const INSTAGRAM_WIDGET_ID = 
   (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID) || 
   (typeof window !== 'undefined' && window.__ENV?.INSTAGRAM_WIDGET_ID) || 
-  "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct widget ID from Elfsight
+  "d5d202f9-e550-40ce-9547-516139df71ad"; // Correct widget ID from Elfsight
 
 // Loading placeholder component
 const InstagramLoadingPlaceholder = () => {
@@ -125,16 +135,15 @@ const ElfsightInstagramFeed: React.FC = () => {
         
         <div className={`w-full overflow-hidden rounded-xl ${isDark ? 'border border-white/10' : 'border border-black/10'} shadow-lg`}>
           <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-lg`}>
-            {/* Elfsight Instagram Feed with error fallback */}
+            {/* Use our new reliable Instagram Feed component */}
             <div className="min-h-[550px] pt-6 sm:pt-0 flex justify-center w-full overflow-x-hidden"> 
               {hasError ? (
                 <InstagramErrorFallback />
               ) : (
-                <ElfsightWidget 
+                <SideHustleInstagramFeed 
                   widgetId={INSTAGRAM_WIDGET_ID}
                   className="w-full max-w-xl mx-auto"
-                  wrapperClassName="w-full max-w-xl mx-auto flex-shrink-0"
-                  fallbackMessage="Loading Instagram feed..."
+                  title=""
                 />
               )}
             </div>

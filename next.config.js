@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 
-// Simple Next.js configuration without PWA for development
-const nextConfig = {
+// Determine if we're in development mode
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Configure Next.js with PWA support (only in production)
+let nextConfig = {
   // Keep original configuration
   reactStrictMode: false, // Changed to false to prevent double rendering issues
   eslint: {
@@ -116,11 +119,15 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'X-Requested-With, Content-Type, Authorization',
+            value: '*',
           },
           {
             key: 'Access-Control-Allow-Credentials',
             value: 'true',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'no-referrer-when-downgrade',
           },
         ],
       },
@@ -138,7 +145,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'X-Requested-With, Content-Type, Authorization',
+            value: '*',
           },
           {
             key: 'Access-Control-Allow-Credentials',
@@ -148,99 +155,135 @@ const nextConfig = {
             key: 'Access-Control-Max-Age',
             value: '86400',
           },
+          {
+            key: 'Referrer-Policy',
+            value: 'no-referrer-when-downgrade',
+          },
         ],
       },
     ];
   },
 };
 
-// For production, we'll add the PWA configuration
-if (process.env.NODE_ENV === 'production') {
-  // This code will only run during the build process, not during development
+// Only add PWA in production
+if (!isDevelopment) {
   try {
-    const withPWA = require('@ducanh2912/next-pwa').default;
-    module.exports = withPWA({
+    const withPWA = require('@ducanh2912/next-pwa').default({
       dest: 'public',
-      disable: false,
+      disable: false, // Enable in production
       register: true,
       skipWaiting: true,
       // Exclude custom service workers
       publicExcludes: ['firebase-messaging-sw.js', 'service-worker-fix.js', 'manifest.json'],
       workboxOptions: {
         disableDevLogs: true,
+        // Exclude Elfsight and Instagram URLs from being handled by workbox
+        navigateFallbackDenylist: [
+          /^https:\/\/(api|widget-data|static)\..*\.elfsight\.com\/.*/i,
+          /^https:\/\/.*\.(cdninstagram|instagram)\.com\/.*/i,
+          /^https:\/\/apps\.elfsight\.com\/.*/i,
+          /^https:\/\/service\.elfsight\.com\/.*/i,
+          /^https:\/\/.*\.elfsightcdn\.com\/.*/i
+        ],
         // Custom runtime caching rules for Elfsight
         runtimeCaching: [
           {
-            // Cache Elfsight API requests with NetworkFirst strategy
-            urlPattern: /^https:\/\/(api|widget-data)\..*\.elfsight\.com\/.*/i,
+            // Cache Elfsight API requests with NetworkOnly strategy
+            urlPattern: /^https:\/\/(api|widget-data|static)\..*\.elfsight\.com\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Cache Instagram API requests with NetworkOnly strategy
+            urlPattern: /^https:\/\/.*\.(cdninstagram|instagram)\.com\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Cache Elfsight CDN requests with NetworkOnly strategy
+            urlPattern: /^https:\/\/.*\.elfsightcdn\.com\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Cache Elfsight apps requests with NetworkOnly strategy
+            urlPattern: /^https:\/\/apps\.elfsight\.com\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Cache Elfsight service requests with NetworkOnly strategy
+            urlPattern: /^https:\/\/service\.elfsight\.com\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Cache page requests with NetworkFirst strategy
+            urlPattern: /^https?.*/,
             handler: 'NetworkFirst',
             options: {
-              // Timeout for Elfsight API requests
-              networkTimeoutSeconds: 10,
-              cacheName: 'elfsight-api-cache',
+              cacheName: 'side-hustle-pages',
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 // 1 hour
-              },
-              // Add CORS headers to cached responses
-              cacheableResponse: {
-                statuses: [0, 200],
-                headers: {
-                  'Access-Control-Allow-Origin': '*',
-                  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-                }
+                maxEntries: 32,
+                maxAgeSeconds: 24 * 60 * 60 // 24 hours
               }
             }
           },
           {
-            // Cache Instagram API requests with NetworkFirst strategy
-            urlPattern: /^https:\/\/.*\.(cdninstagram|instagram)\.com\/.*/i,
-            handler: 'NetworkFirst',
+            // Cache image requests with CacheFirst strategy
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
+            handler: 'CacheFirst',
             options: {
-              // Timeout for Instagram API requests
-              networkTimeoutSeconds: 10,
-              cacheName: 'instagram-api-cache',
+              cacheName: 'side-hustle-images',
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 // 1 hour
-              },
-              // Add CORS headers to cached responses
-              cacheableResponse: {
-                statuses: [0, 200],
-                headers: {
-                  'Access-Control-Allow-Origin': '*',
-                  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-                }
+                maxEntries: 64,
+                maxAgeSeconds: 7 * 24 * 60 * 60 // 7 days
+              }
+            }
+          },
+          {
+            // Cache font requests with CacheFirst strategy
+            urlPattern: /\.(?:woff|woff2|ttf|otf|eot)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'side-hustle-fonts',
+              expiration: {
+                maxEntries: 16,
+                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+              }
+            }
+          },
+          {
+            // Cache style requests with StaleWhileRevalidate strategy
+            urlPattern: /\.(?:css)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'side-hustle-styles',
+              expiration: {
+                maxEntries: 32,
+                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+              }
+            }
+          },
+          {
+            // Cache script requests with StaleWhileRevalidate strategy
+            urlPattern: /\.(?:js)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'side-hustle-scripts',
+              expiration: {
+                maxEntries: 32,
+                maxAgeSeconds: 24 * 60 * 60 // 24 hours
               }
             }
           }
-        ],
-        exclude: [
-          '_redirects',
-          '**/_redirects',
-          '/out/_redirects',
-          /\/_redirects$/,
-          /\.map$/,
-          /^manifest.*\.js$/,
-          /firebase-messaging-sw\.js$/,
-          /service-worker-fix\.js$/,
-          /\.DS_Store/,
-          /\.git/,
-          // Also exclude Elfsight and Instagram URLs
-          /elfsight\.com/,
-          /elfsightcdn\.com/,
-          /cdninstagram\.com/,
-          /instagram\.com/,
-        ],
+        ]
       },
-    })(nextConfig);
+      ...nextConfig
+    });
+    
+    nextConfig = withPWA(nextConfig);
+    console.log('PWA support enabled for production build');
   } catch (e) {
-    console.warn('PWA plugin not available, using fallback config');
-    module.exports = nextConfig;
+    console.error('Error setting up PWA:', e);
   }
 } else {
-  // For development, just use the basic config
-  module.exports = nextConfig;
+  console.log('PWA support disabled in development mode');
 }
+
+module.exports = nextConfig;

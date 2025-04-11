@@ -29,10 +29,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    apple: [
-      { url: "/icons/splash_screens/icon.png", sizes: "512x512", type: "image/png" },
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
-    ],
     shortcut: ["/favicon.ico"],
   },
   // Add PWA metadata
@@ -65,6 +61,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Apple Touch Icon - placed at the very top of head for better detection */}
+        <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
+        
         {/* Manually add viewport meta tag to ensure it's included */}
         <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes" />
         
@@ -80,11 +79,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Side Hustle Bar" />
         <meta name="application-name" content="Side Hustle Bar" />
         
-        {/* Apple touch icon - placed in head for proper accessibility */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        
         {/* Manifest */}
         <link rel="manifest" href="/manifest.json" />
+        
+        {/* Theme color with broader browser support */}
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-navbutton-color" content="#000000" />
         
         {/* Service Worker Registration */}
         <Script 
@@ -105,7 +105,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
-          disableTransitionOnChange
+          storageKey="sidehustle-theme"
         >
           <LocationProvider>
             <ClientComponentsWrapper>

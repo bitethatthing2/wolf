@@ -5,7 +5,8 @@ export function middleware(request: NextRequest) {
   // Special handling for Elfsight API requests to fix CORS issues
   if (request.nextUrl.pathname.includes('/api/elfsight') || 
       request.headers.get('referer')?.includes('elfsight.com') ||
-      request.headers.get('origin')?.includes('elfsight.com')) {
+      request.headers.get('origin')?.includes('elfsight.com') ||
+      request.nextUrl.href.includes('elfsight.com')) {
     
     // Return a modified response with CORS headers for Elfsight
     const response = NextResponse.next();
@@ -13,7 +14,7 @@ export function middleware(request: NextRequest) {
     // Set CORS headers specifically for Elfsight
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    response.headers.set('Access-Control-Allow-Headers', '*');
     response.headers.set('Access-Control-Allow-Credentials', 'true');
     response.headers.set('Access-Control-Max-Age', '86400');
     
@@ -33,7 +34,7 @@ export function middleware(request: NextRequest) {
     // Add security headers
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set('Access-Control-Allow-Headers', '*');
     
     return response;
   }
@@ -45,7 +46,7 @@ export function middleware(request: NextRequest) {
   // Add CSP header with more permissive settings to fix internal server errors
   const cspHeader = `
     default-src 'self' https://*.elfsight.com https://static.elfsight.com https://*.googleusercontent.com https://*.instagram.com https://*.cdninstagram.com https://*.gstatic.com https://*.firebase.googleapis.com https://maps.googleapis.com https://www.google.com;
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.elfsight.com https://static.elfsight.com https://*.elfsightcdn.com https://universe-static.elfsightcdn.com https://core.service.elfsight.com https://apps.elfsight.com https://service.elfsight.com https://*.gstatic.com https://*.googleapis.com https://*.firebase.googleapis.com https://*.google.com https://g.doubleclick.net https://maps.googleapis.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.elfsight.com https://static.elfsight.com https://*.elfsightcdn.com https://universe-static.elfsightcdn.com https://core.service.elfsight.com https://apps.elfsight.com https://service.elfsight.com https://widget-data.service.elfsight.com https://*.gstatic.com https://*.googleapis.com https://*.firebase.googleapis.com https://*.google.com https://g.doubleclick.net https://maps.googleapis.com;
     style-src 'self' 'unsafe-inline' https://*.elfsight.com https://fonts.googleapis.com https://*.gstatic.com https://*.google.com;
     img-src 'self' data: https://*.googleusercontent.com https://*.instagram.com https://*.cdninstagram.com https://*.fbcdn.net https://*.elfsight.com https://*.elfsightcdn.com https://lh3.googleusercontent.com https://phosphor.utils.elfsightcdn.com https://*.service.elfsight.com https://*.googleapis.com https://*.ggpht.com https://*.google.com https://maps.gstatic.com blob:;
     font-src 'self' data: https://fonts.gstatic.com https://*.elfsight.com https://*.elfsightcdn.com;
@@ -80,7 +81,7 @@ export function middleware(request: NextRequest) {
   // Allow prefetching and client-side navigation to work properly
   response.headers.set('Access-Control-Allow-Origin', '*')
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  response.headers.set('Access-Control-Allow-Headers', '*')
   
   // Add service worker headers for better PWA support
   response.headers.set('Service-Worker-Allowed', '/')
