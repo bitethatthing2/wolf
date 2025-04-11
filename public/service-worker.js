@@ -15,20 +15,33 @@ const CACHE_NAME = 'side-hustle-cache-v1';
 // Assets to cache immediately on install
 const PRECACHE_ASSETS = [
   '/',
-  '/index.html',
   '/manifest.json',
   '/favicon.ico',
-  '/apple-touch-icon.png',
-  '/icons/splash_screens/icon.png'
+  '/apple-touch-icon.png'
+  // '/icons/splash_screens/icon.png' // Commented out to prevent cache errors
 ];
 
-// Elfsight domains to exclude from caching
-const ELFSIGHT_DOMAINS = [
+// External domains to exclude from caching (to prevent CORS issues)
+const EXTERNAL_DOMAINS = [
+  // Elfsight and Instagram
   'elfsight.com',
   'elfsightcdn.com',
+  'static.elfsight.com',
   'instagram.com',
   'cdninstagram.com',
-  'widget-data.service.elfsight.com'
+  'api.instagram.com',
+  'widget-data.service.elfsight.com',
+  
+  // Google services 
+  'google.com',
+  'googleapis.com',
+  'gstatic.com',
+  'maps.google.com',
+  'maps.googleapis.com',
+  
+  // Other third-party services
+  'youtube.com',
+  'youtu.be'
 ];
 
 // Install event - precache critical assets
@@ -49,13 +62,24 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Precaching assets');
-        return cache.addAll(PRECACHE_ASSETS);
+        
+        // Cache files individually to prevent one failure from breaking the whole process
+        const cachePromises = PRECACHE_ASSETS.map(url => {
+          return cache.add(url).catch(error => {
+            console.error(`[Service Worker] Failed to cache ${url}:`, error);
+            // Continue despite the error
+            return Promise.resolve();
+          });
+        });
+        
+        return Promise.all(cachePromises);
       })
       .then(() => {
         console.log('[Service Worker] Installation complete');
       })
       .catch((error) => {
         console.error('[Service Worker] Precaching failed:', error);
+        // Installation continues despite errors
       })
   );
 });
@@ -97,9 +121,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Special handling for Elfsight API requests
-const isElfsightRequest = (url) => {
-  return ELFSIGHT_DOMAINS.some(domain => url.hostname.includes(domain));
+// Special handling for external domains that should bypass the service worker
+const isExternalDomainRequest = (url) => {
+  return EXTERNAL_DOMAINS.some(domain => url.hostname.includes(domain));
 };
 
 // Fetch event - handle network requests with cache fallback
@@ -111,10 +135,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Special handling for Elfsight and Instagram requests
-  if (isElfsightRequest(url)) {
-    // For Elfsight/Instagram requests, bypass the service worker completely
-    // This prevents CORS issues and workbox errors
+  // Special handling for external domain requests (Elfsight, Google, etc.)
+  if (isExternalDomainRequest(url)) {
+    // For external domain requests, bypass the service worker completely
+    // This prevents CORS issues and cache errors
     return;
   }
   
@@ -244,7 +268,12 @@ self.addEventListener('fetch', (event) => {
             
             // For image requests, return a fallback image
             if (event.request.destination === 'image') {
-              return caches.match('/icons/splash_screens/icon.png');
+              return caches.match('/apple-touch-icon.png')
+                .catch(() => {
+                  // If fallback image not found, return a response with a transparent 1x1 pixel
+                  const transparentPixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                  return fetch(transparentPixel);
+                });
             }
             
             // For other assets, return a simple response
