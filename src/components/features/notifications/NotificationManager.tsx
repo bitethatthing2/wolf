@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFcmNotifications } from '@/hooks/use-fcm-notifications';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BellIcon, BellOffIcon, CheckIcon, XIcon } from 'lucide-react';
+import { BellIcon, BellOffIcon, CheckIcon, XIcon, AlertTriangleIcon, InfoIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NotificationManagerProps {
   className?: string;
   variant?: 'default' | 'compact' | 'inline';
+  onStateChange?: (enabled: boolean) => void;
 }
 
 /**
@@ -18,28 +19,136 @@ interface NotificationManagerProps {
  */
 export const NotificationManager: React.FC<NotificationManagerProps> = ({
   className,
-  variant = 'default'
+  variant = 'default',
+  onStateChange
 }) => {
   const {
+    fcmToken,
     notificationsEnabled,
     isRegistering,
     registerForNotifications,
-    unregisterFromNotifications
+    unregisterFromNotifications,
+    checkNotificationStatus
   } = useFcmNotifications();
   
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState<string | null>(null);
+  const [isSupported, setIsSupported] = useState<boolean>(true);
+
+  // Check if notifications are supported in this browser
+  useEffect(() => {
+    const checkSupport = () => {
+      const supported = 'Notification' in window;
+      setIsSupported(supported);
+      
+      // If not supported, show error
+      if (!supported) {
+        setShowError('Notifications are not supported in this browser');
+      }
+      
+      return supported;
+    };
+    
+    // Check if we have service worker support
+    const checkServiceWorkerSupport = () => {
+      const supported = 'serviceWorker' in navigator;
+      if (!supported) {
+        setShowError('Service workers are not supported in this browser');
+        setIsSupported(false);
+      }
+      return supported;
+    };
+    
+    // Initial checks
+    const notificationsSupported = checkSupport();
+    const serviceWorkerSupported = checkServiceWorkerSupport();
+    
+    // If supported, check status
+    if (notificationsSupported && serviceWorkerSupported) {
+      checkNotificationStatus();
+    }
+  }, [checkNotificationStatus]);
+
+  // Call onStateChange when notification state changes
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange(notificationsEnabled);
+    }
+  }, [notificationsEnabled, onStateChange]);
 
   const handleToggleNotifications = async () => {
+    // Clear previous states
+    setShowSuccess(false);
+    setShowError(null);
+    
     if (notificationsEnabled) {
-      await unregisterFromNotifications();
-    } else {
-      const success = await registerForNotifications();
+      const success = await unregisterFromNotifications();
       if (success) {
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        // Unregistering successful
+      } else {
+        setShowError('Failed to disable notifications');
+      }
+    } else {
+      try {
+        const success = await registerForNotifications();
+        if (success) {
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 3000);
+        } else {
+          setShowError('Failed to enable notifications');
+        }
+      } catch (error) {
+        console.error('Error registering for notifications:', error);
+        setShowError('An error occurred while enabling notifications');
       }
     }
   };
+
+  // If notifications aren't supported, show unsupported message
+  if (!isSupported) {
+    if (variant === 'compact') {
+      return (
+        <div className={cn("flex items-center space-x-2 text-muted-foreground", className)}>
+          <InfoIcon className="h-4 w-4" />
+          <span className="text-sm">Notifications not supported</span>
+        </div>
+      );
+    }
+    
+    if (variant === 'inline') {
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={true}
+          className={cn("gap-2 cursor-not-allowed", className)}
+        >
+          <BellOffIcon className="h-4 w-4" />
+          <span>Notifications not supported</span>
+        </Button>
+      );
+    }
+    
+    return (
+      <Card className={cn("w-full max-w-md", className)}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangleIcon className="h-5 w-5 text-amber-500" />
+            Push Notifications
+          </CardTitle>
+          <CardDescription>
+            Unfortunately, push notifications are not supported in your browser.
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded-md text-sm">
+            <p>To receive notifications, please use a supported browser like Chrome, Firefox, Edge, or Safari.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Compact variant - just a switch with label
   if (variant === 'compact') {
@@ -57,6 +166,12 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
         >
           {notificationsEnabled ? 'Notifications On' : 'Notifications Off'}
         </label>
+        
+        {isRegistering && (
+          <span className="text-xs text-muted-foreground animate-pulse ml-2">
+            Working...
+          </span>
+        )}
       </div>
     );
   }
@@ -71,7 +186,12 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
         disabled={isRegistering}
         className={cn("gap-2", className)}
       >
-        {notificationsEnabled ? (
+        {isRegistering ? (
+          <>
+            <span className="h-4 w-4 animate-spin">⏳</span>
+            <span>Processing...</span>
+          </>
+        ) : notificationsEnabled ? (
           <>
             <BellIcon className="h-4 w-4" />
             <span>Notifications On</span>
@@ -108,6 +228,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
           <div className="space-y-1">
             <p className="text-sm font-medium">
               {notificationsEnabled ? 'Notifications are enabled' : 'Notifications are disabled'}
+              {isRegistering && <span className="text-xs text-muted-foreground animate-pulse ml-2">Working...</span>}
             </p>
             <p className="text-xs text-muted-foreground">
               {notificationsEnabled 
@@ -128,6 +249,19 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
           <div className="mt-4 p-2 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-md flex items-center gap-2 text-sm">
             <CheckIcon className="h-4 w-4" />
             <span>Notifications enabled successfully!</span>
+          </div>
+        )}
+        
+        {showError && (
+          <div className="mt-4 p-2 bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md flex items-center gap-2 text-sm">
+            <XIcon className="h-4 w-4" />
+            <span>{showError}</span>
+          </div>
+        )}
+        
+        {fcmToken && (
+          <div className="mt-4 p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-xs text-muted-foreground">
+            <p>Your device is registered to receive notifications.</p>
           </div>
         )}
       </CardContent>

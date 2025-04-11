@@ -59,7 +59,7 @@ const messaging = async () => {
 const processedNotifications = new Set<string>();
 
 // For debugging and coordination with SW
-const CLIENT_VERSION = '2.1.0'; // Updated version to match SW version
+const CLIENT_VERSION = '2.0.0'; // Updated version to match SW version
 
 // Send Firebase config to Service Worker
 export const sendConfigToServiceWorker = async (swRegistration: ServiceWorkerRegistration) => {

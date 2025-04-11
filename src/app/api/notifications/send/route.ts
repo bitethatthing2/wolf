@@ -22,31 +22,45 @@ export async function POST(request: Request) {
   // --- Initialize Firebase Admin SDK within the handler ---
   if (!getApps().length) {
     try {
-      if (process.env.PRIVATE_KEY && process.env.PROJECT_ID && process.env.client_email) {
-        const privateKey = process.env.PRIVATE_KEY.replace(/\\n/g, "\n");
-        initializeApp({
-          credential: cert({
-            projectId: process.env.PROJECT_ID,
-            clientEmail: process.env.client_email,
-            privateKey: privateKey,
-          }),
-          storageBucket: process.env.STORAGE_BUCKET,
-        });
-        console.log("Firebase Admin initialized within POST handler.");
-      } else {
-        console.error("Firebase Admin SDK credentials not available during API call.");
-        // Return an error immediately if creds are missing when the API is called
+      // Import service account from the file
+      const serviceAccount = require("@/lib/firebase/service-account.json");
+      
+      initializeApp({
+        credential: cert(serviceAccount),
+        storageBucket: process.env.STORAGE_BUCKET,
+      });
+      console.log("Firebase Admin initialized within POST handler using service account file.");
+    } catch (error) {
+      console.error("Firebase Admin initialization error within POST handler:", error);
+      
+      // Try fallback to environment variables if service account file fails
+      try {
+        if (process.env.PRIVATE_KEY && process.env.PROJECT_ID && process.env.client_email) {
+          const privateKey = process.env.PRIVATE_KEY.replace(/\\n/g, "\n");
+          initializeApp({
+            credential: cert({
+              projectId: process.env.PROJECT_ID,
+              clientEmail: process.env.client_email,
+              privateKey: privateKey,
+            }),
+            storageBucket: process.env.STORAGE_BUCKET,
+          });
+          console.log("Firebase Admin initialized within POST handler using environment variables (fallback).");
+        } else {
+          console.error("Firebase Admin SDK credentials not available during API call.");
+          // Return an error immediately if creds are missing when the API is called
+          return NextResponse.json(
+            { error: "Server configuration error: Firebase Admin credentials missing." },
+            { status: 500 }
+          );
+        }
+      } catch (fallbackError) {
+        console.error("Firebase Admin initialization error with fallback method:", fallbackError);
         return NextResponse.json(
-          { error: "Server configuration error: Firebase Admin credentials missing." },
+          { error: "Server configuration error: Failed to initialize Firebase Admin." },
           { status: 500 }
         );
       }
-    } catch (error) {
-      console.error("Firebase Admin initialization error within POST handler:", error);
-      return NextResponse.json(
-        { error: "Server configuration error: Failed to initialize Firebase Admin." },
-        { status: 500 }
-      );
     }
   }
   // --- End Firebase Admin Initialization ---

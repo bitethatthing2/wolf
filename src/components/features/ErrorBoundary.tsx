@@ -5,6 +5,16 @@ import { usePathname, useRouter } from 'next/navigation';
 import { AlertCircle, RefreshCw, HomeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Add TypeScript declaration for the global window.__wolfAppInit
+declare global {
+  interface Window {
+    __wolfAppInit?: {
+      errors: string[];
+      [key: string]: any;
+    };
+  }
+}
+
 // Class-based error boundary (required for React error boundaries)
 class ErrorBoundaryClass extends Component<
   { children: React.ReactNode, fallback: React.ReactNode },
@@ -51,13 +61,27 @@ export default function ErrorBoundary({ children }: { children: React.ReactNode 
     const handleError = (event: ErrorEvent) => {
       console.error('[ErrorBoundary] Unhandled error:', event);
       
-      // Check if it's a fetch error during navigation
+      // Check if event has error property and it's a TypeError
+      // Add proper type checking to avoid "undefined" errors
       if (
+        event.error && 
         event.error instanceof TypeError && 
+        event.error.message && 
+        typeof event.error.message === 'string' &&
         (event.error.message.includes('fetch') || event.error.message.includes('network')) &&
-        (event.filename?.includes('navigation') || 
-         event.filename?.includes('fetch-server-response') ||
-         event.filename?.includes('router'))
+        (
+          (event.filename && typeof event.filename === 'string' && (
+            event.filename.includes('navigation') || 
+            event.filename.includes('fetch-server-response') ||
+            event.filename.includes('router')
+          )) || 
+          // Also handle cases where filename might not be present
+          (event.error.stack && typeof event.error.stack === 'string' && (
+            event.error.stack.includes('navigation') ||
+            event.error.stack.includes('fetch') ||
+            event.error.stack.includes('router')
+          ))
+        )
       ) {
         console.log('[ErrorBoundary] Navigation error detected, activating recovery mode');
         setHasNavigationError(true);
@@ -72,18 +96,42 @@ export default function ErrorBoundary({ children }: { children: React.ReactNode 
     const handleRejection = (event: PromiseRejectionEvent) => {
       console.error('[ErrorBoundary] Unhandled promise rejection:', event);
       
-      if (
-        event.reason instanceof Error && 
-        (event.reason.message.includes('fetch') || 
-         event.reason.message.includes('navigation') ||
-         event.reason.message.includes('failed to load'))
-      ) {
-        console.log('[ErrorBoundary] Navigation promise rejection, activating recovery mode');
-        setHasNavigationError(true);
-        setErrorDetails(event.reason.message);
-        
-        // Prevent default handling
-        event.preventDefault();
+      // Safely handle the rejection reason with thorough type checking
+      try {
+        // Check if reason is an Error
+        if (
+          event.reason && 
+          (event.reason instanceof Error || 
+           (typeof event.reason === 'object' && event.reason !== null)) 
+        ) {
+          // Get the message safely
+          const message = event.reason instanceof Error 
+            ? event.reason.message 
+            : (typeof event.reason.message === 'string' 
+               ? event.reason.message 
+               : typeof event.reason === 'string' 
+                 ? event.reason 
+                 : String(event.reason));
+          
+          // Check if it's a navigation-related error
+          if (
+            typeof message === 'string' && 
+            (message.includes('fetch') || 
+             message.includes('navigation') ||
+             message.includes('failed to load') ||
+             message.includes('network') ||
+             message.includes('abort'))
+          ) {
+            console.log('[ErrorBoundary] Navigation promise rejection, activating recovery mode');
+            setHasNavigationError(true);
+            setErrorDetails(message);
+            
+            // Prevent default handling
+            event.preventDefault();
+          }
+        }
+      } catch (err) {
+        console.error('[ErrorBoundary] Error while processing rejection:', err);
       }
     };
 
@@ -102,6 +150,29 @@ export default function ErrorBoundary({ children }: { children: React.ReactNode 
   // Fix navigation errors with progressive approaches
   const handleFixNavigationError = async () => {
     try {
+      // Log retry attempt
+      console.log('[ErrorBoundary] Attempting to fix navigation error');
+      
+      // Clear any errors in our global app state
+      if (typeof window !== 'undefined') {
+        // Make sure __wolfAppInit exists
+        if (!window.__wolfAppInit) {
+          window.__wolfAppInit = { errors: [] };
+        } 
+        // Make sure errors array exists
+        else if (!Array.isArray(window.__wolfAppInit.errors)) {
+          window.__wolfAppInit.errors = [];
+        }
+        // Filter out navigation errors
+        else {
+          window.__wolfAppInit.errors = window.__wolfAppInit.errors.filter(
+            err => typeof err === 'string' && 
+                  !err.includes('navigation') && 
+                  !err.includes('Failed to fetch')
+          );
+        }
+      }
+      
       // First try to refresh the router
       router.refresh();
       
@@ -114,24 +185,74 @@ export default function ErrorBoundary({ children }: { children: React.ReactNode 
         console.error('[ErrorBoundary] Navigation retry failed:', navError);
       }
       
+      // If navigation still failing, check if caches need to be cleared
+      if ('caches' in window) {
+        try {
+          // Clear next-data cache first as it's most likely to cause issues
+          const cacheKeys = await window.caches.keys();
+          const nextDataCaches = cacheKeys.filter(key => key.includes('next-data'));
+          
+          if (nextDataCaches.length > 0) {
+            console.log('[ErrorBoundary] Clearing Next.js data caches:', nextDataCaches);
+            await Promise.all(nextDataCaches.map(key => window.caches.delete(key)));
+          }
+        } catch (cacheError) {
+          console.error('[ErrorBoundary] Error clearing caches:', cacheError);
+        }
+      }
+      
       // If in production and service worker is causing issues, 
-      // unregister service workers as a last resort
-      if ('serviceWorker' in navigator) {
+      // try to communicate with the service worker first before unregistering
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         // Wait a moment to see if navigation succeeded
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         if (hasNavigationError) {
-          console.log('[ErrorBoundary] Still having issues, unregistering service workers...');
-          const registrations = await navigator.serviceWorker.getRegistrations();
+          console.log('[ErrorBoundary] Still having issues, trying to communicate with service worker');
           
-          for (const registration of registrations) {
-            await registration.unregister();
-            console.log('[ErrorBoundary] Unregistered service worker:', registration.scope);
+          try {
+            // Send ping message to service worker
+            navigator.serviceWorker.controller.postMessage({ 
+              type: 'PING', 
+              source: 'ErrorBoundary',
+              url: pathname
+            });
+            
+            // Wait for a response
+            const messagePromise = new Promise<boolean>((resolve) => {
+              const timeout = setTimeout(() => resolve(false), 2000);
+              
+              const messageHandler = (event: MessageEvent) => {
+                if (event.data && event.data.type === 'PONG') {
+                  clearTimeout(timeout);
+                  navigator.serviceWorker.removeEventListener('message', messageHandler);
+                  resolve(true);
+                }
+              };
+              
+              navigator.serviceWorker.addEventListener('message', messageHandler);
+            });
+            
+            const gotResponse = await messagePromise;
+            
+            if (!gotResponse) {
+              console.log('[ErrorBoundary] No response from service worker, unregistering...');
+              
+              // If no response, unregister service workers
+              const registrations = await navigator.serviceWorker.getRegistrations();
+              
+              for (const registration of registrations) {
+                await registration.unregister();
+                console.log('[ErrorBoundary] Unregistered service worker:', registration.scope);
+              }
+            }
+          } catch (swError) {
+            console.error('[ErrorBoundary] Error communicating with service worker:', swError);
           }
           
           // Wait a moment before reloading
           await new Promise(resolve => setTimeout(resolve, 500));
-          console.log('[ErrorBoundary] All service workers unregistered, reloading page');
+          console.log('[ErrorBoundary] Recovery attempted, reloading page');
           window.location.reload();
         }
       }

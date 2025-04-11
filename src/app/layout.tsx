@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { Toaster } from "@/components/ui/toaster";
 import ClientScripts from "@/components/layout/ClientScripts";
+import ClientComponentsWrapper from "@/components/layout/ClientComponentsWrapper";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -25,10 +26,24 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/icons/icons/icon-192x192.png",
   },
+  // Add PWA metadata
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-title": "Side Hustle Bar",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "theme-color": "#000000",
+    "msapplication-TileColor": "#000000",
+    "msapplication-tap-highlight": "no",
+  }
 };
 
 export const viewport: Viewport = {
   themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -54,7 +69,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LocationProvider>
-            {children}
+            <ClientComponentsWrapper>
+              {children}
+            </ClientComponentsWrapper>
             <Toaster />
           </LocationProvider>
         </ThemeProvider>

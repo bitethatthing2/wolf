@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useFcmNotifications } from '@/hooks/use-fcm-notifications';
-import { AlertCircle, CheckCircle2, Send } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Send, InfoIcon } from 'lucide-react';
 
 interface NotificationTesterProps {
   className?: string;
@@ -18,7 +18,7 @@ interface NotificationTesterProps {
 }
 
 export function NotificationTester({ className, adminMode = false }: NotificationTesterProps) {
-  const { fcmToken, notificationsEnabled } = useFcmNotifications();
+  const { fcmToken, notificationsEnabled, checkNotificationStatus } = useFcmNotifications();
   
   const [title, setTitle] = useState('Side Hustle Bar');
   const [message, setMessage] = useState('');
@@ -26,11 +26,126 @@ export function NotificationTester({ className, adminMode = false }: Notificatio
   const [platform, setPlatform] = useState('web');
   const [sendToAll, setSendToAll] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [swStatus, setSwStatus] = useState<{ registered: boolean, active: boolean, scope?: string }>({
+    registered: false,
+    active: false
+  });
   const [result, setResult] = useState<{
     status: 'idle' | 'success' | 'error';
     message: string;
     details?: any;
   }>({ status: 'idle', message: '' });
+
+  // Check service worker status
+  useEffect(() => {
+    const checkServiceWorker = async () => {
+      if (!('serviceWorker' in navigator)) {
+        setSwStatus({ registered: false, active: false });
+        return;
+      }
+
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const hasRegistration = registrations.length > 0;
+        const mainRegistration = registrations.find(reg => 
+          reg.active && (reg.scope.includes(window.location.origin) || reg.scope === '/')
+        );
+        
+        setSwStatus({
+          registered: hasRegistration,
+          active: Boolean(mainRegistration?.active),
+          scope: mainRegistration?.scope
+        });
+      } catch (error) {
+        console.error('Error checking service worker status:', error);
+        setSwStatus({ registered: false, active: false });
+      }
+    };
+
+    checkServiceWorker();
+    
+    // Also verify notification status
+    checkNotificationStatus();
+  }, [checkNotificationStatus]);
+
+  // Generate a diagnostic report
+  const generateDiagnostics = () => {
+    const diagnostics = {
+      browser: navigator.userAgent,
+      notifications: {
+        permission: Notification.permission,
+        enabled: notificationsEnabled,
+        fcmToken: fcmToken ? `${fcmToken.substring(0, 10)}...` : 'None',
+      },
+      serviceWorker: {
+        supported: 'serviceWorker' in navigator,
+        registered: swStatus.registered,
+        active: swStatus.active,
+        scope: swStatus.scope,
+      },
+      appState: typeof window !== 'undefined' && window.__wolfAppInit ? {
+        serviceWorkerRegistered: window.__wolfAppInit.serviceWorkerRegistered,
+        pushNotificationsInitialized: window.__wolfAppInit.pushNotificationsInitialized,
+        errors: window.__wolfAppInit.errors.length > 0 ? 
+          window.__wolfAppInit.errors.slice(0, 3).join(', ') + 
+          (window.__wolfAppInit.errors.length > 3 ? ` (and ${window.__wolfAppInit.errors.length - 3} more)` : '') : 
+          'None',
+      } : 'Not available'
+    };
+
+    return JSON.stringify(diagnostics, null, 2);
+  };
+
+  const refreshServiceWorker = async () => {
+    if (!('serviceWorker' in navigator)) {
+      setResult({
+        status: 'error',
+        message: 'Service Worker API not available in this browser'
+      });
+      return;
+    }
+
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      if (registrations.length === 0) {
+        // Try to register a new service worker
+        const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        setResult({
+          status: 'success',
+          message: `New service worker registered with scope: ${registration.scope}`
+        });
+      } else {
+        // Update existing service workers
+        await Promise.all(
+          registrations.map(async registration => {
+            await registration.update();
+          })
+        );
+        setResult({
+          status: 'success',
+          message: `Updated ${registrations.length} service worker(s)`
+        });
+      }
+
+      // Recheck status
+      const newRegistrations = await navigator.serviceWorker.getRegistrations();
+      const mainRegistration = newRegistrations.find(reg => 
+        reg.active && (reg.scope.includes(window.location.origin) || reg.scope === '/')
+      );
+      
+      setSwStatus({
+        registered: newRegistrations.length > 0,
+        active: Boolean(mainRegistration?.active),
+        scope: mainRegistration?.scope
+      });
+    } catch (error: any) {
+      setResult({
+        status: 'error',
+        message: `Service worker refresh failed: ${error.message}`
+      });
+    }
+  };
 
   const sendNotification = async () => {
     if (!title || !message) {
@@ -53,6 +168,9 @@ export function NotificationTester({ className, adminMode = false }: Notificatio
     setResult({ status: 'idle', message: '' });
 
     try {
+      // First verify notification status
+      await checkNotificationStatus();
+      
       const response = await fetch('/api/notifications/send', {
         method: 'POST',
         headers: {
@@ -65,6 +183,13 @@ export function NotificationTester({ className, adminMode = false }: Notificatio
           link,
           platform,
           sendToAll: adminMode ? sendToAll : false, // Only allow sendToAll in admin mode
+          // Add diagnostic data if in admin mode
+          diagnostics: adminMode ? {
+            userAgent: navigator.userAgent,
+            swRegistered: swStatus.registered,
+            swActive: swStatus.active,
+            timestamp: new Date().toISOString()
+          } : undefined
         }),
       });
 
@@ -76,9 +201,29 @@ export function NotificationTester({ className, adminMode = false }: Notificatio
 
       setResult({
         status: 'success',
-        message: `Notification sent successfully! ${data.sent} sent, ${data.failed} failed.`,
+        message: `Notification sent successfully! ${data.sent || 0} sent, ${data.failed || 0} failed.`,
         details: data
       });
+      
+      // Also test local notification if in admin mode and not sending to all
+      if (adminMode && !sendToAll && Notification.permission === 'granted') {
+        try {
+          const localNotification = new Notification(title, {
+            body: message,
+            icon: '/wolf-icon-white.png',
+            tag: 'test-notification',
+            data: { url: link, source: 'tester' }
+          });
+          
+          localNotification.onclick = () => {
+            window.focus();
+            if (link) window.location.href = link;
+            localNotification.close();
+          };
+        } catch (localError) {
+          console.warn('Local notification test failed:', localError);
+        }
+      }
     } catch (error: any) {
       setResult({
         status: 'error',
@@ -109,6 +254,62 @@ export function NotificationTester({ className, adminMode = false }: Notificatio
               You need to enable notifications to receive test messages.
             </AlertDescription>
           </Alert>
+        )}
+        
+        {adminMode && (
+          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-md mb-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center">
+                <InfoIcon className="h-4 w-4 mr-2 text-blue-500" />
+                <span className="text-sm font-medium">Service Worker Status</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={refreshServiceWorker} 
+                className="h-7 px-2 text-xs"
+              >
+                Refresh
+              </Button>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+              <span className="text-gray-500 dark:text-gray-400">Registered:</span>
+              <span className={swStatus.registered ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                {swStatus.registered ? 'Yes' : 'No'}
+              </span>
+              
+              <span className="text-gray-500 dark:text-gray-400">Active:</span>
+              <span className={swStatus.active ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                {swStatus.active ? 'Yes' : 'No'}
+              </span>
+              
+              <span className="text-gray-500 dark:text-gray-400">Scope:</span>
+              <span className="text-gray-800 dark:text-gray-200">
+                {swStatus.scope || 'N/A'}
+              </span>
+              
+              <span className="text-gray-500 dark:text-gray-400">FCM Token:</span>
+              <span className="text-gray-800 dark:text-gray-200">
+                {fcmToken ? 'Available' : 'Missing'}
+              </span>
+            </div>
+            
+            <div className="mt-2 flex items-center">
+              <Switch
+                id="show-diagnostics"
+                checked={showDiagnostics}
+                onCheckedChange={setShowDiagnostics}
+                className="mr-2"
+              />
+              <Label htmlFor="show-diagnostics" className="text-xs">Show diagnostics</Label>
+            </div>
+            
+            {showDiagnostics && (
+              <pre className="mt-2 p-2 bg-gray-200 dark:bg-gray-700 rounded text-xs overflow-auto max-h-32">
+                {generateDiagnostics()}
+              </pre>
+            )}
+          </div>
         )}
         
         <div className="space-y-2">

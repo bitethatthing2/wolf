@@ -108,14 +108,29 @@ export default function ClientComponentsWrapper({ children }: ClientComponentsWr
     }
   }, []);
   
-  // Use initialized state to prevent rendering before initialization
-  if (!initialized && typeof window !== 'undefined') {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
+  // Don't conditionally render based on client-side state to avoid hydration mismatches
+  // Instead, use suppressHydrationWarning and handle visibility with CSS
   
   return (
     <ClientErrorBoundary>
-      {children}
+      {/* Add suppressHydrationWarning to prevent hydration errors */}
+      <div suppressHydrationWarning>
+        {/* Main content - opacity controlled by client-side state */}
+        <div 
+          className="transition-opacity duration-300"
+          style={{ opacity: initialized ? 1 : 0 }}
+        >
+          {children}
+        </div>
+        
+        {/* Loading indicator - only visible before initialization */}
+        <div 
+          className="min-h-screen flex items-center justify-center fixed inset-0 z-50 transition-opacity duration-300 pointer-events-none"
+          style={{ opacity: initialized ? 0 : 1 }}
+        >
+          <span>Loading...</span>
+        </div>
+      </div>
       <ClientSideComponents />
       <NavigationErrorHandler />
     </ClientErrorBoundary>

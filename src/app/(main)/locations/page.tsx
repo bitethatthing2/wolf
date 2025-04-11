@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes';
 import LocationSwitch from '@/components/features/locations/LocationSwitch'; 
 import PageHeader from '@/components/layout/PageHeader'; 
 import { Clock, Mail, Phone } from 'lucide-react';
-import InstagramFeedSection from '@/components/features/social/InstagramFeedSection';
+import ElfsightInstagramFeed from '@/components/features/social/ElfsightInstagramFeed';
 import GoogleReviewsSection from '@/components/features/social/GoogleReviewsSection';
 
 const LocationsPage = () => {
@@ -32,7 +32,7 @@ const LocationsPage = () => {
         </div>
         
         <div className="mt-12"> 
-          <InstagramFeedSection />
+          <ElfsightInstagramFeed />
         </div>
 
         <div className="mt-12"> 
