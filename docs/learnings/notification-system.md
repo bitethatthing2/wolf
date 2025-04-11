@@ -1,6 +1,13 @@
-# Push Notification System Architecture
+# Push Notification System Documentation
 
-This document outlines the implementation and improvements made to the push notification system in our application.
+This document provides an overview of the push notification system implemented in the Side Hustle Bar web application.
+
+## Recent Updates (April 11, 2025)
+
+1. **Added Missing Service Worker** - Created `sw.js` to properly handle push notifications
+2. **Fixed Service Worker Registration** - Enabled registration in all environments, not just production
+3. **Updated Supabase Connection** - Connected to the correct Supabase project URL
+4. **Improved Documentation** - Added comprehensive documentation for the notification system
 
 ## System Overview
 

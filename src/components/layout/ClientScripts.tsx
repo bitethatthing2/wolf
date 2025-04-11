@@ -55,14 +55,12 @@ export default function ClientScripts() {
         src="/pwa-install-helper.js"
       />
       
-      {/* Service worker init - only in production */}
-      {process.env.NODE_ENV === 'production' && (
-        <Script
-          id="service-worker-init"
-          strategy="afterInteractive"
-          src="/service-worker-init.js"
-        />
-      )}
+      {/* Service worker init - enabled for all environments */}
+      <Script
+        id="service-worker-init"
+        strategy="afterInteractive"
+        src="/service-worker-init.js"
+      />
       
       {/* Instagram Widget Script - required for Instagram integration */}
       <Script

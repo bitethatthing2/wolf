@@ -34,6 +34,12 @@ You can find detailed documentation for key systems in the `/docs/` folder:
 - **Next.js Error Handling**: `/docs/learnings/next-error-handling.md`
 - **PWA Installation Flow**: `/docs/architecture/installation-flow.md`
 
+## Supabase Security Recommendations
+- **Update Supabase URL**: The project's Supabase URL should be set to `https://dzvvjgmnlcmgrsnyfqnw.supabase.co` in environment files
+- **Enable Leaked Password Protection**: This should be enabled in the Supabase dashboard under Auth settings
+- **Review OTP Expiry Time**: Set OTP (One-Time Password) expiry to less than an hour for security
+- **Fix Function Search Path**: The `public.update_last_active` function needs its search_path parameter set to address the mutable search path security issue
+
 ## Memories
 
 ### April 11, 2025: Notification System and Error Handling Improvements
