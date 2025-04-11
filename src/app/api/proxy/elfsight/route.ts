@@ -38,13 +38,19 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Forward the request to Elfsight
-    const response = await fetch(targetUrl, {
+    // Add cache-busting parameter
+    const urlObj = new URL(targetUrl);
+    urlObj.searchParams.append('_cb', Date.now().toString());
+    
+    // Forward the request to Elfsight with custom headers
+    const response = await fetch(urlObj.toString(), {
       headers: {
         'User-Agent': request.headers.get('user-agent') || 'Next.js Proxy',
-        'Accept': 'application/json',
-        'Origin': 'https://magnificent-churros-3c51ed.netlify.app',
-        'Referer': 'https://magnificent-churros-3c51ed.netlify.app/'
+        'Accept': 'application/json, text/plain, */*',
+        'Origin': 'https://static.elfsight.com',
+        'Referer': 'https://static.elfsight.com/',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
       },
     });
     
@@ -59,8 +65,10 @@ export async function GET(request: NextRequest) {
         'Content-Type': response.headers.get('Content-Type') || 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept',
+        'Access-Control-Max-Age': '86400',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Proxied-By': 'Next.js Proxy'
       },
     });
     
@@ -75,29 +83,64 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Handle OPTIONS requests for CORS preflight
- */
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
-}
-
-/**
- * Forward POST requests to Elfsight
+ * Direct proxy for widget data API calls
+ * This handles the specific API endpoints that are failing
  */
 export async function POST(request: NextRequest) {
   try {
-    // Get the target URL from the query parameter
-    const { searchParams } = new URL(request.url);
+    // Handle specific widget data endpoints directly
+    const { searchParams, pathname } = new URL(request.url);
     const targetUrl = searchParams.get('url');
+    const widgetId = searchParams.get('widgetId');
     
+    // If we have a direct widget ID, use it to construct the URL
+    if (widgetId) {
+      const body = await request.json();
+      
+      // Construct the appropriate URL for the widget data API
+      let apiUrl = `https://widget-data.service.elfsight.com/api/source/${widgetId}/status`;
+      
+      if (pathname.includes('/posts')) {
+        apiUrl = `https://widget-data.service.elfsight.com/api/posts`;
+        // Add query parameters for posts endpoint
+        const url = new URL(apiUrl);
+        url.searchParams.append('sources[]', JSON.stringify({pid: widgetId, filters: []}));
+        url.searchParams.append('sort', 'date');
+        url.searchParams.append('limit', '50');
+        url.searchParams.append('offset', '0');
+        apiUrl = url.toString();
+      }
+      
+      // Make the API request
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Next.js Proxy)',
+          'Accept': 'application/json, text/plain, */*',
+          'Origin': 'https://static.elfsight.com',
+          'Referer': 'https://static.elfsight.com/',
+          'Cache-Control': 'no-cache',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      
+      // Get response data
+      const data = await response.text();
+      
+      // Return proxied response
+      return new NextResponse(data, {
+        status: response.status,
+        headers: {
+          'Content-Type': response.headers.get('Content-Type') || 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      });
+    }
+    
+    // Fall back to standard URL-based proxy
     if (!targetUrl) {
       return NextResponse.json(
         { error: 'Missing target URL parameter' },
@@ -135,9 +178,11 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': request.headers.get('Content-Type') || 'application/json',
         'User-Agent': request.headers.get('user-agent') || 'Next.js Proxy',
-        'Accept': 'application/json',
-        'Origin': 'https://magnificent-churros-3c51ed.netlify.app',
-        'Referer': 'https://magnificent-churros-3c51ed.netlify.app/'
+        'Accept': 'application/json, text/plain, */*',
+        'Origin': 'https://static.elfsight.com',
+        'Referer': 'https://static.elfsight.com/',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
       },
       body
     });
@@ -153,7 +198,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': response.headers.get('Content-Type') || 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     });
@@ -166,4 +211,19 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Handle OPTIONS requests for CORS preflight
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
 }

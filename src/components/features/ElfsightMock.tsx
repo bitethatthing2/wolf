@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Instagram, Star, ExternalLink } from 'lucide-react';
 
 interface ElfsightMockProps {
@@ -20,6 +20,41 @@ const ElfsightMock: React.FC<ElfsightMockProps> = ({
   wrapperClassName = '',
   type = 'instagram'
 }) => {
+  const [envVariables, setEnvVariables] = useState<Record<string, string>>({});
+  
+  useEffect(() => {
+    // Collect environment variables related to Elfsight
+    const env: Record<string, string> = {};
+    
+    // Check process.env (Next.js)
+    if (typeof process !== 'undefined' && process.env) {
+      if (process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID) {
+        env['NEXT_PUBLIC_INSTAGRAM_WIDGET_ID'] = process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID;
+      }
+      if (process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_WIDGET_ID) {
+        env['NEXT_PUBLIC_GOOGLE_REVIEWS_WIDGET_ID'] = process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_WIDGET_ID;
+      }
+      if (process.env.NEXT_PUBLIC_ELFSIGHT_CORS_PROXY_ENABLED) {
+        env['NEXT_PUBLIC_ELFSIGHT_CORS_PROXY_ENABLED'] = process.env.NEXT_PUBLIC_ELFSIGHT_CORS_PROXY_ENABLED;
+      }
+    }
+    
+    // Check window.__ENV (custom environment)
+    if (typeof window !== 'undefined' && window.__ENV) {
+      if (window.__ENV.INSTAGRAM_WIDGET_ID) {
+        env['window.__ENV.INSTAGRAM_WIDGET_ID'] = window.__ENV.INSTAGRAM_WIDGET_ID;
+      }
+      if (window.__ENV.GOOGLE_REVIEWS_WIDGET_ID) {
+        env['window.__ENV.GOOGLE_REVIEWS_WIDGET_ID'] = window.__ENV.GOOGLE_REVIEWS_WIDGET_ID;
+      }
+      if (window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED) {
+        env['window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED'] = window.__ENV.ELFSIGHT_CORS_PROXY_ENABLED;
+      }
+    }
+    
+    setEnvVariables(env);
+  }, []);
+
   // Choose icon based on type
   const IconComponent = type === 'instagram'
     ? Instagram
@@ -45,12 +80,39 @@ const ElfsightMock: React.FC<ElfsightMockProps> = ({
           <h3 className="mb-2 text-lg font-semibold">{title}</h3>
           
           <p className="mb-4 text-gray-500 dark:text-gray-400">
-            This widget doesn't display in development mode due to CORS restrictions.
+            Widget Diagnostic Information
           </p>
           
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            <p>Widget ID: {widgetId}</p>
-            <p className="mt-1">Will display correctly when deployed.</p>
+          <div className="text-sm text-left w-full max-w-md mb-4 bg-gray-100 dark:bg-gray-700 p-3 rounded overflow-auto">
+            <p className="font-mono">Current Widget ID: <span className="text-blue-600 dark:text-blue-400">{widgetId}</span></p>
+            
+            <p className="mt-2 font-semibold">Environment Variables:</p>
+            {Object.keys(envVariables).length > 0 ? (
+              <ul className="mt-1 pl-4 list-disc space-y-1">
+                {Object.entries(envVariables).map(([key, value]) => (
+                  <li key={key} className="font-mono text-xs">
+                    {key}: <span className="text-green-600 dark:text-green-400">{value}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="italic text-gray-500">No environment variables found</p>
+            )}
+            
+            <p className="mt-2 font-semibold">Host Information:</p>
+            <p className="font-mono text-xs">
+              {typeof window !== 'undefined' ? window.location.hostname : 'Server-side rendering'}
+            </p>
+            
+            <p className="mt-2 font-semibold">Correct Widget IDs:</p>
+            <ul className="mt-1 pl-4 list-disc">
+              <li className="font-mono text-xs">
+                Instagram: <span className="text-green-600 dark:text-green-400">4118f1f5-d59f-496f-8439-e8e0232a0fef</span>
+              </li>
+              <li className="font-mono text-xs">
+                Google Reviews: <span className="text-green-600 dark:text-green-400">f4fdffed-81de-488-2da302faebbe</span>
+              </li>
+            </ul>
           </div>
 
           {type === 'instagram' && (
@@ -93,5 +155,17 @@ const ElfsightMock: React.FC<ElfsightMockProps> = ({
     </div>
   );
 };
+
+// Define global types
+declare global {
+  interface Window {
+    __ENV?: {
+      INSTAGRAM_WIDGET_ID?: string;
+      GOOGLE_REVIEWS_WIDGET_ID?: string;
+      ELFSIGHT_CORS_PROXY_ENABLED?: string;
+      [key: string]: string | undefined;
+    };
+  }
+}
 
 export default ElfsightMock;

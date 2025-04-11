@@ -59,7 +59,7 @@ interface SideHustleInstagramFeedProps {
  * Uses the official Elfsight widget in production and a mock in development
  */
 export default function SideHustleInstagramFeed({
-  widgetId,
+  widgetId = "4118f1f5-d59f-496f-8439-e8e0232a0fef", // Ensure we use the correct widget ID
   className = '',
   title = 'Follow Us on Instagram'
 }: SideHustleInstagramFeedProps) {

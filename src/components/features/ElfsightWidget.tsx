@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import ElfsightMock from './ElfsightMock';
 
 // Dynamically import the official ElfsightWidget with no SSR
 const OfficialElfsightWidget = dynamic(
@@ -14,6 +15,7 @@ interface ElfsightWidgetProps {
   className?: string;
   wrapperClassName?: string;
   fallbackMessage?: string;
+  type?: 'instagram' | 'reviews' | 'other';
 }
 
 /**
@@ -24,10 +26,12 @@ const ElfsightWidget = ({
   widgetId, 
   className = '',
   wrapperClassName = '',
-  fallbackMessage = 'Loading widget...'
+  fallbackMessage = 'Loading widget...',
+  type = 'other'
 }: ElfsightWidgetProps) => {
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   
   // Client-side only rendering
   useEffect(() => {
@@ -38,8 +42,35 @@ const ElfsightWidget = ({
       setIsLoading(false);
     }, 500);
     
-    return () => clearTimeout(timer);
+    // Error handling
+    const handleError = (event: ErrorEvent) => {
+      if (event.message && (
+        event.message.includes('Elfsight') || 
+        event.message.includes('widget') ||
+        (event.filename && (
+          event.filename.includes('elfsight.com') ||
+          event.filename.includes('elfsightcdn.com')
+        ))
+      )) {
+        console.warn('Caught Elfsight-related error:', event.message);
+        setHasError(true);
+        event.preventDefault();
+      }
+    };
+    
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('error', handleError);
+    };
   }, []);
+  
+  // Check widget ID to determine widget type if not explicitly specified
+  const widgetType = type !== 'other' ? type : 
+    widgetId === '4118f1f5-d59f-496f-8439-e8e0232a0fef' ? 'instagram' :
+    widgetId === 'f4fdffed-81de-4d5d-b688-2da302faebbe' ? 'reviews' : 
+    'other';
   
   // If not mounted yet, show loading message
   if (!isClient || isLoading) {
@@ -59,35 +90,19 @@ const ElfsightWidget = ({
      window.location.hostname === '127.0.0.1' || 
      window.location.hostname.includes('.local'));
   
-  // In development, show a mock to avoid CORS errors
-  if (isDevelopment) {
+  // If there's an error or we're in development, show the mock
+  if (hasError || isDevelopment) {
     return (
-      <div className={`elfsight-mock ${wrapperClassName}`}>
-        <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 mb-4 text-gray-400 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            
-            <h3 className="mb-2 text-lg font-semibold">Elfsight Widget</h3>
-            
-            <p className="mb-4 text-gray-500 dark:text-gray-400">
-              This widget doesn't display in development mode due to CORS restrictions.
-            </p>
-            
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              <p>Widget ID: {widgetId}</p>
-              <p className="mt-1">Will display correctly when deployed.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ElfsightMock 
+        widgetId={widgetId}
+        className={className}
+        wrapperClassName={wrapperClassName}
+        type={widgetType}
+      />
     );
   }
   
-  // In production, use the official widget
+  // In production with no errors, use the official widget
   return (
     <div className={wrapperClassName}>
       <OfficialElfsightWidget 
