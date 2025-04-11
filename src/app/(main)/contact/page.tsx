@@ -14,9 +14,9 @@ interface ContactMethod {
 const contactMethods: ContactMethod[] = [
   {
     title: "Email",
-    value: "hello@hustlehard.com",
+    value: "hello@sidehustle.com",
     icon: "📧",
-    link: "mailto:hello@hustlehard.com"
+    link: "mailto:hello@sidehustle.com"
   },
   {
     title: "Phone",

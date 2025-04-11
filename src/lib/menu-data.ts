@@ -290,7 +290,7 @@ export const menuData: FullMenu = {
           icon: foodIcons.torta,
         },
         {
-          name: 'HUSLTE BOWL',
+          name: 'HUSTLE BOWL',
           price: '$15.00',
           description:
             'BEANS, RICE, LETTUCE, PICO, JALAPENOS, SOUR CREAM, GUAC SAUCE, COTIJA, TORTILLA CHIPS, CHOICE OF MEAT',
