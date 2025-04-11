@@ -23,7 +23,11 @@ export async function GET(request: NextRequest) {
       'static.elfsight.com',
       'apps.elfsight.com',
       'service.elfsight.com',
-      'core.service.elfsight.com'
+      'core.service.elfsight.com',
+      'universe-static.elfsightcdn.com',
+      'elfsightcdn.com', 
+      'static.elfsightcdn.com',
+      'apps-api.elfsight.com'
     ];
     
     const targetDomain = new URL(targetUrl).hostname;
@@ -107,7 +111,11 @@ export async function POST(request: NextRequest) {
       'static.elfsight.com',
       'apps.elfsight.com',
       'service.elfsight.com',
-      'core.service.elfsight.com'
+      'core.service.elfsight.com',
+      'universe-static.elfsightcdn.com',
+      'elfsightcdn.com', 
+      'static.elfsightcdn.com',
+      'apps-api.elfsight.com'
     ];
     
     const targetDomain = new URL(targetUrl).hostname;

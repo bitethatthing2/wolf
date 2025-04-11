@@ -8,7 +8,12 @@ const ALLOWED_DOMAINS = [
   'service.elfsight.com',
   'static.elfsight.com',
   'elfsight.com',
-  'apps-api.elfsight.com'
+  'apps-api.elfsight.com',
+  'universe-static.elfsightcdn.com',
+  'elfsightcdn.com',
+  'static.elfsightcdn.com',
+  'apps.elfsight.com',
+  'core.service.elfsight.com'
 ];
 
 exports.handler = async function(event, context) {
