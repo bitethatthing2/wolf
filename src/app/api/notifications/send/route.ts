@@ -12,9 +12,9 @@ async function cleanupOldSubscriptions(supabase: any, olderThanDays: number = 90
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
     
     const { error } = await supabase
-      .from('push_subscriptions')
+      .from('notification_subscriptions')
       .delete()
-      .lt('last_used', cutoffDate.toISOString());
+      .lt('last_active', cutoffDate.toISOString());
       
     if (error) {
       console.error("Error cleaning up old subscriptions:", error);
