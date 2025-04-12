@@ -48,7 +48,15 @@
         return window.env[name];
       }
       
-      return '';
+      // Hardcoded fallback values for development and testing
+      const fallbacks = {
+        'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID': '11762649284903810197',
+        'NEXT_PUBLIC_FIREBASE_PROJECT_ID': 'new1-f04b3',
+        'NEXT_PUBLIC_FIREBASE_API_KEY': 'AIzaSyBQwcudJ_aZl5o6i_FfsdsnaMxhjl3MjuE',
+        'NEXT_PUBLIC_FIREBASE_APP_ID': '1:11762649284903810197:web:c7e4a1f3b3e6e2a28e2626'
+      };
+      
+      return fallbacks[name] || '';
     };
     
     return {
@@ -82,14 +90,25 @@
       return;
     }
     
-    // Get all service worker registrations
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      // Find one with our scope
-      const registration = registrations.find(reg => 
-        reg.scope.includes(window.location.origin) || 
-        reg.scope === '/' || 
-        reg.scope === window.location.origin + '/'
-      );
+    // First try the ready property for the current active service worker
+    navigator.serviceWorker.ready
+    .then(registration => {
+      return { registration, fromReady: true };
+    })
+    .catch(() => {
+      // Fallback to getting all service worker registrations
+      return navigator.serviceWorker.getRegistrations()
+      .then(registrations => {
+        // Find one with our scope
+        const registration = registrations.find(reg => 
+          reg.scope.includes(window.location.origin) || 
+          reg.scope === '/' || 
+          reg.scope === window.location.origin + '/'
+        );
+        return { registration, fromReady: false };
+      });
+    })
+    .then(({ registration, fromReady }) => {
       
       if (!registration) {
         console.log('[Push Notification Init] Service worker not registered yet, waiting...');
@@ -98,6 +117,8 @@
         setTimeout(initializeWhenReady, 1000);
         return;
       }
+      
+      console.log('[Push Notification Init] Found service worker registration', fromReady ? 'from navigator.serviceWorker.ready' : 'from registrations list');
       
       window.__wolfAppInit.pushNotificationStatus.serviceWorkerRegistered = true;
       window.__wolfAppInit.serviceWorkerRegistered = true;
@@ -154,6 +175,29 @@
       window.__wolfAppInit.errors.push('Push notification init error: ' + err.message);
       console.error('[Push Notification Init] Error getting service worker registration:', err);
       
+      // Try a different approach after a few retries
+      if (window.__wolfAppInit.pushNotificationStatus.retryCount > 3) {
+        console.log('[Push Notification Init] Trying alternate service worker registration method');
+        
+        // Try to register the service worker directly as a last resort
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('[Push Notification Init] Registered service worker directly:', registration.scope);
+          window.__wolfAppInit.serviceWorkerRegistered = true;
+          window.__wolfAppInit.pushNotificationStatus.serviceWorkerRegistered = true;
+          
+          // Try again with the new registration
+          setTimeout(initializeWhenReady, 1000);
+        })
+        .catch(regErr => {
+          console.error('[Push Notification Init] Failed to register service worker directly:', regErr);
+          
+          // Give up after all attempts failed
+          window.__wolfAppInit.pushNotificationStatus.error = 'Failed to initialize after multiple attempts';
+        });
+        return;
+      }
+      
       // Retry in case of temporary error
       setTimeout(initializeWhenReady, 2000);
     });
@@ -161,12 +205,22 @@
   
   // Function to check if document and service worker are ready
   function checkReadiness() {
-    // If we have our service worker registered, we can start
+    // If service worker registration is already tracked as complete
     if (window.__wolfAppInit.serviceWorkerRegistered) {
       console.log('[Push Notification Init] Service worker ready, initializing push notifications');
       initializeWhenReady();
       return;
     }
+    
+    // If we've been waiting too long, try directly initializing
+    if (window.__wolfAppInit.pushNotificationStatus.retryCount > 3) {
+      console.log('[Push Notification Init] Service worker may be registered but not tracked, trying direct initialization');
+      initializeWhenReady();
+      return;
+    }
+    
+    // Increment retry count
+    window.__wolfAppInit.pushNotificationStatus.retryCount++;
     
     // Wait for service worker registration
     console.log('[Push Notification Init] Waiting for service worker registration...');
