@@ -29,7 +29,7 @@ export async function testNotificationSetup(supabase: any): Promise<boolean> {
     // First, try to get the table info
     const { data: tableInfo, error: tableError } = await supabase
       .from('notification_subscriptions')
-      .select('*')
+      .select('id, device_token, device_info, created_at, last_active')
       .limit(1);
 
     if (tableError) {
@@ -50,10 +50,12 @@ export async function testNotificationSetup(supabase: any): Promise<boolean> {
     const { data, error } = await supabase
       .from('notification_subscriptions')
       .insert({
-        endpoint: uniqueEndpoint,
-        p256dh: 'test-p256dh',
-        auth: 'test-auth',
-        user_agent: 'test-user-agent'
+        device_token: uniqueEndpoint,
+        device_info: {
+          user_agent: 'test-user-agent',
+          platform: 'test-platform',
+          test: true
+        }
       })
       .select();
 
@@ -111,10 +113,12 @@ export async function saveNotificationSubscription(token: string, supabase: any)
 
     // For FCM tokens, we need to create a subscription-like object
     const subscription = {
-      endpoint: token, // Use the FCM token as the endpoint
-      p256dh: 'fcm', // For FCM, we don't need these values but the table requires them
-      auth: 'fcm',
-      user_agent: navigator.userAgent,
+      device_token: token, // Use the FCM token as the device_token
+      device_info: {
+        user_agent: navigator.userAgent,
+        platform: navigator.platform,
+        fcm: true
+      },
       last_active: new Date().toISOString()
     };
 
@@ -122,7 +126,7 @@ export async function saveNotificationSubscription(token: string, supabase: any)
     const { data: existingSubscription, error: checkError } = await supabase
       .from('notification_subscriptions')
       .select('*')
-      .eq('endpoint', token)
+      .eq('device_token', token)
       .maybeSingle();
 
     if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is expected
@@ -131,14 +135,19 @@ export async function saveNotificationSubscription(token: string, supabase: any)
     }
 
     if (existingSubscription) {
-      // Update the last_active timestamp
+      // Update the last_active timestamp and device info
       const { data: updatedSubscription, error: updateError } = await supabase
         .from('notification_subscriptions')
         .update({ 
           last_active: new Date().toISOString(),
-          user_agent: navigator.userAgent // Update user agent in case it changed
+          device_info: {
+            user_agent: navigator.userAgent,
+            platform: navigator.platform,
+            fcm: true,
+            updated_at: new Date().toISOString()
+          }
         })
-        .eq('endpoint', token)
+        .eq('device_token', token)
         .select()
         .single();
 
@@ -196,14 +205,18 @@ export async function saveWebPushSubscription(
 
     console.log("Preparing subscription data...");
     const subscriptionData = {
-      endpoint: pushSubscription.endpoint,
-      p256dh: btoa(String.fromCharCode.apply(null, 
-        new Uint8Array(pushSubscription.getKey('p256dh') as ArrayBuffer) as unknown as number[]
-      )),
-      auth: btoa(String.fromCharCode.apply(null, 
-        new Uint8Array(pushSubscription.getKey('auth') as ArrayBuffer) as unknown as number[]
-      )),
-      user_agent: userAgent,
+      device_token: pushSubscription.endpoint,
+      device_info: {
+        user_agent: userAgent,
+        platform: navigator.platform,
+        p256dh: btoa(String.fromCharCode.apply(null, 
+          new Uint8Array(pushSubscription.getKey('p256dh') as ArrayBuffer) as unknown as number[]
+        )),
+        auth: btoa(String.fromCharCode.apply(null, 
+          new Uint8Array(pushSubscription.getKey('auth') as ArrayBuffer) as unknown as number[]
+        )),
+        web_push: true
+      },
       last_active: new Date().toISOString()
     };
 
@@ -219,7 +232,7 @@ export async function saveWebPushSubscription(
     const { data: existingData, error: checkError } = await supabase
       .from('notification_subscriptions')
       .select('id')
-      .eq('endpoint', subscriptionData.endpoint)
+      .eq('device_token', subscriptionData.device_token)
       .maybeSingle();
     
     if (checkError && checkError.code !== 'PGRST116') {
@@ -233,12 +246,10 @@ export async function saveWebPushSubscription(
       const { data: updateData, error: updateError } = await supabase
         .from('notification_subscriptions')
         .update({
-          p256dh: subscriptionData.p256dh,
-          auth: subscriptionData.auth,
-          user_agent: subscriptionData.user_agent,
+          device_info: subscriptionData.device_info,
           last_active: subscriptionData.last_active
         })
-        .eq('endpoint', subscriptionData.endpoint)
+        .eq('device_token', subscriptionData.device_token)
         .select();
       
       if (updateError) {
@@ -266,12 +277,10 @@ export async function saveWebPushSubscription(
           const { data: updateData, error: updateError } = await supabase
             .from('notification_subscriptions')
             .update({
-              p256dh: subscriptionData.p256dh,
-              auth: subscriptionData.auth,
-              user_agent: subscriptionData.user_agent,
+              device_info: subscriptionData.device_info,
               last_active: subscriptionData.last_active
             })
-            .eq('endpoint', subscriptionData.endpoint)
+            .eq('device_token', subscriptionData.device_token)
             .select();
           
           if (updateError) {
@@ -364,7 +373,7 @@ export async function unregisterFromPushNotifications(token: string, supabase: a
     const { error } = await supabase
       .from('notification_subscriptions')
       .delete()
-      .eq('endpoint', token);
+      .eq('device_token', token);
 
     if (error) {
       console.error('Error deleting subscription:', error);

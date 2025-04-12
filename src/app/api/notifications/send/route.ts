@@ -172,15 +172,25 @@ export async function POST(request: Request) {
         
         // Categorize tokens by platform
         for (const subscription of subscriptions) {
-          const deviceToken = subscription.endpoint;
-          const userAgent = subscription.user_agent?.toLowerCase() || '';
+          const deviceToken = subscription.device_token || subscription.endpoint;
+          const userAgent = ((subscription.device_info || {}).user_agent || subscription.user_agent || '').toLowerCase();
           
-          // Determine platform based on user agent
+          // Get device info or fallback to user agent for older records
+          const deviceInfo = subscription.device_info || {};
+          const userAgentString = (typeof deviceInfo === 'object' && deviceInfo.user_agent) 
+            ? deviceInfo.user_agent 
+            : userAgent;
+          
+          // Determine platform based on user agent or device_info
           let devicePlatform = "web"; // Default to web
-          if (userAgent.includes("android")) {
+          if (deviceInfo.platform === 'android' || userAgentString.includes("android")) {
             devicePlatform = "android";
             androidTokens.push(deviceToken);
-          } else if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
+          } else if (
+            deviceInfo.platform === 'ios' || 
+            userAgentString.includes("iphone") || 
+            userAgentString.includes("ipad")
+          ) {
             devicePlatform = "ios";
             iosTokens.push(deviceToken);
           } else {
