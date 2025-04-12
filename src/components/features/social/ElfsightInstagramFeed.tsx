@@ -135,16 +135,33 @@ const ElfsightInstagramFeed: React.FC = () => {
         </div>
         
         <div className={`w-full overflow-hidden rounded-xl ${isDark ? 'border border-white/10' : 'border border-black/10'} shadow-lg`}>
-          <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-lg`}>
-            {/* Use the direct Instagram embed component */}
-            <div className="min-h-[550px] pt-6 sm:pt-0 flex justify-center w-full overflow-x-hidden"> 
+          <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-2 sm:p-6 md:p-8 rounded-lg`}>
+            {/* Use the direct Instagram embed component with improved responsive behavior */}
+            <div className="min-h-[550px] pt-2 sm:pt-0 flex justify-center w-full overflow-hidden">
               {hasError ? (
                 <InstagramErrorFallback />
               ) : (
-                <InstagramEmbed 
-                  username="sidehustle_bar"
-                  className="w-full max-w-full mx-auto px-0 sm:px-4"
-                />
+                <div className="w-full max-w-full mx-auto">
+                  <div className="instagram-responsive-wrapper relative w-full overflow-hidden">
+                    <InstagramEmbed 
+                      username="sidehustle_bar"
+                      className="w-full max-w-full mx-auto px-0 sm:px-4 scale-100 sm:scale-100 transform-gpu"
+                    />
+                  </div>
+                  <style jsx>{`
+                    .instagram-responsive-wrapper {
+                      width: 100%;
+                      height: auto;
+                      min-height: 450px;
+                    }
+                    @media (max-width: 640px) {
+                      .instagram-responsive-wrapper iframe {
+                        width: 100% !important;
+                        transform-origin: left top;
+                      }
+                    }
+                  `}</style>
+                </div>
               )}
             </div>
           </div>

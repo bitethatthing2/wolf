@@ -9,6 +9,8 @@ import { Send, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import { defaultLocationData } from '@/contexts/LocationContext';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 interface Message {
   id: string;
@@ -37,12 +39,12 @@ const knowledgeBase = {
       answer: "Parking is available in nearby public lots and street parking. Our Portland location is also easily accessible via public transportation."
     },
     {
-      question: ["reservations", "reserve", "book a table", "large group"],
-      answer: "We accept reservations for groups of 6 or more. Please call us directly to make a reservation. For smaller groups, we operate on a first-come, first-served basis."
+      question: ["reservations", "reserve", "book a table", "large group", "catering", "birthday", "party booking"],
+      answer: "We accept reservations for groups of 6 or more. Please call us directly to make a reservation or book through our website. We also offer catering and special event bookings for birthdays and private parties. For smaller groups, we operate on a first-come, first-served basis."
     },
     {
       question: ["events", "private events", "host an event", "party"],
-      answer: "We can accommodate private events and parties! Please contact us for more information about pricing and availability."
+      answer: "We can accommodate private events and parties! Please contact us for more information about pricing and availability or fill out our reservation form for catering and birthday party bookings."
     },
     {
       question: ["happy hour", "deals", "discounts"],
@@ -88,6 +90,7 @@ export default function KnowledgeBot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -209,12 +212,75 @@ export default function KnowledgeBot() {
 
   return (
     <>
-      {/* Chat button (fixed position) */}
+      {/* 3D Hustle Bot (fixed position in top left) */}
+      <div 
+        className="fixed z-50 left-4 top-20 flex flex-col items-center"
+        onMouseEnter={() => setIsButtonHovered(true)}
+        onMouseLeave={() => setIsButtonHovered(false)}
+      >
+        <motion.div
+          animate={{ 
+            y: isButtonHovered ? [0, -5, 0] : 0,
+            rotate: isButtonHovered ? [-5, 5, -5, 5, 0] : 0
+          }}
+          transition={{
+            y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+            rotate: { duration: 0.5, repeat: 0, ease: "easeInOut" }
+          }}
+          className="cursor-pointer"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <div className="relative w-16 h-16 md:w-20 md:h-20">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gray-800 to-gray-600 animate-pulse blur-sm"></div>
+            <div className="relative z-10 w-full h-full">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-slate-700 via-gray-500 to-slate-800 border-2 border-gray-600 shadow-lg overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Robot face */}
+                  <div className="absolute w-full h-full flex flex-col items-center justify-center p-2">
+                    {/* Eyes */}
+                    <div className="flex justify-center gap-3 w-full">
+                      <motion.div 
+                        animate={{ 
+                          backgroundColor: isButtonHovered ? "#38bdf8" : "#60a5fa"
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-blue-400 opacity-90"
+                      ></motion.div>
+                      <motion.div 
+                        animate={{ 
+                          backgroundColor: isButtonHovered ? "#38bdf8" : "#60a5fa"
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-blue-400 opacity-90"
+                      ></motion.div>
+                    </div>
+                    {/* Mouth */}
+                    <motion.div 
+                      animate={{ 
+                        width: isButtonHovered ? "50%" : "30%"
+                      }}
+                      transition={{ duration: 0.3 }}
+                      className="w-6 h-1 md:h-1.5 rounded-lg bg-blue-400 mt-3 opacity-90"
+                    ></motion.div>
+                  </div>
+                  {/* Overlay - metallic sheen */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-10"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+        <div className={`mt-2 text-xs font-medium ${isDark ? 'text-white' : 'text-black'} bg-opacity-70 px-2 py-1 rounded transition-opacity duration-200 ${isButtonHovered ? 'opacity-100' : 'opacity-0'}`}>
+          Ask Hustle Bot
+        </div>
+      </div>
+
+      {/* Mobile chat button (only visible on smaller screens) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed z-50 bottom-6 right-6 p-3 rounded-full shadow-lg ${
           isDark ? 'bg-white text-black' : 'bg-black text-white'
-        } flex items-center justify-center`}
+        } flex md:hidden items-center justify-center`}
         aria-label="Chat with Side Hustle Bot"
       >
         {isOpen ? (

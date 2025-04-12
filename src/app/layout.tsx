@@ -30,18 +30,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
     shortcut: ["/favicon.ico"],
-    apple: [
-      {
-        url: "/apple-icon.png",
-        sizes: "180x180",
-        type: "image/png"
-      },
-      {
-        url: "/apple-touch-icon.png",
-        sizes: "180x180",
-        type: "image/png"
-      }
-    ],
+    apple: {
+      url: "/apple-touch-icon.png",
+      sizes: "180x180",
+      type: "image/png"
+    },
   },
   // Add PWA metadata
   other: {
@@ -72,8 +65,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Apple Touch Icons (multiple formats for maximum compatibility) */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        {/* Apple Touch Icons (single declaration to prevent duplicates) */}
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         

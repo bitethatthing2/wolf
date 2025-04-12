@@ -197,14 +197,20 @@ const AppInstallFlow = () => {
             <span>Enable Notifications</span>
           </div>
           
-          {/* Add helpful "View Installation Instructions" link */}
+          {/* Make "View detailed installation instructions" button more prominent */}
           {deviceType === "android" || deviceType === "ios" ? (
-            <div className="mt-2 text-center">
+            <div className="mt-4 text-center w-full">
               <a 
                 href={deviceType === "ios" ? "/instructions/ios" : "/instructions/android"} 
-                className="text-sm text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white underline underline-offset-2"
+                className={`inline-flex items-center justify-center gap-2 py-2 px-4 bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-300 dark:to-gray-100 text-white dark:text-black font-medium text-sm rounded-md border border-gray-600 dark:border-gray-300 shadow-md hover:shadow-lg transition-all duration-200 w-full max-w-md`}
               >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 View detailed installation instructions
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </a>
             </div>
           ) : null}
@@ -329,9 +335,9 @@ const AppInstallFlow = () => {
         Stay Connected with Side Hustle Bar
       </h3>
       
-      {/* Updated Descriptive Paragraph */}
+      {/* Updated Descriptive Paragraph with requested text change */}
       <p className="text-sm text-muted-foreground text-center mb-4">
-        Install the Side Hustle Bar app and stay plugged into the action! Enable notifications to join our pack and get the first word on events, specials, and exclusives.
+        Install the app and join the pack! Enable notifications to stay connected and get the first word on events, specials, and exclusives.
       </p>
       
       {/* Added benefit points */}

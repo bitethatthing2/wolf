@@ -35,6 +35,48 @@
   "theme_color": "#000000",
   "related_applications": [],
   "prefer_related_applications": false,
+  "locations": [
+    {
+      "name": "Portland",
+      "address": "327 SW Morrison St, Portland, OR 97204",
+      "phone": "(503) 391-9977",
+      "email": "contact@thesidehustleportland.com",
+      "hours": {
+        "Sunday": "10AM-11PM",
+        "Monday": "10AM-11PM",
+        "Tuesday": "10AM-11PM",
+        "Wednesday": "10AM-11PM",
+        "Thursday": "10AM-1AM",
+        "Friday": "10AM-2:30AM",
+        "Saturday": "10AM-2:30AM"
+      },
+      "coordinates": {
+        "latitude": 45.5189,
+        "longitude": -122.6770
+      },
+      "specialty": "Best tacos in Portland"
+    },
+    {
+      "name": "Salem",
+      "address": "145 Liberty St NE Suite #101, Salem, OR 97301",
+      "phone": "(503) 391-9977",
+      "email": "contact@thesidehustlesalem.com",
+      "hours": {
+        "Sunday": "10AM-11PM",
+        "Monday": "10AM-11PM",
+        "Tuesday": "10AM-11PM",
+        "Wednesday": "10AM-11PM",
+        "Thursday": "10AM-12AM",
+        "Friday": "10AM-2AM",
+        "Saturday": "10AM-2AM"
+      },
+      "coordinates": {
+        "latitude": 44.9429,
+        "longitude": -123.0351
+      },
+      "specialty": "Best tacos in Salem"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Menu",
@@ -53,6 +95,18 @@
       "short_name": "Events",
       "description": "Upcoming events",
       "url": "/events/"
+    },
+    {
+      "name": "Reservations",
+      "short_name": "Reserve",
+      "description": "Make a reservation",
+      "url": "/#reservation"
+    },
+    {
+      "name": "Shop",
+      "short_name": "Shop",
+      "description": "Shop Side Hustle merchandise",
+      "url": "/shop/"
     }
   ],
   "splash_pages": null,
@@ -75,5 +129,14 @@
   "categories": ["food", "entertainment", "sports", "nightlife"],
   "dir": "ltr",
   "lang": "en-US",
-  "iarc_rating_id": ""
+  "iarc_rating_id": "",
+  "features": [
+    "Table ordering via QR code",
+    "Online reservations",
+    "Birthday party bookings",
+    "Catering services",
+    "Push notifications for events",
+    "Offline menu access"
+  ],
+  "description_long": "Side Hustle Bar is the ultimate sports bar and Mexican restaurant experience in Portland and Salem, Oregon. Known for our authentic Mexican cuisine, craft cocktails, and energetic atmosphere. Home to the best tacos in town and a go-to destination for sports viewing, nightlife, and special events."
 }
