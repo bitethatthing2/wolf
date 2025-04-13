@@ -11,7 +11,7 @@ import { useLocation } from "@/contexts/LocationContext";
 import PortlandMap from "@/components/features/locations/PortlandMap"; 
 import SalemMap from "@/components/features/locations/SalemMap";     
 import LocationDirectionButtons from "@/components/features/locations/LocationDirectionButtons"; 
-import InstagramFeedSection from '@/components/features/social/InstagramFeedSection';
+import InstagramFeedSection from '@/components/features/social/ElfsightInstagramFeed';
 import ReservationSection from '@/components/features/social/ReservationSection';
 import GoogleReviewsSection from '@/components/features/social/GoogleReviewsSection';
 import AppInstallFlow from '@/components/features/install/AppInstallFlow';
