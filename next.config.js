@@ -102,7 +102,7 @@ let nextConfig = {
     pagesBufferLength: 5,
   },
   
-  // Add headers to fix CORS issues with Elfsight
+  // Add headers to fix CORS issues with Elfsight and configure CSP
   async headers() {
     return [
       {
@@ -128,6 +128,11 @@ let nextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'no-referrer-when-downgrade',
+          },
+          {
+            // Add Content Security Policy to allow Elfsight
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.gstatic.com https://www.instagram.com https://*.elfsight.com https://static.elfsight.com; style-src 'self' 'unsafe-inline' https://*.elfsight.com; img-src 'self' data: https://*.elfsight.com https://*.elfsightcdn.com https://*.cdninstagram.com https://*.instagram.com https://maps.googleapis.com https://lh3.googleusercontent.com; connect-src 'self' https://*.elfsight.com https://static.elfsight.com https://*.instagram.com; frame-src 'self' https://*.google.com https://www.instagram.com",
           },
         ],
       },

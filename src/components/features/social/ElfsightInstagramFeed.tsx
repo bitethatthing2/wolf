@@ -91,7 +91,7 @@ const InstagramFeedSection: React.FC = () => {
   
   return (
     <section className={`py-12 sm:py-16 md:py-20 ${isDark ? 'bg-gray-950/90' : 'bg-white'} w-full relative overflow-hidden`}>
-      {/* Load Elfsight script */}
+      {/* Load Elfsight script with nonce for CSP */}
       <Script
         src="https://static.elfsight.com/platform/platform.js"
         strategy="lazyOnload"

@@ -36,6 +36,10 @@ const EXTERNAL_DOMAINS = [
   'maps.googleapis.com',
   'lh3.googleusercontent.com',
   
+  // Elfsight domains
+  'elfsight.com',
+  'static.elfsight.com',
+  
   // Other third-party services
   'youtube.com',
   'youtu.be'
