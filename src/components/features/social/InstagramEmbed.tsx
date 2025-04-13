@@ -242,7 +242,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
     const permalinkUrl = `https://www.instagram.com/${username}/?utm_source=ig_embed&utm_campaign=loading&captioned=false`;
     
     const mediaClassName = `${styles.instagramMedia} ${isDark ? styles.instagramMediaDark : styles.instagramMediaLight}`;
-    
+
     return (
       <blockquote 
         className={`instagram-media ${mediaClassName}`}
