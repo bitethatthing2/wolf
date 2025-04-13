@@ -21,6 +21,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const containerRef = useRef<HTMLDivElement>(null);
+  const scriptRef = useRef<HTMLScriptElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -33,11 +34,43 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
       if (document.getElementById('instagram-embed-script')) {
         if (window.instgrm) {
           try {
-            window.instgrm.Embeds.process();
-            setIsLoaded(true);
+            // Re-process with a clean retry approach
+            const processEmbed = () => {
+              try {
+                window.instgrm?.Embeds.process();
+                setIsLoaded(true);
+                console.log('Instagram embed processed successfully');
+              } catch (error) {
+                console.warn('Error during embed processing, will retry once:', error);
+                // Single retry after a short delay
+                setTimeout(() => {
+                  try {
+                    window.instgrm?.Embeds.process();
+                    setIsLoaded(true);
+                    console.log('Instagram embed processed successfully on retry');
+                  } catch (retryError) {
+                    console.error('Instagram embed processing failed after retry:', retryError);
+                    setHasError(true);
+                  }
+                }, 1000);
+              }
+            };
+            
+            processEmbed();
           } catch (error) {
-            console.error('Error processing embeds:', error);
+            console.error('Error accessing Instagram embed API:', error);
             setHasError(true);
+          }
+        } else {
+          console.warn('Instagram embed script loaded but instgrm object not found');
+          // Try reloading the script as a recovery mechanism
+          const existingScript = document.getElementById('instagram-embed-script');
+          if (existingScript) {
+            existingScript.remove();
+            setTimeout(() => loadInstagramEmbed(), 500);
+            
+            // Don't set error yet - give the recovery a chance
+            return;
           }
         }
         return;
@@ -49,23 +82,53 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
       script.src = 'https://www.instagram.com/embed.js';
       script.async = true;
       script.defer = true;
+      script.crossOrigin = 'anonymous'; // Add CORS support
       
       // Set up load and error handlers
       script.onload = () => {
         if (window.instgrm) {
           try {
             // Process after a short delay for consistent behavior
+            // Increased delay for better reliability
             setTimeout(() => {
-              window.instgrm.Embeds.process();
-              setIsLoaded(true);
-            }, 300);
+              try {
+                window.instgrm?.Embeds.process();
+                setIsLoaded(true);
+                console.log('Instagram embed initially processed');
+              } catch (error) {
+                console.warn('Initial process failed, retrying once:', error);
+                // Additional retry with longer delay
+                setTimeout(() => {
+                  try {
+                    window.instgrm?.Embeds.process();
+                    setIsLoaded(true);
+                    console.log('Instagram embed processed on delayed retry');
+                  } catch (retryError) {
+                    console.error('Instagram embed processing failed after retry:', retryError);
+                    setHasError(true);
+                  }
+                }, 1500);
+              }
+            }, 500);
           } catch (error) {
             console.error('Error processing Instagram embeds:', error);
             setHasError(true);
           }
         } else {
           console.warn('Instagram embed script loaded but instgrm object not found');
-          setHasError(true);
+          // Wait a bit longer to see if instgrm object appears with delay
+          setTimeout(() => {
+            if (window.instgrm) {
+              try {
+                window.instgrm?.Embeds.process();
+                setIsLoaded(true);
+              } catch (error) {
+                setHasError(true);
+              }
+            } else {
+              setHasError(true);
+            }
+          }, 1000);
         }
       };
       
@@ -76,19 +139,51 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
       
       // Add script to document
       document.body.appendChild(script);
+      scriptRef.current = script;
     };
 
     // Global error handler
-    const handleError = (event: ErrorEvent) => {
-      if (event.message && (
-        event.message.includes('Instagram') || 
-        event.message.includes('instgrm') ||
-        (event.filename && event.filename.includes('instagram.com'))
-      )) {
-        console.warn('Caught Instagram-related error:', event.message);
-        setHasError(true);
-        event.preventDefault();
+    const handleError = (event: Event | string) => {
+      // Check if it's an Event object (likely a script load error)
+      if (typeof event === 'object' && event instanceof Event) {
+        console.error('Instagram script loading error:', event);
+
+        // Assign to a new const after type guard for better type tracking
+        const safeEvent = event;
+
+        // Attempt recovery if it was a script load error
+        // Compare against the script element referenced by scriptRef
+        if (safeEvent.target === scriptRef.current) {
+          console.info('Script load error detected, attempting recovery...');
+          const existingScript = document.getElementById('instagram-embed-script');
+          if (existingScript) {
+            existingScript.remove();
+            // Increased delay slightly for reliability
+            setTimeout(() => loadInstagramEmbed(), 800);
+            
+            // Don't set error yet - give the recovery a chance
+            // Use the type-narrowed safeEvent
+            // Check for preventDefault existence as it's optional on Event base type
+            if (safeEvent.preventDefault) { 
+              safeEvent.preventDefault(); 
+            }
+            return; // Recovery attempted, exit handler
+          }
+        }
+        // If it was an Event but not recoverable script error, log specific message if possible
+        // Check if it's an ErrorEvent before accessing message
+        if (safeEvent instanceof ErrorEvent && safeEvent.message) {
+          console.warn(`Non-recoverable Instagram Event error: ${safeEvent.message}`);
+        }
+
+      } else {
+        // Handle string errors or other types
+        console.error('Instagram script loading error (non-event):', event);
       }
+
+      // Set error state only if error was not handled by recovery logic
+      console.warn('Setting error state due to unhandled/non-recoverable error.');
+      setHasError(true);
     };
 
     // Add error listener
@@ -97,72 +192,80 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
     // Load Instagram embed
     loadInstagramEmbed();
     
-    // Fallback timer to check if embed loaded
-    const timer = setTimeout(() => {
+    // Progressive fallback system with multiple checks
+    // First quick check
+    const quickCheckTimer = setTimeout(() => {
       if (!isLoaded) {
         const embedPlaceholder = containerRef.current?.querySelector('.instagram-media');
         const embedLoaded = containerRef.current?.querySelector('.instagram-media-rendered');
         
         if (!embedLoaded && embedPlaceholder) {
-          console.warn('Instagram embed failed to load within timeout');
+          console.log('Instagram embed not loaded yet after initial check, will retry processing');
+          
+          // Try processing again
+          if (window.instgrm) {
+            try {
+              window.instgrm?.Embeds.process();
+            } catch (error) {
+              console.warn('Error during quick check retry:', error);
+            }
+          }
+        }
+      }
+    }, 2000);
+    
+    // Final timeout check - more lenient timeout of 8 seconds
+    const finalTimer = setTimeout(() => {
+      if (!isLoaded) {
+        const embedPlaceholder = containerRef.current?.querySelector('.instagram-media');
+        const embedLoaded = containerRef.current?.querySelector('.instagram-media-rendered');
+        
+        if (!embedLoaded && embedPlaceholder) {
+          console.warn('Instagram embed failed to load within final timeout');
           setHasError(true);
         }
       }
-    }, 5000);
+    }, 8000);
     
     // Cleanup
     return () => {
       window.removeEventListener('error', handleError);
-      clearTimeout(timer);
+      clearTimeout(quickCheckTimer);
+      clearTimeout(finalTimer);
     };
   }, [isLoaded]);
 
   // Generate the embed code with the correct username
   const generateEmbed = () => {
-    const permalinkUrl = `https://www.instagram.com/${username}/?utm_source=ig_embed&utm_campaign=loading`;
+    // Instagram requires a post URL for newer API versions, but we can use a profile URL with a specific format
+    // Adding a captioned=false parameter to avoid the "route config was null" error
+    const permalinkUrl = `https://www.instagram.com/${username}/?utm_source=ig_embed&utm_campaign=loading&captioned=false`;
+    
+    const mediaClassName = `${styles.instagramMedia} ${isDark ? styles.instagramMediaDark : styles.instagramMediaLight}`;
     
     return (
       <blockquote 
-        className="instagram-media" 
+        className={`instagram-media ${mediaClassName}`}
         data-instgrm-permalink={permalinkUrl}
         data-instgrm-version="14" 
-        style={{ 
-          background: isDark ? '#121212' : '#FFF', 
-          border: 0, 
-          borderRadius: '3px', 
-          boxShadow: isDark 
-            ? '0 0 1px 0 rgba(255,255,255,0.5),0 1px 10px 0 rgba(255,255,255,0.15)' 
-            : '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)', 
-          margin: '1px', 
-          maxWidth: '100%', 
-          minWidth: 'auto', 
-          padding: 0, 
-          width: 'calc(100% - 2px)' 
-        }}
+        data-instgrm-captioned={false}
       >
-        <div style={{ padding: '16px' }}>
+        <div className={styles.contentPadding}>
           <a 
             href={permalinkUrl}
-            style={{ 
-              background: isDark ? '#121212' : '#FFFFFF', 
-              lineHeight: 0, 
-              padding: '0 0', 
-              textAlign: 'center', 
-              textDecoration: 'none', 
-              width: '100%' 
-            }} 
+            className={`${styles.profileLink} ${isDark ? styles.profileLinkDark : styles.profileLinkLight}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-              <div style={{ backgroundColor: isDark ? '#333' : '#F4F4F4', borderRadius: '50%', flexGrow: 0, height: '40px', marginRight: '14px', width: '40px' }}></div>
-              <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center' }}>
-                <div style={{ backgroundColor: isDark ? '#333' : '#F4F4F4', borderRadius: '4px', flexGrow: 0, height: '14px', marginBottom: '6px', width: '100px' }}></div>
-                <div style={{ backgroundColor: isDark ? '#333' : '#F4F4F4', borderRadius: '4px', flexGrow: 0, height: '14px', width: '60px' }}></div>
+            <div className={styles.profileContainer}>
+              <div className={`${styles.profileImagePlaceholder} ${isDark ? styles.profileImagePlaceholderDark : styles.profileImagePlaceholderLight}`}></div>
+              <div className={styles.profileInfo}>
+                <div className={`${styles.profileInfoBar} ${isDark ? styles.profileInfoBarDark : styles.profileInfoBarLight}`}></div>
+                <div className={`${styles.profileInfoBarSmall} ${isDark ? styles.profileInfoBarDark : styles.profileInfoBarLight}`}></div>
               </div>
             </div>
-            <div style={{ padding: '19% 0' }}></div>
-            <div style={{ display: 'block', height: '50px', margin: '0 auto 12px', width: '50px' }}>
+            <div className={styles.paddingVertical}></div>
+            <div className={styles.logoContainer}>
               <svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlnsXlink="https://www.w3.org/1999/xlink">
                 <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
                   <g transform="translate(-511.000000, -20.000000)" fill={isDark ? "#FFFFFF" : "#000000"}>
@@ -173,126 +276,37 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
                 </g>
               </svg>
             </div>
-            <div style={{ paddingTop: '8px' }}>
-              <div style={{ 
-                color: isDark ? '#CCCCCC' : '#3897f0', 
-                fontFamily: 'Arial,sans-serif', 
-                fontSize: '14px', 
-                fontStyle: 'normal', 
-                fontWeight: 550, 
-                lineHeight: '18px' 
-              }}>
+            <div className={styles.paddingTop}>
+              <div className={`${styles.viewProfileText} ${isDark ? styles.viewProfileTextDark : styles.viewProfileTextLight}`}>
                 View this profile on Instagram
               </div>
             </div>
-            <div style={{ padding: '12.5% 0' }}></div>
-            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '14px', alignItems: 'center' }}>
-              <div style={{ position: 'relative' }}>
-                <div style={{ 
-                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
-                  borderRadius: '50%', 
-                  height: '12.5px', 
-                  width: '12.5px', 
-                  transform: 'translateX(0px) translateY(7px)' 
-                }}></div>
-                <div style={{ 
-                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
-                  height: '12.5px', 
-                  transform: 'rotate(-45deg) translateX(3px) translateY(1px)', 
-                  width: '12.5px', 
-                  flexGrow: 0, 
-                  marginRight: '14px', 
-                  marginLeft: '2px' 
-                }}></div>
-                <div style={{ 
-                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
-                  borderRadius: '50%', 
-                  height: '12.5px', 
-                  width: '12.5px', 
-                  transform: 'translateX(9px) translateY(-18px)' 
-                }}></div>
+            <div className={styles.paddingVerticalLarge}></div>
+            <div className={styles.iconRow}>
+              <div className={styles.iconContainer}>
+                <div className={`${styles.iconDot} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
+                <div className={`${styles.iconLine} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
+                <div className={`${styles.iconDotOffset} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
               </div>
-              <div style={{ marginLeft: '8px' }}>
-                <div style={{ 
-                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
-                  borderRadius: '50%', 
-                  flexGrow: 0, 
-                  height: '20px', 
-                  width: '20px' 
-                }}></div>
-                <div style={{ 
-                  width: 0, 
-                  height: 0, 
-                  borderTop: '2px solid transparent', 
-                  borderLeft: isDark ? '6px solid #333' : '6px solid #f4f4f4', 
-                  borderBottom: '2px solid transparent', 
-                  transform: 'translateX(16px) translateY(-4px) rotate(30deg)' 
-                }}></div>
+              <div className={styles.iconContainerRight}>
+                <div className={`${styles.iconCircle} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
+                <div className={`${styles.iconTriangle} ${isDark ? styles.iconTriangleDark : styles.iconTriangleLight}`}></div>
               </div>
-              <div style={{ marginLeft: 'auto' }}>
-                <div style={{ 
-                  width: 0, 
-                  borderTop: isDark ? '8px solid #333' : '8px solid #F4F4F4', 
-                  borderRight: '8px solid transparent', 
-                  transform: 'translateY(16px)' 
-                }}></div>
-                <div style={{ 
-                  backgroundColor: isDark ? '#333' : '#F4F4F4', 
-                  flexGrow: 0, 
-                  height: '12px', 
-                  width: '16px', 
-                  transform: 'translateY(-4px)' 
-                }}></div>
-                <div style={{ 
-                  width: 0, 
-                  height: 0, 
-                  borderTop: isDark ? '8px solid #333' : '8px solid #F4F4F4', 
-                  borderLeft: '8px solid transparent', 
-                  transform: 'translateY(-4px) translateX(8px)' 
-                }}></div>
+              <div className={styles.autoMargin}>
+                <div className={`${styles.iconTopTriangle} ${isDark ? styles.iconTopTriangleDark : styles.iconTopTriangleLight}`}></div>
+                <div className={`${styles.iconRect} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
+                <div className={`${styles.iconLeftTriangle} ${isDark ? styles.iconLeftTriangleDark : styles.iconLeftTriangleLight}`}></div>
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center', marginBottom: '24px' }}>
-              <div style={{ 
-                backgroundColor: isDark ? '#333' : '#F4F4F4', 
-                borderRadius: '4px', 
-                flexGrow: 0, 
-                height: '14px', 
-                marginBottom: '6px', 
-                width: '224px' 
-              }}></div>
-              <div style={{ 
-                backgroundColor: isDark ? '#333' : '#F4F4F4', 
-                borderRadius: '4px', 
-                flexGrow: 0, 
-                height: '14px', 
-                width: '144px' 
-              }}></div>
+            <div className={styles.captionContainer}>
+              <div className={`${styles.captionLine} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
+              <div className={`${styles.captionLineSmall} ${isDark ? styles.iconDark : styles.iconLight}`}></div>
             </div>
           </a>
-          <p style={{ 
-            color: '#c9c8cd', 
-            fontFamily: 'Arial,sans-serif', 
-            fontSize: '14px', 
-            lineHeight: '17px', 
-            marginBottom: 0, 
-            marginTop: '8px', 
-            overflow: 'hidden', 
-            padding: '8px 0 7px', 
-            textAlign: 'center', 
-            textOverflow: 'ellipsis', 
-            whiteSpace: 'nowrap' 
-          }}>
+          <p className={styles.footerText}>
             <a 
               href={permalinkUrl}
-              style={{ 
-                color: '#c9c8cd', 
-                fontFamily: 'Arial,sans-serif', 
-                fontSize: '14px', 
-                fontStyle: 'normal', 
-                fontWeight: 'normal', 
-                lineHeight: '17px' 
-              }} 
+              className={styles.footerLink}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -300,14 +314,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
             </a> (@
             <a 
               href={permalinkUrl}
-              style={{ 
-                color: '#c9c8cd', 
-                fontFamily: 'Arial,sans-serif', 
-                fontSize: '14px', 
-                fontStyle: 'normal', 
-                fontWeight: 'normal', 
-                lineHeight: '17px' 
-              }} 
+              className={styles.footerLink}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -363,11 +370,36 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
       ref={containerRef} 
       className={`instagram-embed ${className} max-w-[540px] sm:max-w-[440px] md:max-w-[540px] overflow-hidden mx-auto w-full`}
     >
-      <div className="instagram-wrapper w-full h-auto aspect-auto">
+      {/* Direct fallback button for users to view on Instagram if embed is frustrating */}
+      <div className="w-full text-center mb-2">
+        <a 
+          href={`https://www.instagram.com/${username}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ${isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} transition-colors`}
+        >
+          <Instagram className="h-3 w-3" />
+          <span>View on Instagram</span>
+        </a>
+      </div>
+
+      <div className="instagram-wrapper w-full h-auto aspect-auto relative">
+        {/* The actual Instagram embed */}
         {generateEmbed()}
+        
+        {/* Invisible overlay to catch and handle Instagram embed errors */}
+        <div 
+          className="absolute inset-0 z-10 pointer-events-none opacity-0" 
+          onClick={(e) => {
+            e.preventDefault();
+            window.open(`https://www.instagram.com/${username}/`, '_blank');
+          }}
+        />
+        
+        {/* Fallback for users with JavaScript disabled */}
         <noscript>
           <iframe 
-            src={`https://www.instagram.com/${username}/embed`}
+            src={`https://www.instagram.com/${username}/embed?captioned=false`}
             width="100%" 
             height="100%" 
             frameBorder="0" 
@@ -377,6 +409,13 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({
           ></iframe>
         </noscript>
       </div>
+      
+      {/* Loading indicator that disappears once loaded */}
+      {!isLoaded && (
+        <div className="w-full pt-2 text-center animate-pulse">
+          <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Loading feed...</span>
+        </div>
+      )}
     </div>
   );
 };

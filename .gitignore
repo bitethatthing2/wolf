@@ -46,3 +46,6 @@ next-env.d.ts
 # Firebase service keys
 src/lib/firebase/service-account.json
 src/lib/firebase/service-key.json
+
+# Ignore script backups
+scripts/backup/

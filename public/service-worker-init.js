@@ -1,6 +1,7 @@
 /**
  * Service Worker Initialization
  * This script helps ensure proper service worker registration and handling
+ * Updated for compatibility with Next.js 15.x
  */
 
 // Register the service worker
@@ -12,8 +13,30 @@ if ('serviceWorker' in navigator) {
       console.log('Navigation Preload is supported in this browser');
     }
 
-    navigator.serviceWorker.register('/sw.js', {
-      scope: '/'
+    // First, check if we already have a service worker
+    navigator.serviceWorker.getRegistration().then(existingReg => {
+      if (existingReg && existingReg.active) {
+        console.log('Service Worker already registered with scope:', existingReg.scope);
+        
+        // Send configurations to the existing service worker
+        try {
+          if (window.firebaseConfig) {
+            existingReg.active.postMessage({
+              type: 'CONFIG_FIREBASE',
+              config: window.firebaseConfig
+            });
+          }
+        } catch (error) {
+          console.warn('Error sending config to existing service worker:', error);
+        }
+        
+        return existingReg;
+      } else {
+        // If not registered yet, register it
+        return navigator.serviceWorker.register('/sw.js', {
+          scope: '/'
+        });
+      }
     })
       .then(function(registration) {
         console.log('Service Worker registered with scope:', registration.scope);
@@ -24,6 +47,18 @@ if ('serviceWorker' in navigator) {
             type: 'IMPORT_SCRIPTS',
             scripts: ['/service-worker-fix.js']
           });
+          
+          // Also send Firebase config if available
+          try {
+            if (window.firebaseConfig) {
+              registration.active.postMessage({
+                type: 'CONFIG_FIREBASE',
+                config: window.firebaseConfig
+              });
+            }
+          } catch (error) {
+            console.warn('Error sending config to service worker:', error);
+          }
         }
         
         // Check for updates
