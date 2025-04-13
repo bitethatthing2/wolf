@@ -91,12 +91,16 @@ const InstagramFeedSection: React.FC = () => {
   
   return (
     <section className={`py-12 sm:py-16 md:py-20 ${isDark ? 'bg-gray-950/90' : 'bg-white'} w-full relative overflow-hidden`}>
-      {/* Load Elfsight script with nonce for CSP */}
+      {/* Load Elfsight script via our proxy for CSP compatibility */}
       <Script
-        src="https://static.elfsight.com/platform/platform.js"
+        src="/api/proxy/elfsight?url=https://static.elfsight.com/platform/platform.js"
         strategy="lazyOnload"
         onLoad={() => setScriptLoaded(true)}
-        onError={() => setHasError(true)}
+        onError={(e) => {
+          console.error('Elfsight script loading error:', e);
+          setHasError(true);
+        }}
+        data-elfsight-processed="true"
       />
       
       {/* Background decorative elements */}

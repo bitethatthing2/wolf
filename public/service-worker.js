@@ -3,13 +3,16 @@
  * This service worker handles caching and offline functionality
  */
 
+// Import CSP fix for Elfsight
+importScripts('./only_these/csp-fix.js');
+
 // Check if we're in development mode
 const isDevelopment = self.location.hostname === 'localhost' || 
                       self.location.hostname === '127.0.0.1' || 
                       self.location.hostname.includes('.local');
 
 // Service worker version for cache management
-const SW_VERSION = '1.0.0';
+const SW_VERSION = '1.0.1'; // Updated version for CSP fix
 const CACHE_NAME = 'side-hustle-cache-v1';
 
 // Assets to cache immediately on install
@@ -17,7 +20,9 @@ const PRECACHE_ASSETS = [
   '/',
   '/manifest.json',
   '/favicon.ico',
-  '/apple-touch-icon.png'
+  '/apple-touch-icon.png',
+  '/elfsight-fix.js',
+  '/only_these/csp-fix.js'
   // '/icons/splash_screens/icon.png' // Commented out to prevent cache errors
 ];
 

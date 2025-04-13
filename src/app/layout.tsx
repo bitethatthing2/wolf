@@ -87,10 +87,18 @@ export default function RootLayout({
         <meta name="color-scheme" content="dark light" />
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-navbutton-color" content="#000000" />
-        <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.instagram.com https://*.google.com https://api.instagram.com https://*.googleapis.com; img-src 'self' https://*.instagram.com https://*.cdninstagram.com https://*.google.com https://*.googleapis.com https://*.gstatic.com https://lh3.googleusercontent.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.instagram.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.gstatic.com https://www.instagram.com; frame-src 'self' https://*.google.com https://*.youtube.com https://*.instagram.com https://www.instagram.com https://maps.google.com; font-src 'self' https://fonts.gstatic.com data:;" />
+        {/* <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.elfsight.com https://static.elfsight.com https://*.elfsightcdn.com https://*.instagram.com https://*.google.com https://api.instagram.com https://*.googleapis.com; img-src 'self' https://*.elfsight.com https://*.elfsightcdn.com https://*.instagram.com https://*.cdninstagram.com https://*.google.com https://*.googleapis.com https://*.gstatic.com https://lh3.googleusercontent.com data:; style-src 'self' 'unsafe-inline' https://*.elfsight.com https://fonts.googleapis.com https://www.instagram.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.elfsight.com https://static.elfsight.com https://*.google.com https://*.gstatic.com https://www.instagram.com; frame-src 'self' https://*.google.com https://*.youtube.com https://*.instagram.com https://www.instagram.com https://maps.google.com; font-src 'self' https://fonts.gstatic.com data:;" /> */}
+        {/* Temporarily disabling CSP for debugging - will be added back with proper configuration */}
         
         {/* Manifest */}
         <link rel="manifest" href="/manifest.json" />
+        
+        {/* Pre-CSP Check - Run this before anything else to detect CSP issues */}
+        <Script 
+          src="/only_these/pre-csp-check.js"
+          strategy="beforeInteractive"
+          id="pre-csp-check"
+        />
         
         {/* Service Worker Registration */}
         <Script 

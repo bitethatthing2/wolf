@@ -50,12 +50,25 @@ if ('serviceWorker' in navigator) {
           
           // Also send Firebase config if available
           try {
+            // Send Firebase config if available
             if (window.firebaseConfig) {
               registration.active.postMessage({
                 type: 'CONFIG_FIREBASE',
                 config: window.firebaseConfig
               });
             }
+            
+            // Send information about Elfsight to the service worker
+            registration.active.postMessage({
+              type: 'ELFSIGHT_DOMAINS',
+              domains: [
+                'elfsight.com',
+                'static.elfsight.com',
+                'apps.elfsight.com',
+                'service.elfsight.com',
+                'elfsightcdn.com'
+              ]
+            });
           } catch (error) {
             console.warn('Error sending config to service worker:', error);
           }

@@ -101,7 +101,32 @@ export default function ClientScripts() {
         src="/direct-animation-fix.js"
       />
       
-      {/* 3rd party integration scripts removed - we now use direct Instagram embed */}
+      {/* 3rd party integration scripts */}
+      <Script
+        id="elfsight-fix"
+        strategy="beforeInteractive"
+        src="/elfsight-fix.js"
+        onError={(e) => {
+          console.error('Elfsight script error:', e);
+          sessionStorage.setItem('elfsightScriptError', JSON.stringify({
+            time: new Date().toISOString(),
+            error: e.type
+          }));
+        }}
+      />
+      
+      <Script
+        id="elfsight-platform-fix"
+        strategy="beforeInteractive"
+        src="/elfsight-platform-fix.js"
+        onError={(e) => {
+          console.error('Elfsight platform fix error:', e);
+          sessionStorage.setItem('elfsightPlatformError', JSON.stringify({
+            time: new Date().toISOString(),
+            error: e.type
+          }));
+        }}
+      />
       
       {/* Environment configuration script that loads before anything else */}
       <Script 
