@@ -210,7 +210,7 @@ export function NotificationTester({ className, adminMode = false }: Notificatio
         try {
           const localNotification = new Notification(title, {
             body: message,
-            icon: '/wolf-icon-white.png',
+            icon: '/logo-main-dark.png',
             tag: 'test-notification',
             data: { url: link, source: 'tester' }
           });

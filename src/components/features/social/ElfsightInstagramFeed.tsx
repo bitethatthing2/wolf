@@ -73,7 +73,11 @@ const InstagramErrorFallback = () => {
   );
 };
 
-const ElfsightInstagramFeed: React.FC = () => {
+/**
+ * InstagramFeedSection - Component for displaying the Instagram feed using our custom implementation
+ * This uses the direct Instagram embed approach rather than Elfsight widgets
+ */
+const InstagramFeedSection: React.FC = () => {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -166,15 +170,9 @@ const ElfsightInstagramFeed: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        <div className="mt-6 sm:mt-8 md:mt-10 text-center">
-          <p className={`text-xs sm:text-sm ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-            Stay updated on events, specials, and vibes.
-          </p>
-        </div>
       </div>
     </section>
   );
 };
 
-export default ElfsightInstagramFeed;
+export default InstagramFeedSection;

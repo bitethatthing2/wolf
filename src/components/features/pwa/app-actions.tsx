@@ -152,7 +152,7 @@ export function AppActions() {
           setTimeout(() => {
             new Notification("Welcome to Side Hustle Bar!", {
               body: "Thanks for enabling notifications. You'll now receive updates about events and promotions.",
-              icon: "/wolf-icon-white.png"
+              icon: "/logo-main-dark.png"
             });
           }, 2000);
         } else {

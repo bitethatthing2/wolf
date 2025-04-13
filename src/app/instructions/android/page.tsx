@@ -35,7 +35,7 @@ export default function AndroidInstructionsPage() {
                 </div>
                 <div className="relative w-full sm:w-1/2 h-auto rounded-lg overflow-hidden border border-white/10 shadow-lg">
                   <Image 
-                    src="/android_installation_guide-black.png" 
+                    src="/app-install-android-light.png" 
                     alt="Android Installation Banner" 
                     width={300} 
                     height={600}
@@ -127,7 +127,7 @@ export default function AndroidInstructionsPage() {
                 <div className="relative w-full sm:w-1/2 h-auto rounded-lg overflow-hidden border border-white/10 shadow-lg flex justify-center items-center p-4 bg-gray-900">
                   <div className="w-16 h-16 rounded-xl flex items-center justify-center bg-gradient-to-br from-bar-accent to-bar-accent/70">
                     <Image 
-                      src="/wolf-icon-white.png" 
+                      src="/logo-main-dark.png" 
                       alt="App Icon" 
                       width={40} 
                       height={40}

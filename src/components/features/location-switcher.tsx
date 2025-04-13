@@ -27,9 +27,9 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
   
   let currentImage: string;
   if (selectedLocation === 'portland') {
-    currentImage = '/wolf-light-white.png';
+    currentImage = '/logo-footer-dark.png';
   } else {
-    currentImage = isDarkMode ? '/wolf-light-white.png' : '/wolf-icon-black.png';
+    currentImage = isDarkMode ? '/logo-footer-dark.png' : '/logo-main-light.png';
   }
   
   // Function to toggle location AND theme
@@ -123,7 +123,7 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
             >
               {/* Using menu icons instead of wolf icons */}
               <Image
-                src={selectedLocation === 'portland' ? '/main-menu-icon-black.png' : '/main-menu-icon-white copy.png'}
+                src={selectedLocation === 'portland' ? '/nav-menu-light.png' : '/main-menu-icon-white copy.png'}
                 alt="Location Toggle Icon"
                 // Increased size
                 width={28} 

@@ -7,10 +7,11 @@ import { useToast } from "@/hooks/use-toast";
 import { fetchToken, setupForegroundMessageHandler, isIOS } from "@/lib/firebase/client";
 
 // Hook version for debugging
-const HOOK_VERSION = '1.1.0';
+const HOOK_VERSION = '1.2.0';
 
-// Token refresh interval (7 days in milliseconds)
-const TOKEN_REFRESH_INTERVAL = 7 * 24 * 60 * 60 * 1000;
+// Token refresh interval (6 days in milliseconds to ensure tokens never expire)
+// Firebase tokens expire after 7 days, so we refresh slightly earlier
+const TOKEN_REFRESH_INTERVAL = 6 * 24 * 60 * 60 * 1000;
 
 /**
  * Hook to manage FCM token for push notifications

@@ -331,10 +331,48 @@ export async function registerForPushNotifications(swRegistration: ServiceWorker
     }
 
     // Get FCM token
+    console.log('Fetching FCM token with service worker registration...');
     const token = await fetchToken(swRegistration);
     if (!token) {
       console.error('Failed to get FCM token');
       return null;
+    }
+    
+    // Show a welcome notification for new registrations
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        console.log('Showing welcome notification...');
+        
+        // Get user agent info to customize welcome message
+        const userAgent = navigator.userAgent;
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+        const isAndroid = /Android/.test(userAgent);
+        
+        // Custom welcome message based on platform
+        let welcomeMessage = 'You\'ll now receive updates about our latest events and specials.';
+        if (isIOS) {
+          welcomeMessage = 'Thanks for enabling notifications on your iOS device!';
+        } else if (isAndroid) {
+          welcomeMessage = 'Thanks for joining the Side Hustle pack! You\'ll get updates on events and specials.';
+        }
+        
+        // Show welcome notification with appropriate icon
+        const iconPath = isAndroid 
+          ? '/only_these/android/notification-icon-android.png'
+          : '/only_these/ios/notification-icon-ios.png';
+          
+        setTimeout(() => {
+          new Notification('Welcome to Side Hustle Bar!', {
+            body: welcomeMessage,
+            icon: iconPath,
+            badge: '/only_these/notification-badge.png',
+            tag: 'welcome-notification',
+            silent: isIOS
+          });
+        }, 1500);
+      } catch (error) {
+        console.error('Error showing welcome notification:', error);
+      }
     }
 
     // Save subscription to Supabase

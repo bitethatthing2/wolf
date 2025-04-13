@@ -218,13 +218,28 @@ export const useFcmNotifications = () => {
         if (!hasShownWelcome && 'Notification' in window) {
           localStorage.setItem('sidehustle_welcome_shown', 'true');
           
+          // Get user agent info to customize welcome message
+          const userAgent = navigator.userAgent;
+          const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+          const isAndroid = /Android/.test(userAgent);
+          
+          // Custom welcome message based on platform
+          let welcomeMessage = 'You\'ll now receive updates about our latest events and specials.';
+          if (isIOS) {
+            welcomeMessage = 'Thanks for enabling notifications on your iOS device!';
+          } else if (isAndroid) {
+            welcomeMessage = 'Thanks for joining the Side Hustle pack! You\'ll get updates on events and specials.';
+          }
+          
           // Small delay to not overwhelm the user
           setTimeout(() => {
             try {
               new Notification('Welcome to Side Hustle Bar!', {
-                body: 'You\'ll now receive updates about our latest events and specials.',
-                icon: '/wolf-icon-white.png',
-                silent: false
+                body: welcomeMessage,
+                icon: '/logo-main-dark.png',
+                badge: '/icons/splash_screens/icon.png',
+                silent: false,
+                tag: 'welcome-notification'
               });
             } catch (error) {
               console.error('Error showing welcome notification:', error);

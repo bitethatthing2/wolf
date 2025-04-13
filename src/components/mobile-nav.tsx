@@ -50,7 +50,7 @@ export function MobileNav() {
               <Image
                 key={resolvedTheme} // Add key for potential theme transitions
                 // Use white icon copy on white BG (dark mode), black icon on black BG (light mode)
-                src={resolvedTheme === 'dark' ? '/main-menu-icon-white copy.png' : '/main-menu-icon-black.png'}
+                src={resolvedTheme === 'dark' ? '/main-menu-icon-white copy.png' : '/nav-menu-light.png'}
                 alt="Menu"
                 // Increased size
                 width={32} // Logical base width

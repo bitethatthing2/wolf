@@ -16,8 +16,8 @@ export function SiteHeader() {
   }, [])
 
   const logoSrc = resolvedTheme === 'dark' 
-    ? '/nav-bar-sidehustle-dark.png' 
-    : '/nav-bar-sidehustle-white.png'
+    ? '/nav-header-light.png' 
+    : '/nav-header-dark.png'
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">

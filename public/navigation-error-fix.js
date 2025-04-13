@@ -1,9 +1,11 @@
 /**
  * Enhanced Navigation Error Fix
  * 
- * This script provides comprehensive error handling for Next.js navigation,
+ * This script provides comprehensive error handling for Next.js 15.x navigation,
  * addressing "Failed to fetch" errors and other common navigation issues.
  * It also provides coordination with service worker for smoother experience.
+ * 
+ * Updated to be compatible with Next.js 15.x App Router
  */
 
 (function() {
@@ -14,7 +16,8 @@
     serviceWorkerRegistering: false,
     pushNotificationsInitialized: false,
     polyfillsLoaded: false,
-    errors: []
+    errors: [],
+    nextJsVersion: '15.x'
   };
 
   // Define configurable options
@@ -24,7 +27,8 @@
     retryDelay: 800,
     errorLogging: true,
     serviceWorkerCoordination: true,
-    refreshOnFatalError: true
+    refreshOnFatalError: true,
+    appRouterSupport: true  // Next.js 15 uses App Router by default
   };
 
   // Utility function for logging

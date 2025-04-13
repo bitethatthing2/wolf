@@ -11,7 +11,8 @@ import { useLocation } from "@/contexts/LocationContext";
 import PortlandMap from "@/components/features/locations/PortlandMap"; 
 import SalemMap from "@/components/features/locations/SalemMap";     
 import LocationDirectionButtons from "@/components/features/locations/LocationDirectionButtons"; 
-import ElfsightInstagramFeed from '@/components/features/social/ElfsightInstagramFeed';
+import InstagramFeedSection from '@/components/features/social/InstagramFeedSection';
+import ReservationSection from '@/components/features/social/ReservationSection';
 import GoogleReviewsSection from '@/components/features/social/GoogleReviewsSection';
 import AppInstallFlow from '@/components/features/install/AppInstallFlow';
 
@@ -59,7 +60,7 @@ export default function HomePage() {
               className="rounded-full bg-black dark:bg-white p-1"
             >
               <Image 
-                src="/wolf_girl.png" 
+                src="/homepage-chef-icon.png" 
                 alt="Wolf icon" 
                 width={24} 
                 height={24} 
@@ -80,7 +81,7 @@ export default function HomePage() {
               className="rounded-full bg-black dark:bg-white p-1"
             >
               <Image 
-                src="/wolf_girl.png" 
+                src="/homepage-chef-icon.png" 
                 alt="Wolf icon" 
                 width={24} 
                 height={24} 
@@ -142,7 +143,9 @@ export default function HomePage() {
         )}
       </div>
 
-      <ElfsightInstagramFeed />
+      <InstagramFeedSection />
+      
+      <ReservationSection />
       
       <GoogleReviewsSection />
     </main>

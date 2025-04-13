@@ -34,7 +34,7 @@ export default function IOSInstructionsPage() {
                   </div>
                   <div className="relative w-full sm:w-1/2 h-auto rounded-lg overflow-hidden border border-white/10 shadow-lg">
                     <Image 
-                      src="/instructions/share-ios.png" 
+                      src="/instructions/ios-share-button.png" 
                       alt="iOS Safari Share Button" 
                       width={500} 
                       height={300}
@@ -58,7 +58,7 @@ export default function IOSInstructionsPage() {
                   </div>
                   <div className="relative w-full sm:w-1/2 h-auto rounded-lg overflow-hidden border border-white/10 shadow-lg">
                     <Image 
-                      src="/instructions/ios-add-homescreen.png" 
+                      src="/instructions/ios-add-homescreen-screenshot.png" 
                       alt="iOS Add to Home Screen Option" 
                       width={500} 
                       height={300}

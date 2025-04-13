@@ -49,26 +49,32 @@ const AppInstallFlow = () => {
       const isLocalhost = window.location.hostname === 'localhost' || 
                           window.location.hostname === '127.0.0.1';
       
-      // Only register in production (HTTPS) or if explicitly enabled in development
-      if (window.location.protocol === 'https:' || 
-          isLocalhost || 
-          process.env.NODE_ENV === 'production') {
-        
-        navigator.serviceWorker.register('/sw.js', { scope: '/' })
-          .then(registration => {
-            console.log('Service Worker registered successfully with scope:', registration.scope);
-          })
-          .catch(error => {
-            console.error('Service Worker registration failed:', error);
-            
-            // Log more detailed error for localhost issues
-            if (isLocalhost) {
-              console.info('Note: For local development, you can:\n1. Use HTTPS with a local certificate\n2. Test in production\n3. Use Chrome with --unsafely-treat-insecure-origin-as-secure flag');
+      // Always register service worker regardless of environment
+      // This ensures Push Notifications work in all environments
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(registration => {
+          console.log('Service Worker registered successfully with scope:', registration.scope);
+          
+          // Send Firebase config to service worker if available
+          try {
+            if (registration.active && (window as any).firebaseConfig) {
+              registration.active.postMessage({
+                type: 'CONFIG_FIREBASE',
+                config: (window as any).firebaseConfig
+              });
             }
-          });
-      } else {
-        console.log('Service Worker registration skipped - requires HTTPS except on localhost');
-      }
+          } catch (configError) {
+            console.warn('Could not send config to service worker:', configError);
+          }
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+          
+          // Log more detailed error for localhost issues
+          if (isLocalhost) {
+            console.info('Note: For local development, you can:\n1. Use HTTPS with a local certificate\n2. Test in production\n3. Use Chrome with --unsafely-treat-insecure-origin-as-secure flag');
+          }
+        });
     }
     
     return () => {
@@ -118,9 +124,9 @@ const AppInstallFlow = () => {
   // Get the appropriate installation icon based on device type and theme
   const getInstallIcon = () => {
     if (deviceType === "ios") {
-      return isDarkTheme ? "/apple_icon_install_white.png" : "/ios_pwa_install-black.png";
+      return isDarkTheme ? "/app-install-ios-dark.png" : "/app-install-ios-light.png";
     } else if (deviceType === "android") {
-      return isDarkTheme ? "/android-installation-guide-white.png.png" : "/android_installation_guide-black.png";
+      return isDarkTheme ? "/app-install-android-dark.png" : "/app-install-android-light.png";
     } 
     return ""; // Default empty for desktop (will use Lucide icon)
   };

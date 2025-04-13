@@ -114,7 +114,7 @@ export default function DynamicFooter() {
             <div className="mb-6 relative">
               <div className="flex items-center justify-center">
                 <Image 
-                  src={isDark ? '/wolf-icon-white.png' : '/wolf-icon-black.png'}
+                  src={isDark ? '/logo-main-dark.png' : '/logo-main-light.png'}
                   alt="Side Hustle Bar Wolf Logo"
                   width={80}
                   height={80}

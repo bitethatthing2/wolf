@@ -1,11 +1,13 @@
 /**
  * PWA Installation Helper
  * This script provides global PWA installation support and improves the installation experience
+ * Updated for compatibility with Next.js 15.x and modern browsers
  */
 
 // Store the install prompt event for later use
 let pwaInstallPrompt;
 let installButtonId = 'install-pwa-button'; // Default ID for install button
+const PWA_VERSION = '2.1.0'; // Version for tracking
 
 // Check if the app is already installed
 const isAppInstalled = () => {

@@ -42,6 +42,104 @@ You can find detailed documentation for key systems in the `/docs/` folder:
 
 ## Memories
 
+### April 12, 2025: Instagram Embedding Improvements
+
+#### Instagram API Integration Fixes
+- Fixed "route config was null" error by adding `captioned=false` parameter to embed URLs
+- Implemented comprehensive error detection and recovery for Instagram embed issues
+- Added multiple fallback mechanisms and retry logic for reliable embedding
+- Enhanced user experience with direct Instagram links as backup options
+- Improved script loading with better CORS support and timing adjustments
+- Added progressive timeout system with increasing durations for better reliability
+
+### April 12, 2025: Component Cleanup and Organization
+
+#### Instagram Component Simplification
+- Removed unused and redundant components related to Instagram embedding
+- Consolidated the implementation to use `InstagramFeedSection` and `InstagramEmbed` only
+- Removed dependency on `next-elfsight-widget` package
+- Created documentation in `/docs/cleanup-instructions.md`
+- Added utility script for component cleanup (`scripts/cleanup-unused-components.sh`)
+- Updated all references to use the simplified component structure
+- Fixed import paths in locations page
+
+### April 12, 2025: Image and Icon Usage Mapping
+
+#### Comprehensive Image Organization
+- Created a complete mapping of all images and their usage locations in `/docs/image-usage-map.md`
+- Established a consistent naming convention for images (`[location]-[purpose]-[theme?].[extension]`)
+- Developed utility scripts for image analysis and renaming (`scripts/analyze-icon-usage.js` and `scripts/rename-images.js`)
+- Categorized images by function (app icons, UI elements, food photos, etc.)
+- Documented all notification icons in the `/only_these/` directory
+- Created a plan for systematic image renaming with backward compatibility
+
+#### Image Usage Patterns
+- Identified all components that reference images and their usage patterns
+- Mapped menu item images to their corresponding components
+- Documented theme-dependent image switching (light/dark mode variations)
+- Analyzed splash screen organization for iOS and Android devices
+- Documented image organization for delivery service icons
+- Mapped blog and event image usage
+
+### April 12, 2025: Project Structure Consolidation and Flow Analysis
+
+#### Component Structure Improvements
+- Renamed components to better reflect their actual functionality (ElfsightInstagramFeed → InstagramFeedSection)
+- Analyzed Instagram implementation to understand the relationship between components
+- Created documentation for project structure and component flow in /docs/project-structure-analysis.md
+- Ensured proper interaction between Instagram, Reservation, and Review sections
+- Identified opportunities for component consolidation
+- Documented component relationships and dependencies for better maintainability
+
+#### Push Notification System Enhancements
+- Implemented platform-specific notification icons for Android and iOS
+- Enhanced deduplication system using IndexedDB for better persistence
+- Added content hash generation for duplicate notification prevention
+- Improved iOS vs Android detection for optimal notification display
+- Added platform-specific welcome notifications with tailored messaging
+- Fixed service worker registration and initialization
+- Implemented automatic token refresh on 6-day cycle (preventing token expiration)
+- Added special handling for foreground notifications on iOS devices
+
+### April 12, 2025: Reservation System Implementation
+
+#### Booking System Features
+- Added a comprehensive reservation system between Instagram and Google Reviews sections
+- Implemented three booking types: table reservations, catering requests, and birthday/event bookings
+- Created responsive form interfaces with input validation and theme compatibility
+- Used Framer Motion for smooth transitions between form types
+- Added contact information section for large group inquiries
+
+### April 12, 2025: Next.js 15 Update with Notification and PWA Enhancements
+
+#### Next.js 15 Compatibility
+- Updated project to use Next.js 15.2.4 with App Router support
+- Enhanced service worker registration for Next.js 15 compatibility
+- Improved error handling for modern Next.js navigation patterns
+- Maintained backward compatibility with existing notification system
+
+#### Push Notification System Enhancements
+- Fixed the token refresh mechanism to prevent expired tokens (6-day rotation cycle)
+- Improved deduplication by implementing content hashing and IndexedDB persistence
+- Added native iOS/Android tag support for better cross-platform notification handling
+- Implemented token rotation and cleanup for old/expired tokens
+- Enhanced the service worker's handling of push notifications
+- Added platform-specific welcome notifications
+
+#### Error Handling Improvements
+- Fixed "Failed to fetch" TypeErrors during navigation with retry logic
+- Resolved "missing required error components" error with proper polyfill initialization
+- Enhanced error boundaries to properly catch and display client-side errors
+- Added early script initialization for critical Next.js components
+- Consolidated error handlers in service worker and client components
+
+#### PWA Installation Improvements
+- Enhanced Android installation guide with visual indicators and clear steps
+- Improved iOS installation detection and instruction clarity
+- Added welcome notification for new installations
+- Created platform-specific installation prompts
+- Added service worker initialization improvements
+
 ### April 11, 2025: Notification System and Error Handling Improvements
 
 #### Push Notification System Enhancements

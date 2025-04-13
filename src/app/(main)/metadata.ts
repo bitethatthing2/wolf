@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     siteName: "Side Hustle Bar",
     images: [
       {
-        url: "/wolf-icon-black.png",
+        url: "/logo-main-light.png",
         width: 512,
         height: 512,
         alt: "Side Hustle Bar Logo",
@@ -23,6 +23,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Side Hustle Bar - Sports Bar, Restaurant, and Nightclub",
     description: "High-Energy Sports Bar, Restaurant, and Nightclub featuring Executive Chef Rebecca Sanchez. #1 Rated Mexican Food & Best Tacos in Town.",
-    images: ["/wolf-icon-black.png"],
+    images: ["/logo-main-light.png"],
   },
 };

@@ -1,18 +1,28 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Instagram } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Instagram, ExternalLink } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
 import dynamic from 'next/dynamic';
+import InstagramEmbed from './InstagramEmbed';
 
-// Dynamically import InstagramEmbed with no SSR and error handling
-const InstagramEmbed = dynamic(
-  () => import('@/components/features/social/InstagramEmbed').catch(err => {
-    console.error("Error loading InstagramEmbed component:", err);
-    return () => <InstagramErrorFallback />;
-  }),
-  { ssr: false, loading: () => <InstagramLoadingPlaceholder /> }
-);
+// Add type declaration for window.__ENV
+declare global {
+  interface Window {
+    __ENV?: {
+      INSTAGRAM_WIDGET_ID?: string;
+      [key: string]: string | undefined;
+    };
+  }
+}
+
+// Removed SideHustleInstagramFeed dynamic import - using direct implementation instead
+
+// Get the Instagram widget ID from environment variables or fallback to hardcoded value
+const INSTAGRAM_WIDGET_ID = 
+  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID) || 
+  (typeof window !== 'undefined' && window.__ENV?.INSTAGRAM_WIDGET_ID) || 
+  "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct Instagram feed widget ID
 
 // Loading placeholder component
 const InstagramLoadingPlaceholder = () => {
@@ -49,12 +59,17 @@ const InstagramErrorFallback = () => {
         rel="noopener noreferrer"
         className={`inline-flex items-center gap-2 px-4 py-2 rounded ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black'}`}
       >
-        View on Instagram
+        <span>View on Instagram</span>
+        <ExternalLink className="h-4 w-4" />
       </a>
     </div>
   );
 };
 
+/**
+ * InstagramFeedSection - Component for displaying the Instagram feed using our custom implementation
+ * This uses the direct Instagram embed approach rather than Elfsight widgets
+ */
 const InstagramFeedSection: React.FC = () => {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -69,9 +84,13 @@ const InstagramFeedSection: React.FC = () => {
       if (event.message && (
         event.message.includes('Instagram') || 
         event.message.includes('instgrm') || 
-        (event.filename && event.filename.includes('instagram.com'))
+        event.message.includes('elfsight') ||
+        (event.filename && (
+          event.filename.includes('instagram.com') ||
+          event.filename.includes('elfsight.com')
+        ))
       )) {
-        console.warn('Caught Instagram-related error:', event.message);
+        console.warn('Caught Instagram/Elfsight-related error:', event.message);
         setHasError(true);
         event.preventDefault();
         return true;
@@ -113,22 +132,54 @@ const InstagramFeedSection: React.FC = () => {
         </div>
         
         <div className={`w-full overflow-hidden rounded-xl ${isDark ? 'border border-white/10' : 'border border-black/10'} shadow-lg`}>
-          <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-lg`}>
-            {/* Instagram Embed with error fallback */}
-            <div className="min-h-[550px] pt-6 sm:pt-0 flex justify-center w-full overflow-x-auto"> 
+          <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-2 sm:p-6 md:p-8 rounded-lg`}>
+            {/* Use the direct Instagram embed component with improved responsive behavior */}
+            <div className="min-h-[550px] pt-2 sm:pt-0 flex justify-center w-full overflow-hidden">
               {hasError ? (
                 <InstagramErrorFallback />
               ) : (
-                <InstagramEmbed className="w-full max-w-xl mx-auto flex-shrink-0" />
+                <div className="w-full max-w-full mx-auto">
+                  {/* Error boundary at the section level */}
+                  <div className="instagram-responsive-wrapper relative w-full overflow-hidden">
+                    <InstagramEmbed 
+                      username="sidehustle_bar"
+                      className="w-full max-w-full mx-auto px-0 sm:px-4 scale-100 sm:scale-100 transform-gpu"
+                    />
+                    
+                    {/* Direct "View our Instagram" link as a backup */}
+                    <div className="w-full text-center mt-4">
+                      <a 
+                        href="https://www.instagram.com/sidehustle_bar/" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm ${
+                          isDark 
+                            ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700' 
+                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200'
+                        } transition-colors`}
+                      >
+                        <Instagram className="h-4 w-4" />
+                        <span>Follow us on Instagram</span>
+                      </a>
+                    </div>
+                  </div>
+                  <style jsx>{`
+                    .instagram-responsive-wrapper {
+                      width: 100%;
+                      height: auto;
+                      min-height: 450px;
+                    }
+                    @media (max-width: 640px) {
+                      .instagram-responsive-wrapper iframe {
+                        width: 100% !important;
+                        transform-origin: left top;
+                      }
+                    }
+                  `}</style>
+                </div>
               )}
             </div>
           </div>
-        </div>
-        
-        <div className="mt-6 sm:mt-8 md:mt-10 text-center">
-          <p className={`text-xs sm:text-sm ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-            Stay updated on events, specials, and vibes.
-          </p>
         </div>
       </div>
     </section>

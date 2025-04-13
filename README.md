@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Side Hustle Bar Website
+
+This is a [Next.js 15.x](https://nextjs.org) project for the Side Hustle Bar website, featuring PWA support, push notifications, and offline capabilities.
 
 ## Getting Started
 
@@ -16,9 +18,22 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### PWA Support
+- The site can be installed as a Progressive Web App
+- Supports both iOS and Android installation flows
+- Provides offline access to critical content
+
+### Push Notifications
+- Firebase Cloud Messaging (FCM) for cross-platform notifications
+- Token rotation to prevent expiration (7-day refresh)
+- Platform-specific notification styles
+
+### Error Handling
+- Comprehensive error handling for network issues
+- Navigation error recovery with retry mechanisms
+- Error boundaries for graceful component failures
 
 ## Learn More
 

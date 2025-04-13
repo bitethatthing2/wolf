@@ -32,14 +32,14 @@ export default function OrderPage() {
                   <div className="relative h-full w-full">
                     {/* Light Mode Icon */}
                     <Image 
-                      src="/doordash_icon-light.png" 
+                      src="/delivery-doordash-light.png" 
                       alt="DoorDash Logo Light"
                       fill
                       className="object-contain dark:hidden" // Hide in dark mode
                     />
                     {/* Dark Mode Icon (Updated filename) */}
                     <Image 
-                      src="/darkdoordash_icon.png" 
+                      src="/delivery-doordash-dark.png" 
                       alt="DoorDash Logo Dark"
                       fill
                       className="object-contain hidden dark:block" // Show only in dark mode
@@ -63,14 +63,14 @@ export default function OrderPage() {
                   <div className="relative h-full w-full">
                     {/* Light Mode Icon */}
                     <Image 
-                      src="/postmates-black-icon.png" 
+                      src="/delivery-postmates-light.png" 
                       alt="Postmates Logo Light"
                       fill
                       className="object-contain dark:hidden" // Hide in dark mode
                     />
                     {/* Dark Mode Icon (Updated filename) */}
                     <Image 
-                      src="/postmates-icon-white.png" 
+                      src="/delivery-postmates-dark.png" 
                       alt="Postmates Logo Dark"
                       fill
                       className="object-contain hidden dark:block" // Show only in dark mode
@@ -95,14 +95,14 @@ export default function OrderPage() {
                   <div className="relative h-full w-full">
                     {/* Light Mode Icon */}
                     <Image 
-                      src="/uber eats.png" // Light theme icon
+                      src="/delivery-ubereats-light.png" // Light theme icon
                       alt="Uber Eats Logo Light"
                       fill
                       className="object-contain dark:hidden" // Hide in dark mode
                     />
                     {/* Dark Mode Icon */}
                     <Image 
-                      src="/uber_eats-dark.png" // Dark theme icon
+                      src="/delivery-ubereats-dark.png" // Dark theme icon
                       alt="Uber Eats Logo Dark"
                       fill
                       className="object-contain hidden dark:block" // Show only in dark mode

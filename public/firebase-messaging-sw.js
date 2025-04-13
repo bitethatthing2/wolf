@@ -15,7 +15,7 @@ self.addEventListener('activate', function(event) {
   event.waitUntil(self.clients.claim()); // Take control of all clients
 });
 
-// Load Firebase scripts dynamically
+// Load Firebase scripts dynamically - using the newer v9 compat version
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
@@ -54,7 +54,7 @@ function isValidImageUrl(url) {
 let processedNotifications = new Set();
 
 // Service worker version for debugging
-const SW_VERSION = '2.2.0';
+const SW_VERSION = '3.0.0';
 console.log(`[Firebase SW v${SW_VERSION}] Service Worker initializing...`);
 
 // Load processed notifications from IndexedDB to persist across service worker restarts
@@ -178,7 +178,7 @@ messaging.onBackgroundMessage((payload) => {
   }, 0);
   
   const notificationId = payload.messageId || payload.collapseKey || 
-                         `${contentHash}_${Date.now().toString()}`;
+                       `${contentHash}_${Date.now().toString()}`;
   
   // Skip if we've already processed this notification
   if (processedNotifications.has(notificationId)) {
@@ -197,7 +197,7 @@ messaging.onBackgroundMessage((payload) => {
   saveProcessedNotification(notificationId);
   console.log(`[SW v${SW_VERSION}] Added notification ${notificationId} to processed set. Total: ${processedNotifications.size}`);
   
-  // Check for duplicate content in recent notifications (last 5 minutes)
+  // Check for duplicate content in recent notifications
   if (payload.data?.deduplicationKey) {
     const deduplicationKey = payload.data.deduplicationKey;
     if (processedNotifications.has(deduplicationKey)) {
@@ -214,15 +214,15 @@ messaging.onBackgroundMessage((payload) => {
   const displayLink = payload.fcmOptions?.link || payload.data?.url || '/';
   const displayImage = payload.data?.image || payload.notification?.image;
   
-  // Use the correct icon paths
+  // Use the correct icon paths based on platform
   const notificationOptions = {
     body: displayBody,
     // Use Android notification drawer icon for Android and standard icon for others
     icon: isAndroid ? 
-      `${baseUrl}/drawable/android_notification_drawer.png` : 
-      `${baseUrl}/icons/splash_screens/icon.png`,
+      `${baseUrl}/only_these/android/notification-icon-android.png` : 
+      `${baseUrl}/only_these/ios/notification-icon-ios.png`,
     // Use larger badge icon for better visibility in status bar
-    badge: `${baseUrl}/icons/splash_screens/icon.png`,
+    badge: `${baseUrl}/only_these/notification-badge.png`,
     data: { 
       url: displayLink,
       ...payload.data,
@@ -240,7 +240,7 @@ messaging.onBackgroundMessage((payload) => {
       {
         action: 'open',
         title: 'View',
-        icon: `${baseUrl}/icons/splash_screens/icon.png`
+        icon: `${baseUrl}/only_these/notification-badge.png`
       }
     ]
   };
@@ -305,4 +305,15 @@ self.addEventListener('push', (event) => {
   console.log(`[SW v${SW_VERSION}] Push event received but letting Firebase handle it`);
   // Let Firebase's onBackgroundMessage handle it
   // This prevents the browser from showing its own notification
+});
+
+// Handle sync events for offline-stored notifications
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'process-pending-notifications') {
+    console.log(`[SW v${SW_VERSION}] Processing pending notifications via sync`);
+    event.waitUntil(
+      // Process any stored notifications here
+      Promise.resolve()
+    );
+  }
 });
