@@ -3,33 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Instagram, ExternalLink } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
-import dynamic from 'next/dynamic';
-import InstagramEmbed from './InstagramEmbed';
+import Script from 'next/script';
 
-// Add type declaration for window.__ENV
-declare global {
-  interface Window {
-    __ENV?: {
-      INSTAGRAM_WIDGET_ID?: string;
-      [key: string]: string | undefined;
-    };
-  }
-}
-
-// Dynamically import SideHustleInstagramFeed with no SSR
-const SideHustleInstagramFeed = dynamic(
-  () => import('@/components/features/SideHustleInstagramFeed').catch(err => {
-    console.error("Error loading SideHustleInstagramFeed component:", err);
-    return () => <InstagramErrorFallback />;
-  }),
-  { ssr: false, loading: () => <InstagramLoadingPlaceholder /> }
-);
-
-// Get the Instagram widget ID from environment variables or fallback to hardcoded value
-const INSTAGRAM_WIDGET_ID = 
-  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_INSTAGRAM_WIDGET_ID) || 
-  (typeof window !== 'undefined' && window.__ENV?.INSTAGRAM_WIDGET_ID) || 
-  "4118f1f5-d59f-496f-8439-e8e0232a0fef"; // Correct Instagram feed widget ID
+// Elfsight widget ID
+const ELFSIGHT_WIDGET_ID = "4118f1f5-d59f-496f-8439-e8e0232a0fef";
 
 // Loading placeholder component
 const InstagramLoadingPlaceholder = () => {
@@ -74,30 +51,25 @@ const InstagramErrorFallback = () => {
 };
 
 /**
- * InstagramFeedSection - Component for displaying the Instagram feed using our custom implementation
- * This uses the direct Instagram embed approach rather than Elfsight widgets
+ * InstagramFeedSection - Component for displaying the Instagram feed using Elfsight widget
  */
 const InstagramFeedSection: React.FC = () => {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   
   useEffect(() => {
     // Only set mounted to true in the client
     setMounted(true);
     
-    // Set up error boundary for Instagram-related errors
+    // Set up error boundary for Elfsight-related errors
     const handleError = (event: ErrorEvent) => {
       if (event.message && (
-        event.message.includes('Instagram') || 
-        event.message.includes('instgrm') || 
         event.message.includes('elfsight') ||
-        (event.filename && (
-          event.filename.includes('instagram.com') ||
-          event.filename.includes('elfsight.com')
-        ))
+        (event.filename && event.filename.includes('elfsight.com'))
       )) {
-        console.warn('Caught Instagram/Elfsight-related error:', event.message);
+        console.warn('Caught Elfsight-related error:', event.message);
         setHasError(true);
         event.preventDefault();
         return true;
@@ -119,6 +91,14 @@ const InstagramFeedSection: React.FC = () => {
   
   return (
     <section className={`py-12 sm:py-16 md:py-20 ${isDark ? 'bg-gray-950/90' : 'bg-white'} w-full relative overflow-hidden`}>
+      {/* Load Elfsight script */}
+      <Script
+        src="https://static.elfsight.com/platform/platform.js"
+        strategy="lazyOnload"
+        onLoad={() => setScriptLoaded(true)}
+        onError={() => setHasError(true)}
+      />
+      
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-5">
         <div className={`absolute top-[15%] right-[5%] w-32 h-32 rounded-full ${isDark ? 'bg-white/5' : 'bg-black/5'} blur-3xl`}></div>
@@ -140,31 +120,15 @@ const InstagramFeedSection: React.FC = () => {
         
         <div className={`w-full overflow-hidden rounded-xl ${isDark ? 'border border-white/10' : 'border border-black/10'} shadow-lg`}>
           <div className={`${isDark ? 'bg-gray-900/60' : 'bg-gray-50/70'} backdrop-blur-md p-2 sm:p-6 md:p-8 rounded-lg`}>
-            {/* Use the direct Instagram embed component with improved responsive behavior */}
             <div className="min-h-[550px] pt-2 sm:pt-0 flex justify-center w-full overflow-hidden">
               {hasError ? (
                 <InstagramErrorFallback />
+              ) : !scriptLoaded ? (
+                <InstagramLoadingPlaceholder />
               ) : (
                 <div className="w-full max-w-full mx-auto">
-                  <div className="instagram-responsive-wrapper relative w-full overflow-hidden">
-                    <InstagramEmbed 
-                      username="sidehustle_bar"
-                      className="w-full max-w-full mx-auto px-0 sm:px-4 scale-100 sm:scale-100 transform-gpu"
-                    />
-                  </div>
-                  <style jsx>{`
-                    .instagram-responsive-wrapper {
-                      width: 100%;
-                      height: auto;
-                      min-height: 450px;
-                    }
-                    @media (max-width: 640px) {
-                      .instagram-responsive-wrapper iframe {
-                        width: 100% !important;
-                        transform-origin: left top;
-                      }
-                    }
-                  `}</style>
+                  {/* Elfsight Instagram Feed Widget */}
+                  <div className={`elfsight-app-${ELFSIGHT_WIDGET_ID}`} data-elfsight-app-lazy></div>
                 </div>
               )}
             </div>
