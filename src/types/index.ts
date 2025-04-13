@@ -27,7 +27,7 @@ export interface MenuIcon {
 export interface MenuItem {
   name: string;
   description?: string;
-  price?: string;
+  price?: string | number;
   options?: string[];
   note?: string;
   image?: string;
@@ -37,6 +37,8 @@ export interface MenuItem {
   vegetarian?: boolean;
   vegan?: boolean;
   glutenFree?: boolean;
+  featured?: boolean;
+  dietary?: string[];
 }
 
 export interface MenuSubSection {

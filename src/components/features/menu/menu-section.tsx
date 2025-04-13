@@ -1,93 +1,237 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+
+import { useState } from "react"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MenuIcon } from "@/components/common/menu-icon"
-import type { MenuSection as MenuSectionType } from "@/types"
+import type { MenuSection as MenuSectionType, MenuItem as MenuItemType } from "@/types"
+import { Eye } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog"
 
 interface MenuSectionProps {
   section: MenuSectionType;
   className?: string;
 }
 
+export function MenuFeaturedCard({ item, section, className }: { item: MenuItemType; section: MenuSectionType; className?: string }) {
+  const [open, setOpen] = useState(false)
+  
+  return (
+    <div className={cn("bg-black dark:bg-white rounded-lg overflow-hidden", className)}>
+      {item.image && (
+        <div className="relative w-full aspect-[4/3]">
+          <Image
+            src={item.image}
+            alt={item.name}
+            fill
+            unoptimized
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="p-3 sm:p-4">
+        <h2 className="text-lg sm:text-xl font-bold text-white dark:text-black uppercase">
+          {item.name}
+        </h2>
+        <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600">
+          {section.title}
+        </p>
+        <p className="text-sm text-gray-400 dark:text-gray-600 mt-2 line-clamp-2">
+          {item.description}
+        </p>
+        <div className="mt-3 sm:mt-4 flex justify-between items-center">
+          <span className="text-xl font-bold text-white dark:text-black">
+            {typeof item.price === 'number' 
+              ? `$${item.price.toFixed(2)}` 
+              : item.price && item.price.startsWith('$') 
+                ? item.price 
+                : item.price ? `$${item.price}` : ''}
+          </span>
+          <Button 
+            variant="hustle"
+            size="sm"
+            className="flex items-center justify-center gap-2 py-1.5 sm:py-2"
+            onClick={() => setOpen(true)}
+          >
+            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white dark:bg-black flex items-center justify-center">
+              <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-black dark:text-white" />
+            </div>
+            <span className="text-sm">View Item</span>
+          </Button>
+        </div>
+      </div>
+      
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="bg-white dark:bg-black text-black dark:text-white border-gray-200 dark:border-gray-800 max-w-md mx-2 sm:mx-auto rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl font-bold uppercase">{item.name}</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400 text-sm">{item.description}</DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col gap-3 sm:gap-4">
+            {item.image && (
+              <div className="relative w-full aspect-video rounded-md overflow-hidden">
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                  sizes="(max-width: 768px) 100vw, 400px"
+                />
+              </div>
+            )}
+            
+            {item.options && item.options.length > 0 && (
+              <div className="mt-1 sm:mt-2">
+                <h4 className="font-medium mb-1 text-sm sm:text-base">Options:</h4>
+                <ul className="space-y-1">
+                  {item.options.map((option, index) => (
+                    <li key={index} className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                      • {option}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {item.note && (
+              <p className="text-xs sm:text-sm italic text-gray-500">{item.note}</p>
+            )}
+            
+            <div className="flex justify-between items-center mt-1 sm:mt-2">
+              <span className="text-lg sm:text-xl font-bold">
+                {typeof item.price === 'number' 
+                  ? `$${item.price.toFixed(2)}` 
+                  : item.price && item.price.startsWith('$') 
+                    ? item.price 
+                    : item.price ? `$${item.price}` : ''}
+              </span>
+              <div className="flex gap-1">
+                {item.popular && (
+                  <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">
+                    Popular
+                  </span>
+                )}
+                {item.spicy && (
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    Spicy
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <DialogClose asChild>
+            <Button 
+              className="w-full mt-2"
+              variant="hustle"
+            >
+              Close
+            </Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
 export function MenuSection({ section, className }: MenuSectionProps) {
   const { title, items = [], icon } = section;
   
   return (
-    <Card className={cn("w-full bg-card", className)}>
-      <CardHeader className="border-b py-3">
-        <div className="flex items-center gap-2">
-          {icon && (
-            <MenuIcon 
-              icon={icon} 
-              size={24}
-              className="text-foreground flex-shrink-0" 
-            />
-          )}
-          <CardTitle className="text-xl font-bold tracking-tight">{title}</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="space-y-4">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="rounded-lg border p-3"
-            >
-              <div className="grid grid-cols-[auto_1fr_auto] gap-2">
-                {item.icon && (
-                  <div className="pt-1">
+    <div className={cn("w-full", className)}>
+      <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-black dark:text-white uppercase flex items-center gap-2">
+        {icon && (
+          <MenuIcon 
+            icon={icon} 
+            size={24}
+            className="text-black dark:text-white flex-shrink-0" 
+          />
+        )}
+        {title}
+      </h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="bg-black dark:bg-white rounded-lg overflow-hidden p-3 sm:p-4"
+          >
+            <div className="flex justify-between items-start gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  {item.icon && (
                     <MenuIcon 
                       icon={item.icon} 
-                      size={18}
-                      className="text-foreground flex-shrink-0" 
+                      size={20}
+                      className="text-white dark:text-black flex-shrink-0" 
                     />
-                  </div>
-                )}
-                <div className="overflow-hidden">
-                  <h3 className="font-semibold leading-tight tracking-tight">
+                  )}
+                  <h3 className="text-base sm:text-lg font-bold text-white dark:text-black uppercase truncate">
                     {item.name}
                   </h3>
-                  {item.description && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {item.description}
-                    </p>
-                  )}
-                  {item.options && item.options.length > 0 && (
-                    <ul className="mt-2 space-y-1">
-                      {item.options.map((option, idx) => (
-                        <li key={idx} className="text-xs text-muted-foreground">
-                          • {option}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {item.note && (
-                    <p className="text-xs italic text-muted-foreground mt-1">
-                      {item.note}
-                    </p>
-                  )}
                 </div>
-                <div className="flex-shrink-0 text-right">
-                  <div className="text-base font-semibold whitespace-nowrap">
-                    {item.price}
-                  </div>
-                  <div className="flex flex-col gap-1 mt-1">
-                    {item.popular && (
-                      <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                        Popular
-                      </span>
-                    )}
-                    {item.spicy && (
-                      <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                        Spicy
-                      </span>
-                    )}
-                  </div>
-                </div>
+                
+                {item.description && (
+                  <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 mt-2">
+                    {item.description}
+                  </p>
+                )}
+              </div>
+              
+              <span className="text-base sm:text-xl font-bold text-white dark:text-black whitespace-nowrap">
+                {typeof item.price === 'number' 
+                  ? `$${item.price.toFixed(2)}` 
+                  : item.price && item.price.startsWith('$') 
+                    ? item.price 
+                    : item.price ? `$${item.price}` : ''}
+              </span>
+            </div>
+            
+            {item.options && item.options.length > 0 && (
+              <div className="mt-2 sm:mt-3">
+                <ul className="space-y-1">
+                  {item.options.map((option, idx) => (
+                    <li key={idx} className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 flex items-center gap-1">
+                      <span className="text-white dark:text-black">•</span> {option}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {item.note && (
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 italic mt-2">
+                {item.note}
+              </p>
+            )}
+            
+            <div className="mt-2 sm:mt-3 flex justify-between items-center">
+              <div className="flex flex-wrap items-center gap-1">
+                {item.popular && (
+                  <span className="bg-yellow-500 text-black text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                    Popular
+                  </span>
+                )}
+                {item.spicy && (
+                  <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                    Spicy
+                  </span>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }

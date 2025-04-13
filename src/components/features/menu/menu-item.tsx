@@ -12,7 +12,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog"
 import Image from "next/image"
@@ -25,46 +24,61 @@ interface MenuItemProps {
 export function MenuItem({ item, className }: MenuItemProps) {
   const [open, setOpen] = useState(false)
   return (
-    <div className={cn("p-3 mb-3 bg-black dark:bg-white rounded-lg", className)}>
-      <div className="grid grid-cols-[auto_1fr_auto] gap-2">
-        {item.icon && (
-          <div className="pt-1">
-            <MenuIcon 
-              icon={item.icon} 
-              size={18}
-              className="text-white dark:text-black flex-shrink-0" 
-            />
+    <div className={cn("bg-black dark:bg-white rounded-lg overflow-hidden", className)}>
+      <div className="p-4">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              {item.icon && (
+                <MenuIcon 
+                  icon={item.icon} 
+                  size={20}
+                  className="text-white dark:text-black flex-shrink-0" 
+                />
+              )}
+              <h3 className="text-lg font-bold text-white dark:text-black uppercase">
+                {item.name}
+              </h3>
+            </div>
+            
+            {item.description && (
+              <p className="text-gray-400 dark:text-gray-600 text-sm mt-2">
+                {item.description}
+              </p>
+            )}
+            
+            {item.options && item.options.length > 0 && (
+              <ul className="mt-2 space-y-1">
+                {item.options.map((option, index) => (
+                  <li key={index} className="text-gray-400 dark:text-gray-600 text-sm flex items-center gap-1">
+                    <span className="text-white dark:text-black">•</span> {option}
+                  </li>
+                ))}
+              </ul>
+            )}
+            
+            {item.note && (
+              <p className="text-gray-500 dark:text-gray-500 text-sm italic mt-2">
+                {item.note}
+              </p>
+            )}
           </div>
-        )}
-        <div className="overflow-hidden">
-          <h3 className="text-base font-bold text-white dark:text-black uppercase">
-            {item.name}
-          </h3>
-          {item.description && (
-            <p className="text-gray-400 dark:text-gray-600 text-xs mt-1 line-clamp-2">
-              {item.description}
-            </p>
-          )}
-          {item.options && item.options.length > 0 && (
-            <ul className="mt-1 space-y-0.5">
-              {item.options.map((option, index) => (
-                <li key={index} className="text-gray-400 dark:text-gray-600 text-xs">
-                  • {option}
-                </li>
-              ))}
-            </ul>
-          )}
-          {item.note && (
-            <p className="text-gray-500 dark:text-gray-500 text-xs italic mt-1">
-              {item.note}
-            </p>
+          
+          {item.image && (
+            <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden">
+              <Image
+                src={item.image}
+                alt={item.name}
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
           )}
         </div>
-        <div className="flex-shrink-0 text-right">
-          <div className="bg-white text-black dark:bg-black dark:text-white px-2 py-0.5 rounded-full text-sm font-bold whitespace-nowrap">
-            {item.price}
-          </div>
-          <div className="flex flex-col gap-1 mt-1">
+        
+        <div className="mt-4 flex justify-between items-center">
+          <div className="flex items-center gap-1">
             {item.popular && (
               <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
                 Popular
@@ -75,14 +89,19 @@ export function MenuItem({ item, className }: MenuItemProps) {
                 Spicy
               </span>
             )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-white dark:text-black whitespace-nowrap">
+              {item.price}
+            </span>
             <Button 
-              variant="outline" 
+              variant="hustle" 
               size="sm"
-              className="mt-2 bg-white dark:bg-black text-black dark:text-white border-0 hover:bg-gray-100 dark:hover:bg-gray-900"
+              className="flex items-center justify-center gap-2"
               onClick={() => setOpen(true)}
             >
-              <div className="rounded-full w-6 h-6 mr-1.5 flex items-center justify-center bg-white dark:bg-black">
-                <Eye className="h-3.5 w-3.5 text-black dark:text-white" />
+              <div className="w-5 h-5 rounded-full bg-white dark:bg-black flex items-center justify-center">
+                <Eye className="w-3 h-3 text-black dark:text-white" />
               </div>
               View
             </Button>
