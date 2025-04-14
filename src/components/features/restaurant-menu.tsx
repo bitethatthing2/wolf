@@ -6,23 +6,28 @@ import { cn } from "@/lib/utils";
 import { getMenuItemImagePath } from "@/lib/utils";
 
 // Types
-interface MenuItem {
+export interface MenuItem {
   id: string;
   name: string;
   description: string;
-  price: string;
+  price: string | number;
   imagePath?: string;
+  image?: string;
   vegetarian?: boolean;
   vegan?: boolean;
   glutenFree?: boolean;
   spicy?: boolean;
   popular?: boolean;
+  dietary?: string[];
+  isChefSpecial?: boolean;
 }
 
-interface MenuCategory {
+export interface MenuCategory {
+  id?: string;
   title: string;
   items: MenuItem[];
   story?: string;
+  icon?: React.ReactElement;
 }
 
 interface RestaurantMenuProps {

@@ -6,7 +6,7 @@ import { UtensilsCrossed, Wine } from "lucide-react";
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { cn } from "@/lib/utils";
+import { cn, getMenuItemImagePath } from "@/lib/utils";
 
 interface MenuItem {
   id: string;
@@ -14,6 +14,7 @@ interface MenuItem {
   description: string;
   price: string | number;
   imagePath?: string;
+  image?: string;
   vegetarian?: boolean;
   vegan?: boolean;
   glutenFree?: boolean;
@@ -56,14 +57,12 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
     return price.startsWith('$') ? price : `$${price}`;
   };
 
-  // Process image path if available
-  const imagePath = item.imagePath ? 
-    (item.imagePath.startsWith('@') ? 
-      `/${item.imagePath.substring(1)}` : 
-      item.imagePath.startsWith('/') ? 
-        item.imagePath : 
-        `/${item.imagePath}`
-    ) : null;
+  // Use the utility function to get the image path
+  const imagePath = item.image 
+    ? getMenuItemImagePath(item.image)
+    : item.imagePath 
+      ? getMenuItemImagePath(item.imagePath)
+      : getMenuItemImagePath(undefined);
 
   return (
     <div className="flex gap-4 p-4 rounded-lg bg-white dark:bg-black border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">

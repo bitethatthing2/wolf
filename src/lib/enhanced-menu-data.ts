@@ -4,20 +4,51 @@ import { Beef, Coffee, IceCream, Sandwich, Utensils, Wine, Beer, GlassWater, Gla
 // All images should be stored in the public directory
 const ITEM_IMAGES = {
   // Starters
-  "CHIPS & GUAC": "/menu-item-chips-guac.png",
-  "BASKET OF FRIES": "/menu-item-basket-fries.png",
-  "BASKET OF TOTS": "/menu-item-basket-tots.png",
-  "FLAUTAS": "/menu-item-flautas-potatoes.png",
-  "LOADED FRIES": "/menu-item-loaded-fries.png",
-  "LOADED NACHO": "/menu-item-loaded-nacho.png",
+  "CHIPS & GUAC": "/assets/foodmenu/chips-guac.png",
+  "BASKET OF FRIES": "/assets/foodmenu/basket-fries.png",
+  "BASKET OF TOTS": "/assets/foodmenu/basket-tots.png",
   
   // Main dishes
-  "BURRITO": "/menu-item-burrito.png",
-  "TACOS": "/menu-item-tacos.png",
+  "FLAUTAS": "/assets/foodmenu/flautas.png",
+  "LOADED FRIES": "/assets/foodmenu/loaded-fries.png",
+  "LOADED NACHO": "/assets/foodmenu/loaded-nacho.png",
+  "BURRITO": "/assets/foodmenu/burrito.png",
+  "TACOS": "/assets/foodmenu/tacos.png",
+  "MULITAS": "/assets/foodmenu/mulitas.png",
+  "TORTA": "/assets/foodmenu/torta.png",
+  "HUSTLE BOWL": "/assets/foodmenu/hustle-bowl.png",
+  "QUESO TACOS": "/assets/foodmenu/queso-tacos.png",
+  "QUESADILLA": "/assets/foodmenu/quesadilla.png",
+  "VAMPIROS": "/assets/foodmenu/vampiros.png",
+  "EMPANADAS": "/assets/foodmenu/empanadas.png",
+  "TACO SALAD": "/assets/foodmenu/taco-salad.png",
+  
+  // Birria
+  "BIRRIA QUESO TACOS": "/assets/foodmenu/birria-queso-tacos.png",
+  "BIRRIA PIZZA": "/assets/foodmenu/birria-pizza.png",
+  "BIRRIA RAMEN BOWL": "/assets/foodmenu/birria-ramen.png",
+  "BIRRIA FLAUTAS": "/assets/foodmenu/birria-flautas.png",
+  
+  // Seafood
+  "FRIED FISH TACOS": "/assets/foodmenu/fish-tacos.png",
+  "FRIED SHRIMP TACOS": "/assets/foodmenu/shrimp-tacos.png",
+  
+  // Breakfast
+  "ASADA & BACON": "/assets/foodmenu/asada-bacon.png",
   
   // Drinks
-  "ESPRESSO": "/menu-item-espresso.png",
-  "MARGARITA": "/menu-item-margarita.png",
+  "ESPRESSO": "/assets/foodmenu/espresso.png",
+  "MARGARITA": "/assets/foodmenu/iced-margarita.png",
+  "ICED DOÑA 70": "/assets/foodmenu/iced-dona-70.png",
+  "ICED PINA COLADA": "/assets/foodmenu/iced-pina-colada.png",
+  "CANTARITO": "/assets/foodmenu/cantarito.png",
+  "PALOMA": "/assets/foodmenu/paloma.png",
+  "PINEAPPLE PARADISE": "/assets/foodmenu/pineapple-paradise.png",
+  "MICHELADA": "/assets/foodmenu/michelada.png",
+  "BLOODY MARY": "/assets/foodmenu/bloody-mary.png",
+  "PEACHY BEACHY": "/assets/foodmenu/peachy-beachy.png",
+  "COCONUT BERRY DREAM": "/assets/foodmenu/coconut-berry-dream.png",
+  "MANGO TAMARINDO": "/assets/foodmenu/mango-tamarindo.png",
 };
 
 // Section stories for enhanced context
@@ -117,50 +148,58 @@ export const enhancedMenuData = {
           id: "mulitas",
           name: "MULITAS",
           description: "CORN TORTILLA, QUESO OAXACA, CILANTRO, ONIONS, GUAC SAUCE, CHOICE OF MEAT",
-          price: 7.75
+          price: 7.75,
+          image: ITEM_IMAGES["MULITAS"]
         },
         {
           id: "torta",
           name: "TORTA",
           description: "BREAD, CHEESE OAXACA, BEANS, LETTUCE, TOMATOES, ONIONS, CILANTRO, AVOCADO, JALAPENOS, CHIPOTLE, GUAC SAUCE, COTIJA, CHOICE OF MEAT",
-          price: 13.50
+          price: 13.50,
+          image: ITEM_IMAGES["TORTA"]
         },
         {
           id: "hustle-bowl",
           name: "HUSTLE BOWL",
           description: "BEANS, RICE, LETTUCE, PICO, JALAPENOS, SOUR CREAM, GUAC SAUCE, COTIJA, TORTILLA CHIPS, CHOICE OF MEAT",
-          price: 15.00
+          price: 15.00,
+          image: ITEM_IMAGES["HUSTLE BOWL"]
         },
         {
           id: "queso-tacos",
           name: "QUESO TACOS",
           description: "GLUTEN FREE CORN TORTILLA, QUESO OAXACA, ONIONS, CILANTRO CHOICE OF MEAT",
           price: 5.75,
-          glutenFree: true
+          glutenFree: true,
+          image: ITEM_IMAGES["QUESO TACOS"]
         },
         {
           id: "quesadilla",
           name: "QUESADILLA",
           description: "FLOUR TORTILLA, QUESO OAXACA, GUAC SAUCE, CHOICE OF MEAT",
-          price: 14.00
+          price: 14.00,
+          image: ITEM_IMAGES["QUESADILLA"]
         },
         {
           id: "vampiros",
           name: "VAMPIROS",
           description: "CORN TORTILLA, QUESO OAXACA, GUACAMOLE, CHOICE OF MEAT",
-          price: 7.75
+          price: 7.75,
+          image: ITEM_IMAGES["VAMPIROS"]
         },
         {
           id: "empanadas",
           name: "EMPANADAS",
           description: "FRIED FLOUR, QUESO OAXACA, SOUR CREAM, GUAC SAUCE, LETTUCE CHOICE OF MEAT",
-          price: 7.00
+          price: 7.00,
+          image: ITEM_IMAGES["EMPANADAS"]
         },
         {
           id: "taco-salad",
           name: "TACO SALAD",
           description: "FLOUR TORTILLA, LETTUCE, PICO CILANTRO, SOUR CREAM, COTIJA, CHOICE OF MEAT",
-          price: 14.00
+          price: 14.00,
+          image: ITEM_IMAGES["TACO SALAD"]
         }
       ]
     },
@@ -173,25 +212,29 @@ export const enhancedMenuData = {
           id: "birria-queso-tacos",
           name: "BIRRIA QUESO TACOS",
           description: "3 QUESO BIRRIA TACOS, QUESO OAXACA, ONIONS, CILANTRO",
-          price: 16.75
+          price: 16.75,
+          image: ITEM_IMAGES["BIRRIA QUESO TACOS"]
         },
         {
           id: "birria-pizza",
           name: "BIRRIA PIZZA",
           description: "TWO FLOUR TORTILLAS, CILANTRO, ONIONS, QUESO OAXACA",
-          price: 29.00
+          price: 29.00,
+          image: ITEM_IMAGES["BIRRIA PIZZA"]
         },
         {
           id: "birria-ramen",
           name: "BIRRIA RAMEN BOWL",
           description: "BIRRIA TAPATIO NOODLES, CILANTRO AND ONIONS",
-          price: 14.75
+          price: 14.75,
+          image: ITEM_IMAGES["BIRRIA RAMEN BOWL"]
         },
         {
           id: "birria-flautas",
           name: "BIRRIA FLAUTAS",
           description: "CORN TORTILLA, BIRRIA, COSME",
-          price: 12.00
+          price: 12.00,
+          image: ITEM_IMAGES["BIRRIA FLAUTAS"]
         }
       ]
     },
@@ -204,13 +247,15 @@ export const enhancedMenuData = {
           id: "fish-tacos",
           name: "FRIED FISH TACOS (2)",
           description: "ONIONS, CABBAGE, CHIPOTLE, CHEESE, CORN TORTILLA",
-          price: 8.75
+          price: 8.75,
+          image: ITEM_IMAGES["FRIED FISH TACOS"]
         },
         {
           id: "shrimp-tacos",
           name: "FRIED SHRIMP TACOS (2)",
           description: "ONIONS, CABBAGE, CHIPOTLE, CHEESE, CORN TORTILLA",
-          price: 8.75
+          price: 8.75,
+          image: ITEM_IMAGES["FRIED SHRIMP TACOS"]
         }
       ]
     },
@@ -223,7 +268,8 @@ export const enhancedMenuData = {
           id: "asada-bacon",
           name: "ASADA & BACON",
           description: "FLOUR TORTILLA, ASADA, BACON, TOTS, SOUR CREAM, GUAC SAUCE",
-          price: 13.00
+          price: 13.00,
+          image: ITEM_IMAGES["ASADA & BACON"]
         }
       ]
     },
@@ -384,61 +430,71 @@ export const enhancedMenuData = {
           id: "iced-dona-70",
           name: "ICED DOÑA 70",
           description: "Don 70, Strawberry Syrup, Peach Syrup, Lime Juice",
-          price: 22
+          price: 22,
+          image: ITEM_IMAGES["ICED DOÑA 70"]
         },
         {
           id: "iced-pina-colada",
           name: "ICED PINA COLADA",
           description: "Captain Morgan, Coconut Syrup, and Coconut Milk",
-          price: 15
+          price: 15,
+          image: ITEM_IMAGES["ICED PINA COLADA"]
         },
         {
           id: "cantarito",
           name: "CANTARITO",
           description: "Herradura Blanco, Orange, Lime, and Salt",
-          price: 12
+          price: 12,
+          image: ITEM_IMAGES["CANTARITO"]
         },
         {
           id: "paloma",
           name: "PALOMA",
           description: "Cazadores, Orange, Grape Fruit Juice, Lime, and Salt",
-          price: 11
+          price: 11,
+          image: ITEM_IMAGES["PALOMA"]
         },
         {
           id: "pineapple-paradise",
           name: "PINEAPPLE PARADISE",
           description: "Grey Goose, Passion Fruit, and Pineapple",
-          price: 11
+          price: 11,
+          image: ITEM_IMAGES["PINEAPPLE PARADISE"]
         },
         {
           id: "michelada",
           name: "MICHELADA",
           description: "Beer, Michelada Mix, and Fresh Lime",
-          price: 12
+          price: 12,
+          image: ITEM_IMAGES["MICHELADA"]
         },
         {
           id: "bloody-mary",
           name: "BLOODY MARY",
           description: "Tito's, Bloody Mary Mix, Pickles, Banana Peppers, Olives, and Spices",
-          price: 12
+          price: 12,
+          image: ITEM_IMAGES["BLOODY MARY"]
         },
         {
           id: "peachy-beachy",
           name: "PEACHY BEACHY",
           description: "Tito's, Champaign, and Peach syrup",
-          price: 12
+          price: 12,
+          image: ITEM_IMAGES["PEACHY BEACHY"]
         },
         {
           id: "coconut-berry-dream",
           name: "COCONUT BERRY DREAM",
           description: "Vanilla Vodka, Huckleberry, Coconut, and Pineapple",
-          price: 12
+          price: 12,
+          image: ITEM_IMAGES["COCONUT BERRY DREAM"]
         },
         {
           id: "mango-tamarindo",
           name: "MANGO TAMARINDO",
           description: "Spicy Tamarindo, Mango, and Pineapple",
-          price: 12.50
+          price: 12.50,
+          image: ITEM_IMAGES["MANGO TAMARINDO"]
         }
       ]
     },
