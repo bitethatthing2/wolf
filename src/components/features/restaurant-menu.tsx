@@ -1,292 +1,29 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Utensils, Coffee, Pizza, Cake, Beef, Wine, Sandwich, IceCream, Award, Flame, Sparkles, ChevronDown, X } from "lucide-react";
-import { MexicanFoodIcons } from "../icons/MexicanFoodIcons";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { cn, getMenuItemImagePath } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getMenuItemImagePath } from "@/lib/utils";
 
+// Types
 interface MenuItem {
   id: string;
   name: string;
   description: string;
-  price: string | number;
-  popular?: boolean;
+  price: string;
+  imagePath?: string;
   vegetarian?: boolean;
   vegan?: boolean;
-  spicy?: boolean;
   glutenFree?: boolean;
-  image?: string;
-  dietary?: string[];
-  isChefSpecial?: boolean;
+  spicy?: boolean;
+  popular?: boolean;
 }
 
 interface MenuCategory {
-  id: string;
   title: string;
-  icon: React.ElementType;
-  story?: string;
   items: MenuItem[];
+  story?: string;
 }
-
-const getIngredientHighlight = (itemName: string, description: string = "") => {
-  const lowerName = itemName.toLowerCase();
-  const lowerDesc = description.toLowerCase();
-  
-  if (lowerName.includes("taco") || lowerDesc.includes("tortilla") || lowerName.includes("burrito")) 
-    return "Hand-pressed tortillas";
-  if (lowerName.includes("fries") || lowerName.includes("tots")) 
-    return "Crispy perfection";
-  if (lowerName.includes("guac") || lowerDesc.includes("avocado")) 
-    return "Premium ingredients";
-  if (lowerName.includes("salsa") || lowerDesc.includes("sauce")) 
-    return "House-made recipe";
-  if (lowerName.includes("beef") || lowerDesc.includes("steak") || lowerDesc.includes("meat")) 
-    return "Premium quality";
-  if (lowerName.includes("cocktail") || lowerDesc.includes("spirits")) 
-    return "Craft mixology";
-  if (lowerName.includes("coffee") || lowerDesc.includes("espresso")) 
-    return "Locally roasted";
-  
-  return "Chef's selection";
-};
-
-interface MenuItemCardProps {
-  item: MenuItem;
-  onImageClick: (image: string | undefined, name: string) => void;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-}
-
-const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onImageClick, isExpanded, onToggleExpand }) => {
-  const formatPrice = (price: string | number) => {
-    if (typeof price === 'number') {
-      return `$${price.toFixed(2)}`;
-    }
-    return price.startsWith('$') ? price : `$${price}`;
-  };
-
-  // Process the image path
-  let imagePath = null;
-  if (item.image) {
-    // Handle @ prefix paths
-    if (item.image.startsWith('@')) {
-      imagePath = `/${item.image.substring(1)}`;
-    } 
-    // Handle /images/menu/ paths
-    else if (item.image.includes('/images/menu/')) {
-      const filename = item.image.split('/').pop()?.split('.')[0];
-      imagePath = `/${filename}.png`;
-    }
-    // Handle direct paths
-    else {
-      imagePath = item.image.startsWith('/') ? item.image : `/${item.image}`;
-    }
-  }
-
-  return (
-    <div className="rounded-xl overflow-hidden border border-border hover:border-primary hover:shadow-md transition-all duration-300 bg-black p-3 sm:p-4 lg:p-5">
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        {/* Content */}
-        <div className="flex-1" onClick={onToggleExpand}>
-          <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base sm:text-lg text-white pr-2">{item.name}</h3>
-            <span className="font-bold text-base sm:text-lg text-white whitespace-nowrap">{formatPrice(item.price)}</span>
-          </div>
-          
-          {/* Craftsmanship Badge */}
-          <div className="mt-2 mb-2.5">
-            <span className="inline-flex items-center gap-1 bg-white px-2 py-1 rounded-md text-black text-xs sm:text-sm">
-              <Award className="w-3 h-3 sm:w-4 sm:h-4" />
-              {getIngredientHighlight(item.name, item.description)}
-            </span>
-          </div>
-          
-          <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-            {item.description}
-          </p>
-          
-          {/* Tags */}
-          {(item.popular || item.vegetarian || item.vegan || item.spicy || item.glutenFree || item.dietary) && (
-            <div className="flex flex-wrap gap-1.5 mt-2.5">
-              {item.popular && (
-                <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-xs font-medium text-black">
-                  Popular
-                </span>
-              )}
-              {item.vegetarian && (
-                <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-xs font-medium text-black">
-                  Vegetarian
-                </span>
-              )}
-              {item.vegan && (
-                <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-xs font-medium text-black">
-                  Vegan
-                </span>
-              )}
-              {item.spicy && (
-                <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-xs font-medium text-black">
-                  Spicy
-                </span>
-              )}
-              {item.glutenFree && (
-                <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-xs font-medium text-black">
-                  Gluten-Free
-                </span>
-              )}
-              {item.dietary?.map((tag) => (
-                <span key={tag} className="inline-flex items-center rounded-full bg-gray-800/80 px-2 py-0.5 text-xs font-medium text-white">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          
-          {/* Extra details when expanded */}
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-3 pt-3 sm:mt-4 sm:pt-4 border-t border-gray-800"
-            >
-              <div className="flex items-start gap-2 sm:gap-3 mb-3 p-2 bg-white rounded-lg">
-                {Math.random() > 0.5 ? (
-                  <>
-                    <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-black mt-0.5 flex-shrink-0" />
-                    <p className="text-black text-xs sm:text-sm">
-                      <span className="text-black font-medium">Chef's Special:</span> This dish showcases Ms. Hustle's signature preparation method, perfected over years in professional kitchens.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-black mt-0.5 flex-shrink-0" />
-                    <p className="text-black text-xs sm:text-sm">
-                      <span className="text-black font-medium">Local Favorite:</span> One of our most requested items, with regulars coming back specifically for this dish.
-                    </p>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </div>
-        
-        {/* Image */}
-        {imagePath && (
-          <div 
-            className="relative w-full h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-lg cursor-pointer mt-2 sm:mt-0"
-            onClick={() => onImageClick(imagePath, item.name)}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 z-10 flex items-center justify-center">
-              <span className="text-white text-xs sm:text-sm font-medium">View Dish</span>
-            </div>
-            <Image
-              src={imagePath}
-              alt={item.name}
-              fill
-              className="object-cover transition-transform duration-700 hover:scale-110"
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 128px, 144px"
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-interface MenuCategoryProps {
-  category: MenuCategory;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
-  onImageClick: (image: string | undefined, name: string) => void;
-  expandedItems: Record<string, boolean>;
-  onToggleExpand: (itemId: string) => void;
-}
-
-const MenuCategorySection: React.FC<MenuCategoryProps> = ({ 
-  category, 
-  isCollapsed, 
-  onToggleCollapse, 
-  onImageClick,
-  expandedItems,
-  onToggleExpand
-}) => {
-  // Get theme for this category - simplified to black and white
-  const getCategoryTheme = (title: string): string => {
-    return "border-white/20 bg-black";
-  };
-
-  return (
-    <div id={`section-${category.title}`} className="mb-6 rounded-xl overflow-hidden shadow-lg">
-      {/* Section Header */}
-      <button 
-        onClick={onToggleCollapse}
-        className={cn(
-          "w-full flex items-start justify-between p-4 sm:p-5 lg:p-6 text-left transition-colors duration-300",
-          getCategoryTheme(category.title),
-          "hover:bg-opacity-90 active:bg-opacity-70"
-        )}
-      >
-        <div className="flex flex-1">
-          <div className="flex-1">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white leading-tight">
-              {category.title}
-            </h2>
-            {category.story && (
-              <p className="text-gray-400 text-xs sm:text-sm italic mt-1 pr-4 sm:pr-6 line-clamp-2 sm:line-clamp-none">
-                {category.story}
-              </p>
-            )}
-            {/* Add sauce call-to-action */}
-            {category.title.includes("SAUCE") && (
-              <p className="text-white text-xs sm:text-sm font-medium mt-1 pr-4 sm:pr-6">
-                Try our house-made sauces with any dish to add a unique burst of flavor!
-              </p>
-            )}
-            {/* Add meat pricing notice */}
-            {category.title.includes("MEAT") && (
-              <p className="text-white text-xs sm:text-sm font-medium mt-1 pr-4 sm:pr-6">
-                Add any premium meat to your dish for just $2.00 each!
-              </p>
-            )}
-          </div>
-        </div>
-        <ChevronDown 
-          className={`w-4 h-4 sm:w-5 sm:h-5 text-white transform transition-transform duration-300 ${
-            !isCollapsed ? 'rotate-180' : ''
-          }`} 
-        />
-      </button>
-      
-      {/* Collapsible Content */}
-      {!isCollapsed && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="bg-black p-3 sm:p-4 lg:p-6"
-        >
-          <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6">
-            {category.items.map((item) => (
-              <MenuItemCard 
-                key={item.id || item.name} 
-                item={item} 
-                onImageClick={onImageClick}
-                isExpanded={!!expandedItems[`${category.title}-${item.name}`]}
-                onToggleExpand={() => onToggleExpand(`${category.title}-${item.name}`)}
-              />
-            ))}
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
-};
 
 interface RestaurantMenuProps {
   menuData?: {
@@ -296,6 +33,7 @@ interface RestaurantMenuProps {
   sections?: MenuCategory[];
   activeCategory?: string | null;
   searchQuery?: string;
+  activeFilters?: string[];
   onCategoryChange?: (category: string | null) => void;
   sectionStories?: Record<string, string>;
 }
@@ -304,7 +42,8 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
   menuData, 
   sections, 
   activeCategory,
-  searchQuery,
+  searchQuery = "",
+  activeFilters = [],
   onCategoryChange,
   sectionStories = {} 
 }) => {
@@ -326,7 +65,7 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
           initialCollapsedState[section.title] = section.title !== activeCategory;
         } else {
           // Default behavior: keep first section expanded, collapse others
-          initialCollapsedState[section.title] = index !== 0;
+        initialCollapsedState[section.title] = index !== 0;
         }
       });
       setCollapsedSections(initialCollapsedState);
@@ -338,7 +77,7 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
           initialCollapsedState[section.title] = section.title !== activeCategory;
         } else {
           // Default behavior: keep first section expanded, collapse others
-          initialCollapsedState[section.title] = index !== 0;
+        initialCollapsedState[section.title] = index !== 0;
         }
       });
       setCollapsedSections(initialCollapsedState);
@@ -375,31 +114,90 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
     setShowImageModal(true);
   };
 
-  // Get active sections, filtered by activeCategory if provided
+  // Filter menu items based on search query and active filters
+  const filterMenuItems = (item: MenuItem): boolean => {
+    // Search query filter
+    if (searchQuery && searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      const nameMatch = item.name.toLowerCase().includes(query);
+      const descMatch = item.description.toLowerCase().includes(query);
+      
+      if (!nameMatch && !descMatch) {
+        return false;
+      }
+    }
+    
+    // Dietary filters
+    if (activeFilters.length > 0) {
+      const hasAllFilters = activeFilters.every(filter => {
+        switch (filter) {
+          case "vegetarian":
+            return !!item.vegetarian;
+          case "vegan":
+            return !!item.vegan;
+          case "glutenFree":
+            return !!item.glutenFree;
+          case "spicy":
+            return !!item.spicy;
+          case "popular":
+            return !!item.popular;
+          default:
+            return true;
+        }
+      });
+      
+      if (!hasAllFilters) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  // Filter and process sections
+  const processedSections = (allSections: MenuCategory[]): MenuCategory[] => {
+    // If no search or filters, just handle activeCategory
+    if (!searchQuery && activeFilters.length === 0) {
+      return activeCategory 
+        ? allSections.filter(section => {
+            return section.title === activeCategory || 
+                   section.title.includes(activeCategory) ||
+                   (activeCategory === "MARGARITAS" && 
+                    (section.title.includes("MARGARITA") || 
+                     section.items.some(item => 
+                       item.name.toUpperCase().includes("MARGARITA") || 
+                       (item.description || "").toUpperCase().includes("MARGARITA")
+                     )
+                    )
+                   );
+          })
+        : allSections;
+    }
+    
+    // Apply search and filters
+    return allSections.map(section => {
+      // Filter items in this section
+      const filteredItems = section.items.filter(filterMenuItems);
+      
+      // Return section with filtered items
+      return {
+        ...section,
+        items: filteredItems
+      };
+    }).filter(section => section.items.length > 0); // Only keep sections with matching items
+  };
+
+  // Get active sections, filtered by activeCategory, search, and filters
   const allSections = menuData ? menuData[activeTab] : sections || [];
-  const activeSections = activeCategory 
-    ? allSections.filter(section => {
-        // Match exact title or containing words for more flexibility
-        return section.title === activeCategory || 
-               section.title.includes(activeCategory) ||
-               // Special case for "MARGARITAS" to match sections with margarita in the title
-               (activeCategory === "MARGARITAS" && 
-                (section.title.includes("MARGARITA") || 
-                 section.items.some(item => 
-                   item.name.toUpperCase().includes("MARGARITA") || 
-                   (item.description || "").toUpperCase().includes("MARGARITA")
-                 )
-                )
-               );
-      })
-    : allSections;
+  const activeSections = processedSections(allSections);
+
+  // Check if there are no results after filtering
+  const noResults = activeSections.length === 0 && (searchQuery || activeFilters.length > 0);
 
   return (
     <div className="w-full">
-      {/* Remove the category navigation text menu - we'll rely on the icon menu from the parent component */}
-      
       {/* Show a message if no sections match the filter */}
-      {activeSections.length === 0 && activeCategory && (
+      {activeSections.length === 0 && activeCategory && !searchQuery && activeFilters.length === 0 && (
         <div className="py-12 text-center">
           <p className="text-muted-foreground">No categories match your selection.</p>
           {onCategoryChange && (
@@ -411,6 +209,23 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
               Show All Categories
             </Button>
           )}
+        </div>
+      )}
+      
+      {/* Show a message if no results after search/filter */}
+      {noResults && (
+        <div className="py-12 text-center">
+          <p className="text-muted-foreground">No menu items match your search or filters.</p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+                onClick={() => {
+              // This will be handled by the parent component
+              if (onCategoryChange) onCategoryChange(null);
+            }}
+          >
+            Clear Filters
+          </Button>
         </div>
       )}
       
@@ -473,4 +288,180 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
       )}
     </div>
   );
-} 
+}
+
+// Menu Category Section Component
+interface MenuCategorySectionProps {
+  category: MenuCategory & { story?: string };
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+  onImageClick: (image: string | undefined, name: string) => void;
+  expandedItems: Record<string, boolean>;
+  onToggleExpand: (id: string) => void;
+}
+
+const MenuCategorySection: React.FC<MenuCategorySectionProps> = ({ 
+  category, 
+  isCollapsed,
+  onToggleCollapse,
+  onImageClick,
+  expandedItems,
+  onToggleExpand
+}) => {
+  return (
+    <div id={`section-${category.title}`} className="border border-border rounded-lg overflow-hidden">
+      {/* Category Header */}
+      <div 
+        className={cn(
+          "px-4 py-3 flex justify-between items-center cursor-pointer",
+          "bg-white text-black dark:bg-black dark:text-white",
+          isCollapsed ? "border-b-0" : "border-b border-border"
+        )}
+        onClick={onToggleCollapse}
+      >
+        <h2 className="text-lg font-bold">{category.title}</h2>
+        <div className="w-6 h-6 flex items-center justify-center">
+          <div className={cn(
+            "w-4 h-0.5 bg-current transition-transform",
+            isCollapsed ? "" : "rotate-90"
+          )}></div>
+          <div className="w-4 h-0.5 bg-current absolute"></div>
+        </div>
+      </div>
+      
+      {/* Category Story (if available) */}
+      {!isCollapsed && category.story && (
+        <div className="px-4 py-3 bg-gray-100 text-black dark:bg-gray-900 dark:text-white text-sm italic border-b border-border">
+          {category.story}
+        </div>
+      )}
+      
+      {/* Menu Items */}
+      {!isCollapsed && (
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {category.items.map((item) => (
+            <MenuItemCard 
+              key={item.id} 
+              item={item} 
+              isExpanded={!!expandedItems[item.id]}
+              onToggleExpand={() => onToggleExpand(item.id)}
+              onImageClick={onImageClick}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Menu Item Card Component
+interface MenuItemCardProps {
+  item: MenuItem;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onImageClick: (image: string | undefined, name: string) => void;
+}
+
+const MenuItemCard: React.FC<MenuItemCardProps> = ({ 
+  item, 
+  isExpanded,
+  onToggleExpand,
+  onImageClick
+}) => {
+  // Process image path
+  const imagePath = item.imagePath ? getMenuItemImagePath(item.imagePath) : undefined;
+  
+  return (
+    <div 
+      className={cn(
+        "border border-border rounded-lg overflow-hidden transition-all duration-200 hover:shadow-md",
+        "bg-white text-black dark:bg-black dark:text-white"
+      )}
+    >
+      <div className="p-4">
+        <div className="flex justify-between">
+          <div className="flex-1">
+            <div className="flex items-start gap-1">
+              <h3 className="text-base font-bold">{item.name}</h3>
+              <div className="flex gap-1 ml-2 mt-0.5">
+                {item.vegetarian && (
+                  <span 
+                    title="Vegetarian" 
+                    className="inline-block w-4 h-4 rounded-full bg-green-500 border border-green-600"
+                  ></span>
+                )}
+                {item.vegan && (
+                  <span 
+                    title="Vegan" 
+                    className="inline-block w-4 h-4 rounded-full bg-green-600 border border-green-700"
+                  ></span>
+                )}
+                {item.glutenFree && (
+                  <span 
+                    title="Gluten-Free" 
+                    className="inline-block w-4 h-4 rounded-full bg-amber-400 border border-amber-500"
+                  ></span>
+                )}
+                {item.spicy && (
+                  <span 
+                    title="Spicy" 
+                    className="inline-block w-4 h-4 rounded-full bg-red-500 border border-red-600"
+                  ></span>
+                )}
+                {item.popular && (
+                  <span 
+                    title="Popular" 
+                    className="inline-block w-4 h-4 rounded-full bg-purple-500 border border-purple-600"
+                  ></span>
+                )}
+              </div>
+            </div>
+            <p className="text-sm mt-1 text-gray-600 dark:text-gray-300">{item.description}</p>
+          </div>
+          <div className="ml-4 text-right">
+            <div className="font-bold">{item.price}</div>
+            
+            {/* Image thumbnail if available */}
+            {imagePath && (
+              <div 
+                className="mt-2 w-16 h-16 rounded-md overflow-hidden cursor-pointer relative border border-border"
+                onClick={() => onImageClick(imagePath, item.name)}
+              >
+                <Image
+                  src={imagePath}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Expanded content - could include ingredients, allergens, etc. */}
+        {isExpanded && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
+              <strong>Dietary Info:</strong> {[
+                item.vegetarian ? 'Vegetarian' : null,
+                item.vegan ? 'Vegan' : null,
+                item.glutenFree ? 'Gluten-Free' : null,
+                item.spicy ? 'Spicy' : null,
+                item.popular ? 'Popular' : null
+              ].filter(Boolean).join(', ') || 'No special dietary information'}
+            </p>
+          </div>
+        )}
+        
+        {/* Expand/collapse button */}
+        <button
+          onClick={onToggleExpand}
+          className="mt-2 text-xs text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white underline"
+        >
+          {isExpanded ? 'Show less' : 'Show more'}
+        </button>
+      </div>
+    </div>
+  );
+}
