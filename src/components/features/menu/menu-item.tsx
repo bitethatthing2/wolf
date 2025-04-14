@@ -4,7 +4,7 @@ import { useState } from "react"
 import type { MenuItem as MenuItemType } from "@/types"
 import { MenuIcon } from "@/components/common/menu-icon"
 import { cn } from "@/lib/utils"
-import { Eye } from "lucide-react"
+import { Eye, Star, Leaf, Salad, XCircle, Flame } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -24,7 +24,7 @@ interface MenuItemProps {
 export function MenuItem({ item, className }: MenuItemProps) {
   const [open, setOpen] = useState(false)
   return (
-    <div className={cn("bg-black dark:bg-white rounded-lg overflow-hidden", className)}>
+    <div className={cn("bg-black dark:bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow", className)}>
       <div className="p-4">
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">
@@ -42,7 +42,7 @@ export function MenuItem({ item, className }: MenuItemProps) {
             </div>
             
             {item.description && (
-              <p className="text-gray-400 dark:text-gray-600 text-sm mt-2">
+              <p className="text-gray-300 dark:text-gray-700 text-sm mt-2">
                 {item.description}
               </p>
             )}
@@ -50,7 +50,7 @@ export function MenuItem({ item, className }: MenuItemProps) {
             {item.options && item.options.length > 0 && (
               <ul className="mt-2 space-y-1">
                 {item.options.map((option, index) => (
-                  <li key={index} className="text-gray-400 dark:text-gray-600 text-sm flex items-center gap-1">
+                  <li key={index} className="text-gray-300 dark:text-gray-700 text-sm flex items-center gap-1">
                     <span className="text-white dark:text-black">•</span> {option}
                   </li>
                 ))}
@@ -58,14 +58,14 @@ export function MenuItem({ item, className }: MenuItemProps) {
             )}
             
             {item.note && (
-              <p className="text-gray-500 dark:text-gray-500 text-sm italic mt-2">
+              <p className="text-gray-400 dark:text-gray-600 text-sm italic mt-2">
                 {item.note}
               </p>
             )}
           </div>
           
           {item.image && (
-            <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden">
+            <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
               <Image
                 src={item.image}
                 alt={item.name}
@@ -78,15 +78,35 @@ export function MenuItem({ item, className }: MenuItemProps) {
         </div>
         
         <div className="mt-4 flex justify-between items-center">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {item.popular && (
-              <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                Popular
+              <span className="bg-white text-black dark:bg-black dark:text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1">
+                <Star className="h-3 w-3" />
+                <span>Popular</span>
+              </span>
+            )}
+            {item.vegetarian && (
+              <span className="bg-white text-black dark:bg-black dark:text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1">
+                <Leaf className="h-3 w-3" />
+                <span>Vegetarian</span>
+              </span>
+            )}
+            {item.vegan && (
+              <span className="bg-white text-black dark:bg-black dark:text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1">
+                <Salad className="h-3 w-3" />
+                <span>Vegan</span>
+              </span>
+            )}
+            {item.glutenFree && (
+              <span className="bg-white text-black dark:bg-black dark:text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1">
+                <XCircle className="h-3 w-3" />
+                <span>Gluten-Free</span>
               </span>
             )}
             {item.spicy && (
-              <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                Spicy
+              <span className="bg-white text-black dark:bg-black dark:text-white text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex items-center gap-1">
+                <Flame className="h-3 w-3" />
+                <span>Spicy</span>
               </span>
             )}
           </div>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MenuIcon } from "@/components/common/menu-icon"
 import type { MenuSection as MenuSectionType, MenuItem as MenuItemType } from "@/types"
-import { Eye } from "lucide-react"
+import { Eye, Star, Leaf, Salad, XCircle, Flame, ShoppingCart } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,7 @@ export function MenuFeaturedCard({ item, section, className }: { item: MenuItemT
   const [open, setOpen] = useState(false)
   
   return (
-    <div className={cn("bg-black dark:bg-white rounded-lg overflow-hidden", className)}>
+    <div className={cn("bg-black dark:bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow", className)}>
       {item.image && (
         <div className="relative w-full aspect-[4/3]">
           <Image
@@ -41,10 +41,10 @@ export function MenuFeaturedCard({ item, section, className }: { item: MenuItemT
         <h2 className="text-lg sm:text-xl font-bold text-white dark:text-black uppercase">
           {item.name}
         </h2>
-        <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600">
+        <p className="text-xs sm:text-sm text-gray-300 dark:text-gray-700">
           {section.title}
         </p>
-        <p className="text-sm text-gray-400 dark:text-gray-600 mt-2 line-clamp-2">
+        <p className="text-sm text-gray-300 dark:text-gray-700 mt-2 line-clamp-2">
           {item.description}
         </p>
         <div className="mt-3 sm:mt-4 flex justify-between items-center">
@@ -149,22 +149,30 @@ export function MenuSection({ section, className }: MenuSectionProps) {
   
   return (
     <div className={cn("w-full", className)}>
-      <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-black dark:text-white uppercase flex items-center gap-2">
+      <div className="flex items-center mb-3 sm:mb-4 gap-3">
         {icon && (
-          <MenuIcon 
-            icon={icon} 
-            size={24}
-            className="text-black dark:text-white flex-shrink-0" 
-          />
+          <div className="w-10 h-10 rounded-full bg-white dark:bg-black flex items-center justify-center border border-gray-200 dark:border-gray-800">
+            <MenuIcon 
+              icon={icon} 
+              size={20}
+              className="text-black dark:text-white flex-shrink-0" 
+            />
+          </div>
         )}
-        {title}
-      </h3>
+        <h3 className="text-lg sm:text-xl font-bold text-black dark:text-white uppercase border-b border-gray-200 dark:border-gray-800 pb-2 flex-1">
+          {title}
+        </h3>
+      </div>
+      
+      {section.story && (
+        <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm italic">{section.story}</p>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         {items.map((item, index) => (
           <div
             key={index}
-            className="bg-black dark:bg-white rounded-lg overflow-hidden p-3 sm:p-4"
+            className="bg-black dark:bg-white rounded-lg overflow-hidden p-3 sm:p-4 shadow-md hover:shadow-lg transition-shadow"
           >
             <div className="flex justify-between items-start gap-3 sm:gap-4">
               <div className="flex-1 min-w-0">
@@ -182,7 +190,7 @@ export function MenuSection({ section, className }: MenuSectionProps) {
                 </div>
                 
                 {item.description && (
-                  <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 mt-2">
+                  <p className="text-xs sm:text-sm text-gray-300 dark:text-gray-700 mt-2">
                     {item.description}
                   </p>
                 )}
@@ -201,7 +209,7 @@ export function MenuSection({ section, className }: MenuSectionProps) {
               <div className="mt-2 sm:mt-3">
                 <ul className="space-y-1">
                   {item.options.map((option, idx) => (
-                    <li key={idx} className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 flex items-center gap-1">
+                    <li key={idx} className="text-xs sm:text-sm text-gray-300 dark:text-gray-700 flex items-center gap-1">
                       <span className="text-white dark:text-black">•</span> {option}
                     </li>
                   ))}
@@ -210,7 +218,7 @@ export function MenuSection({ section, className }: MenuSectionProps) {
             )}
             
             {item.note && (
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 italic mt-2">
+              <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 italic mt-2">
                 {item.note}
               </p>
             )}
@@ -218,12 +226,27 @@ export function MenuSection({ section, className }: MenuSectionProps) {
             <div className="mt-2 sm:mt-3 flex justify-between items-center">
               <div className="flex flex-wrap items-center gap-1">
                 {item.popular && (
-                  <span className="bg-yellow-500 text-black text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                  <span className="bg-white text-black dark:bg-black dark:text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
                     Popular
                   </span>
                 )}
+                {item.vegetarian && (
+                  <span className="bg-white text-black dark:bg-black dark:text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                    Vegetarian
+                  </span>
+                )}
+                {item.vegan && (
+                  <span className="bg-white text-black dark:bg-black dark:text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                    Vegan
+                  </span>
+                )}
+                {item.glutenFree && (
+                  <span className="bg-white text-black dark:bg-black dark:text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                    Gluten-Free
+                  </span>
+                )}
                 {item.spicy && (
-                  <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
+                  <span className="bg-white text-black dark:bg-black dark:text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
                     Spicy
                   </span>
                 )}
