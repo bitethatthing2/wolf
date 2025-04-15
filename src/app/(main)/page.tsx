@@ -145,8 +145,6 @@ export default function HomePage() {
 
       <InstagramFeedSection />
       
-      <ReservationSection />
-      
       <GoogleReviewsSection />
     </main>
   )

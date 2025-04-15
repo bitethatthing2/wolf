@@ -14,7 +14,9 @@ import {
   ShoppingCart,
   ChefHat,
   Info,
-  Mail
+  Mail,
+  Beer,
+  CalendarCheck
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -112,6 +114,30 @@ export function MobileNav() {
                   <MapPin className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
                 </div>
                 Locations
+              </Link>
+            </Button>
+            <Button 
+              variant="default" 
+              className="w-full justify-start gap-2"
+              asChild
+            >
+              <Link href="/bar-tap" onClick={() => setOpen(false)}>
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <Beer className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
+                BarTap
+              </Link>
+            </Button>
+            <Button 
+              variant="default" 
+              className="w-full justify-start gap-2"
+              asChild
+            >
+              <Link href="/reservations" onClick={() => setOpen(false)}>
+                <div className={`w-6 h-6 rounded-full ${resolvedTheme === 'dark' ? 'bg-white' : 'bg-black'} flex items-center justify-center mr-2`}>
+                  <CalendarCheck className={`h-4 w-4 ${resolvedTheme === 'dark' ? 'text-black' : 'text-white'}`} />
+                </div>
+                Reservations
               </Link>
             </Button>
             <Button 

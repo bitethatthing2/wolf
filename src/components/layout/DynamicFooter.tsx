@@ -39,7 +39,7 @@ export default function DynamicFooter() {
   // If not hydrated yet, return a placeholder to prevent layout shift
   if (!isHydrated) {
     return (
-      <section className="w-full bg-white dark:bg-gray-950/90 relative">
+      <section className="w-full bg-white dark:bg-background relative">
         <div className="container mx-auto py-12 px-8">
           {/* Placeholder content with same structure but no theme-dependent elements */}
           <div className="opacity-0">Loading footer...</div>
@@ -52,17 +52,17 @@ export default function DynamicFooter() {
   const isDark = resolvedTheme === 'dark';
   
   return (
-    <section className={`w-full ${isDark ? 'bg-gray-950/90' : 'bg-white'} relative`}>
+    <section className="footer w-full bg-white dark:bg-background relative outline-none">
       {/* Scroll to top button */}
       {showScrollTop && (
         <button 
           onClick={scrollToTop}
-          className={`absolute -top-6 left-1/2 transform -translate-x-1/2 ${
-            isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'
-          } px-4 py-2 rounded-md shadow-lg transition-all flex items-center gap-2`}
+          className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white text-black hover:bg-gray-100 px-4 py-2 rounded-md shadow-lg transition-all flex items-center gap-2"
           aria-label="Scroll to top"
         >
-          <ArrowUp className="h-4 w-4" />
+          <div className="w-5 h-5 rounded-full bg-black flex items-center justify-center mr-1 icon-circle">
+            <ArrowUp className="h-3 w-3 text-white" />
+          </div>
           <span className="text-sm font-medium">Back to top</span>
         </button>
       )}
@@ -80,30 +80,30 @@ export default function DynamicFooter() {
           <div className="w-full max-w-md flex flex-wrap justify-center gap-4">
             <a 
               href="/menu" 
-              className={`flex items-center justify-center py-3 px-6 ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} font-bold text-base rounded-md`}
+              className="flex items-center justify-center py-3 px-6 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-gray-100 font-bold text-base rounded-md"
             >
-              <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
-                <UtensilsCrossed className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+              <div className="w-6 h-6 rounded-full bg-white dark:bg-black flex items-center justify-center mr-2 icon-circle">
+                <UtensilsCrossed className="h-4 w-4 text-black dark:text-white" />
               </div>
-              <span className={isDark ? 'text-black' : 'text-white'}>View Menu</span>
+              <span>View Menu</span>
             </a>
             <a 
               href="/order" 
-              className={`flex items-center justify-center py-3 px-6 ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} font-bold text-base rounded-md`}
+              className="flex items-center justify-center py-3 px-6 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-gray-100 font-bold text-base rounded-md"
             >
-              <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
-                <ShoppingCart className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+              <div className="w-6 h-6 rounded-full bg-white dark:bg-black flex items-center justify-center mr-2 icon-circle">
+                <ShoppingCart className="h-4 w-4 text-black dark:text-white" />
               </div>
-              <span className={isDark ? 'text-black' : 'text-white'}>Order Now</span>
+              <span>Order Now</span>
             </a>
             <a 
               href="/events" 
-              className={`flex items-center justify-center py-3 px-6 ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} font-bold text-base rounded-md`}
+              className="flex items-center justify-center py-3 px-6 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-gray-100 font-bold text-base rounded-md"
             >
-              <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
-                <Calendar className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} />
+              <div className="w-6 h-6 rounded-full bg-white dark:bg-black flex items-center justify-center mr-2 icon-circle">
+                <Calendar className="h-4 w-4 text-black dark:text-white" />
               </div>
-              <span className={isDark ? 'text-black' : 'text-white'}>Upcoming Events</span>
+              <span>Upcoming Events</span>
             </a>
           </div>
         </div>
@@ -135,26 +135,18 @@ export default function DynamicFooter() {
                 target="_blank" 
                 rel="noopener noreferrer" 
                 aria-label="Instagram"
-                className={`h-10 w-10 ${
-                  isDark 
-                    ? 'bg-white hover:opacity-90' 
-                    : 'bg-black hover:opacity-90'
-                } rounded-full flex items-center justify-center transition-opacity`}
+                className="h-10 w-10 bg-white rounded-full flex items-center justify-center transition-all hover:bg-gray-100 hover:shadow-md border-4 border-black dark:bg-black dark:border-transparent"
               >
-                <Instagram className={`h-5 w-5 ${isDark ? 'text-black' : 'text-white'}`} strokeWidth={2.5} />
+                <Instagram className="h-5 w-5 text-black dark:text-white" strokeWidth={2.5} />
               </a>
               <a 
                 href="https://www.facebook.com/p/The-Side-Hustle-Bar-100094503669280/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 aria-label="Facebook"
-                className={`h-10 w-10 ${
-                  isDark 
-                    ? 'bg-white hover:opacity-90' 
-                    : 'bg-black hover:opacity-90'
-                } rounded-full flex items-center justify-center transition-opacity`}
+                className="h-10 w-10 bg-white rounded-full flex items-center justify-center transition-all hover:bg-gray-100 hover:shadow-md border-4 border-black dark:bg-black dark:border-transparent"
               >
-                <Facebook className={`h-5 w-5 ${isDark ? 'text-black' : 'text-white'}`} strokeWidth={2.5} />
+                <Facebook className="h-5 w-5 text-black dark:text-white" strokeWidth={2.5} />
               </a>
             </div>
           </div>
@@ -164,7 +156,11 @@ export default function DynamicFooter() {
             <h3 className={`${isDark ? 'text-white' : 'text-black'} font-bold mb-5 text-xl`}>Visit {currentLocation.name.split('-')[1].trim()}</h3>
             <ul className="space-y-5">
               <li className="flex items-start">
-                <MapPin className={`${isDark ? 'text-white' : 'text-black'} h-5 w-5 mr-3 mt-0.5 flex-shrink-0`} />
+                <div className="flex-shrink-0 mr-3">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm icon-circle border-4 border-black dark:bg-black dark:border-transparent">
+                    <MapPin className="h-4 w-4 text-black dark:text-white" />
+                  </div>
+                </div>
                 <div>
                   <p className={isDark ? 'text-gray-300' : 'text-gray-900 font-medium'}>{currentLocation.address}</p>
                   <Link href="/locations" className={`${isDark ? 'text-white' : 'text-black font-semibold'} text-sm hover:underline mt-1 inline-block`}>
@@ -173,7 +169,11 @@ export default function DynamicFooter() {
                 </div>
               </li>
               <li className="flex items-start">
-                <Phone className={`${isDark ? 'text-white' : 'text-black'} h-5 w-5 mr-3 mt-0.5 flex-shrink-0`} />
+                <div className="flex-shrink-0 mr-3">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-black dark:border-transparent">
+                    <Phone className="h-4 w-4 text-black dark:text-white" />
+                  </div>
+                </div>
                 <div>
                   <a href={`tel:${formattedPhone}`} className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-900 font-medium hover:text-black'}`}>
                     {currentLocation.phone}
@@ -181,7 +181,11 @@ export default function DynamicFooter() {
                 </div>
               </li>
               <li className="flex items-start">
-                <Mail className={`${isDark ? 'text-white' : 'text-black'} h-5 w-5 mr-3 mt-0.5 flex-shrink-0`} />
+                <div className="flex-shrink-0 mr-3">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-black dark:border-transparent">
+                    <Mail className="h-4 w-4 text-black dark:text-white" />
+                  </div>
+                </div>
                 <div>
                   <a href={`mailto:${currentLocation.email}`} className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-900 font-medium hover:text-black'}`}>
                     {currentLocation.email}
@@ -189,7 +193,11 @@ export default function DynamicFooter() {
                 </div>
               </li>
               <li className="flex items-start">
-                <Clock className={`${isDark ? 'text-white' : 'text-black'} h-5 w-5 mr-3 mt-0.5 flex-shrink-0`} />
+                <div className="flex-shrink-0 mr-3">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-black dark:border-transparent">
+                    <Clock className="h-4 w-4 text-black dark:text-white" />
+                  </div>
+                </div>
                 <div>
                   <p className={isDark ? 'text-gray-300' : 'text-gray-900 font-medium'}>Today: {currentLocation.hours[getDayOfWeek()]}</p>
                   <button className={`${isDark ? 'text-white' : 'text-black font-semibold'} text-sm hover:underline mt-1`} onClick={() => document.getElementById('hours-details')?.classList.toggle('hidden')}>
@@ -263,51 +271,60 @@ export default function DynamicFooter() {
             <h3 className={`${isDark ? 'text-white' : 'text-black'} font-bold mb-5 text-xl`}>Ready to Order?</h3>
             <div className="rounded-lg py-4 flex flex-col">
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-900 font-medium'} mb-4`}>Order online for pickup or delivery</p>
-              <a 
-                href="/order" 
-                className={`flex items-center justify-center gap-2 py-3 px-6 ${
-                  isDark 
-                    ? 'bg-white hover:bg-gray-100 text-black' 
-                    : 'bg-black hover:bg-gray-800 text-white'
-                } font-bold text-base rounded-md mb-4`}
-              >
-                <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
-                  <ShoppingCart className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} strokeWidth={2.5} />
-                </div>
-                <span className={isDark ? 'text-black' : 'text-white'}>Order Online</span>
-              </a>
-              <a 
-                href="/reservations"
-                className={`flex items-center justify-center gap-2 py-3 px-6 ${
-                  isDark 
-                    ? 'bg-white hover:bg-gray-100 text-black' 
-                    : 'bg-black hover:bg-gray-800 text-white'
-                } font-bold text-base rounded-md`}
-              >
-                <div className={`w-6 h-6 rounded-full ${isDark ? 'bg-black' : 'bg-white'} flex items-center justify-center mr-2`}>
-                  <Calendar className={`h-4 w-4 ${isDark ? 'text-white' : 'text-black'}`} strokeWidth={2.5} />
-                </div>
-                <span className={isDark ? 'text-black' : 'text-white'}>Make a Reservation</span>
-              </a>
+              
+              {/* Order Online Button */}
+              <div className="mb-4">
+                <a 
+                  href="/order" 
+                  className="inline-flex items-center justify-center w-full py-3 px-6 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-gray-100 font-bold text-base rounded-md"
+                >
+                  <span className="w-6 h-6 rounded-full bg-white dark:bg-black flex items-center justify-center mr-2">
+                    <ShoppingCart className="h-4 w-4 text-black dark:text-white" strokeWidth={2.5} />
+                  </span>
+                  <span>Order Online</span>
+                </a>
+              </div>
+              
+              {/* Make a Reservation Button */}
+              <div>
+                <a 
+                  href="/reservations"
+                  className="inline-flex items-center justify-center w-full py-3 px-6 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-gray-100 font-bold text-base rounded-md"
+                >
+                  <span className="w-6 h-6 rounded-full bg-white dark:bg-black flex items-center justify-center mr-2">
+                    <Calendar className="h-4 w-4 text-black dark:text-white" strokeWidth={2.5} />
+                  </span>
+                  <span>Make a Reservation</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
         
         {/* Simple separator div instead of Separator component */}
-        <div className={`my-10 h-px ${isDark ? 'bg-gray-800' : 'bg-gray-200'} w-full`}></div>
+        <div className={`my-10 h-px ${isDark ? 'bg-gray-700/50' : 'bg-gray-200'} w-full bg-blend-normal`}></div>
         
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className={`${isDark ? 'text-gray-400' : 'text-gray-800 font-medium'} mb-4 md:mb-0`}>
             &copy; {new Date().getFullYear()} Side Hustle Bar. All rights reserved.
           </p>
-          <div className="flex space-x-6">
-            <Link href="/privacy" className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-800 font-medium hover:text-black'}`}>
+          <div className="flex flex-wrap gap-4 md:gap-6 justify-center bg-transparent">
+            <Link 
+              href="/privacy" 
+              className="bg-white text-black px-3 py-1 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 hover:bg-gray-100"
+            >
               Privacy Policy
             </Link>
-            <Link href="/terms" className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-800 font-medium hover:text-black'}`}>
+            <Link 
+              href="/terms" 
+              className="bg-white text-black px-3 py-1 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 hover:bg-gray-100"
+            >
               Terms of Service
             </Link>
-            <Link href="/accessibility" className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-800 font-medium hover:text-black'}`}>
+            <Link 
+              href="/accessibility" 
+              className="bg-white text-black px-3 py-1 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 hover:bg-gray-100"
+            >
               Accessibility
             </Link>
           </div>

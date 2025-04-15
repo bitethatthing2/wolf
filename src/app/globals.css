@@ -29,11 +29,12 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Dark navy blue background matching footer */
+    --background: 220 40% 13%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 220 40% 13%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 40% 13%;
     --popover-foreground: 210 40% 98%;
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
@@ -92,6 +93,88 @@
     @apply min-h-[44px] min-w-[44px];
   }
   
+  /* Footer link styles for consistent white backgrounds */
+  /* .footer-link {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    background-image: none !important;
+  }
+  
+  .footer-link:hover {
+    background-color: #f3f4f6 !important;
+  } */
+
+  /* Ensure footer buttons have correct styling by default */
+  /*
+  section.footer a.flex, 
+  section.footer button.flex,
+  .footer a.flex,
+  .footer button.flex,
+  section.footer a[href="/menu"],
+  section.footer a[href="/order"],
+  section.footer a[href="/events"],
+  section.footer a[href="/reservations"],
+  section.footer a[href="/privacy"],
+  section.footer a[href="/terms"],
+  section.footer a[href="/accessibility"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  section.footer a.flex:hover, 
+  section.footer button.flex:hover,
+  .footer a.flex:hover,
+  .footer button.flex:hover,
+  section.footer a[href="/menu"]:hover,
+  section.footer a[href="/order"]:hover,
+  section.footer a[href="/events"]:hover,
+  section.footer a[href="/reservations"]:hover,
+  section.footer a[href="/privacy"]:hover,
+  section.footer a[href="/terms"]:hover,
+  section.footer a[href="/accessibility"]:hover {
+    background-color: #f3f4f6 !important;
+  }
+  */
+
+  /* Ensure footer icons have proper styling */
+  /*
+  section.footer .icon-circle,
+  .footer .icon-circle {
+    background-color: #000000 !important;
+  }
+  
+  section.footer .icon-circle svg,
+  .footer .icon-circle svg {
+    color: #ffffff !important;
+  }
+  */
+
+  /* Override any footer location/contact icons to maintain white background with black icons */
+  /*
+  section.footer li .w-8.h-8.rounded-full svg,
+  .footer li .w-8.h-8.rounded-full svg {
+    color: #000000 !important;
+  }
+  */
+
+  /* Ensure footer social media icons maintain white background */
+  /*
+  section.footer .h-10.w-10 svg,
+  .footer .h-10.w-10 svg {
+    color: #000000 !important;
+  }
+  */
+
+  /* Set white backgrounds for specific footer elements */
+  /*
+  section.footer li .w-8.h-8.rounded-full,
+  .footer li .w-8.h-8.rounded-full,
+  section.footer .h-10.w-10,
+  .footer .h-10.w-10 {
+    background-color: #ffffff !important;
+  }
+  */
+
   /* Ensure buttons have proper touch sizing */
   button, 
   a[role="button"],

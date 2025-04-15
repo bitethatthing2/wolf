@@ -4,15 +4,16 @@ import React from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/common/PageHeader';
-import { QrCode, Utensils, InfoIcon } from 'lucide-react';
+import { QrCode, Utensils, InfoIcon, Beer } from 'lucide-react';
 import Link from 'next/link';
+import { BarTapProcess } from '@/components/features/bartap';
 
 export default function TableOrderingPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <PageHeader 
-        title="Table Ordering" 
-        description="Scan the QR code at your table to order directly from our menu" 
+        title="Food Table Ordering" 
+        description="Scan the QR code at your table to order food directly from our menu" 
       />
       
       <div className="mx-auto mt-12 max-w-3xl">
@@ -39,7 +40,7 @@ export default function TableOrderingPage() {
             
             {/* Instructions Section */}
             <div className="bg-muted/30 p-8">
-              <h2 className="mb-4 text-xl font-bold">How It Works</h2>
+              <h2 className="mb-4 text-xl font-bold">How Food Ordering Works</h2>
               <ol className="space-y-4">
                 <li className="flex items-start gap-3">
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
@@ -57,7 +58,7 @@ export default function TableOrderingPage() {
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                     3
                   </div>
-                  <p>Browse our menu and select your items</p>
+                  <p>Browse our food menu and select your items</p>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
@@ -69,7 +70,7 @@ export default function TableOrderingPage() {
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                     5
                   </div>
-                  <p>We'll bring your order right to your table</p>
+                  <p>We'll bring your food right to your table</p>
                 </li>
               </ol>
             </div>
@@ -81,12 +82,20 @@ export default function TableOrderingPage() {
                 <h3 className="text-lg font-semibold">Need assistance?</h3>
                 <p className="text-sm text-muted-foreground">Our staff is always happy to help</p>
               </div>
-              <Link href="/order">
-                <Button variant="outline" className="gap-2">
-                  <InfoIcon className="h-4 w-4" />
-                  Other Order Options
-                </Button>
-              </Link>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Link href="/order">
+                  <Button variant="outline" className="gap-2">
+                    <InfoIcon className="h-4 w-4" />
+                    Food Delivery Options
+                  </Button>
+                </Link>
+                <Link href="/bar-tap">
+                  <Button variant="default" className="gap-2">
+                    <Beer className="h-4 w-4" />
+                    BarTap™ Drink Service
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -97,13 +106,19 @@ export default function TableOrderingPage() {
               <Utensils className="h-6 w-6 text-primary-foreground" />
             </div>
             <div className="flex-1">
-              <h3 className="mb-2 text-xl font-semibold">Table Ordering Benefits</h3>
+              <h3 className="mb-2 text-xl font-semibold">Food Table Ordering Benefits</h3>
               <ul className="ml-6 list-disc space-y-1 text-muted-foreground">
-                <li>No waiting for service - order at your own pace</li>
-                <li>Easily split bills between friends</li>
-                <li>View detailed menu items with photos</li>
-                <li>Special offers exclusive to table ordering</li>
+                <li>No waiting for food service - order at your own pace</li>
+                <li>Easily split food bills between friends</li>
+                <li>View detailed food menu items with photos</li>
+                <li>Special food offers exclusive to table ordering</li>
               </ul>
+              <p className="mt-4 text-sm font-medium text-primary">
+                <Link href="/bar-tap" className="flex items-center gap-2 hover:underline">
+                  <Beer className="w-4 h-4" />
+                  For premium drink service, use the BarTap™ feature - a simple 3-step process
+                </Link>
+              </p>
             </div>
           </div>
         </div>

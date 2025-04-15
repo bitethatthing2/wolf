@@ -46,6 +46,12 @@ export function Header() {
             <Link href="/locations" className="font-medium">
               Locations
             </Link>
+            <Link href="/bar-tap" className="font-medium">
+              BarTap
+            </Link>
+            <Link href="/reservations" className="font-medium">
+              Reservations
+            </Link>
             <Link href="/events" className="font-medium">
               Events
             </Link>

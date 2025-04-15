@@ -2,7 +2,7 @@ import { BackButton } from "@/components/ui/back-button";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-background">
       <div className="container py-8">
         <div className="mb-4">
           <BackButton />

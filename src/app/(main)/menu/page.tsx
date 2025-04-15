@@ -92,7 +92,7 @@ const MenuSection: React.FC<MenuSectionProps> = ({ section, isActive, onToggle, 
         className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all duration-300 ease-in-out highlight-section-target ${
           isActive 
             ? "bg-gray-100 dark:bg-gray-900 shadow-md" 
-            : "bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-950"
+            : "bg-white dark:bg-background hover:bg-gray-50 dark:hover:bg-gray-900/80"
         }`}
         onClick={onToggle}
         onKeyDown={handleKeyDown}
@@ -102,8 +102,8 @@ const MenuSection: React.FC<MenuSectionProps> = ({ section, isActive, onToggle, 
         aria-controls={`section-content-${id}`}
       >
         {SectionIcon && (
-          <div className="w-12 h-12 rounded-full bg-white dark:bg-black flex-shrink-0 flex items-center justify-center border border-gray-200 dark:border-gray-800 shadow-sm">
-            <SectionIcon className="w-6 h-6 text-black dark:text-white" />
+          <div className="w-12 h-12 rounded-full bg-white dark:bg-white flex-shrink-0 flex items-center justify-center border border-gray-200 dark:border-gray-800 shadow-sm">
+            <SectionIcon className="w-6 h-6 text-black" />
           </div>
         )}
         <h2 className="text-xl font-bold text-black dark:text-white uppercase flex-1">
@@ -184,7 +184,7 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
         {(item.vegetarian || item.vegan || item.glutenFree || item.spicy || item.popular) && (
           <div className="flex flex-wrap gap-1.5 mt-3 pt-2 border-t border-gray-700 dark:border-gray-300">
             {item.popular && (
-              <Badge className="bg-white text-black dark:bg-black dark:text-white py-0.5 px-2 rounded-full">
+              <Badge className="bg-white text-black dark:bg-white dark:text-black py-0.5 px-2 rounded-full">
                 <div className="flex items-center gap-1">
                   <Star className="h-3 w-3" />
                   <span className="text-xs">Popular</span>
@@ -192,7 +192,7 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
               </Badge>
             )}
             {item.vegetarian && (
-              <Badge className="bg-white text-black dark:bg-black dark:text-white py-0.5 px-2 rounded-full">
+              <Badge className="bg-white text-black dark:bg-white dark:text-black py-0.5 px-2 rounded-full">
                 <div className="flex items-center gap-1">
                   <Leaf className="h-3 w-3" />
                   <span className="text-xs">Vegetarian</span>
@@ -200,7 +200,7 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
               </Badge>
             )}
             {item.vegan && (
-              <Badge className="bg-white text-black dark:bg-black dark:text-white py-0.5 px-2 rounded-full">
+              <Badge className="bg-white text-black dark:bg-white dark:text-black py-0.5 px-2 rounded-full">
                 <div className="flex items-center gap-1">
                   <Salad className="h-3 w-3" />
                   <span className="text-xs">Vegan</span>
@@ -208,7 +208,7 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
               </Badge>
             )}
             {item.glutenFree && (
-              <Badge className="bg-white text-black dark:bg-black dark:text-white py-0.5 px-2 rounded-full">
+              <Badge className="bg-white text-black dark:bg-white dark:text-black py-0.5 px-2 rounded-full">
                 <div className="flex items-center gap-1">
                   <XCircle className="h-3 w-3" />
                   <span className="text-xs">Gluten-Free</span>
@@ -216,7 +216,7 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
               </Badge>
             )}
             {item.spicy && (
-              <Badge className="bg-white text-black dark:bg-black dark:text-white py-0.5 px-2 rounded-full">
+              <Badge className="bg-white text-black dark:bg-white dark:text-black py-0.5 px-2 rounded-full">
                 <div className="flex items-center gap-1">
                   <Flame className="h-3 w-3" />
                   <span className="text-xs">Spicy</span>
@@ -236,7 +236,7 @@ const MenuToggle: React.FC<{
   onChange: (tab: string) => void;
 }> = ({ activeTab, onChange }) => {
   return (
-    <div className="bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden mb-4 shadow-sm">
+    <div className="bg-white dark:bg-background rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden mb-4 shadow-sm">
       <div className="flex h-14">
         {/* Food Tab */}
         <button
@@ -244,18 +244,18 @@ const MenuToggle: React.FC<{
           className={`relative flex items-center justify-center gap-2 w-1/2 h-full font-bold uppercase transition-all duration-300 ${
             activeTab === "food" 
               ? "bg-black dark:bg-white text-white dark:text-black" 
-              : "bg-white dark:bg-black text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900"
+              : "bg-white dark:bg-background text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900"
           }`}
           aria-pressed={activeTab === "food" ? "true" : "false"}
         >
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
             activeTab === "food" 
-              ? "bg-white dark:bg-black" 
+              ? "bg-white dark:bg-white" 
               : "bg-gray-100 dark:bg-gray-800"
           }`}>
             <UtensilsCrossed className={`w-4 h-4 ${
               activeTab === "food" 
-                ? "text-black dark:text-white" 
+                ? "text-black" 
                 : "text-gray-600 dark:text-gray-400"
             }`} />
           </div>
@@ -268,18 +268,18 @@ const MenuToggle: React.FC<{
           className={`relative flex items-center justify-center gap-2 w-1/2 h-full font-bold uppercase transition-all duration-300 ${
             activeTab === "drinks" 
               ? "bg-black dark:bg-white text-white dark:text-black" 
-              : "bg-white dark:bg-black text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900"
+              : "bg-white dark:bg-background text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900"
           }`}
           aria-pressed={activeTab === "drinks" ? "true" : "false"}
         >
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
             activeTab === "drinks" 
-              ? "bg-white dark:bg-black" 
+              ? "bg-white dark:bg-white" 
               : "bg-gray-100 dark:bg-gray-800"
           }`}>
             <Wine className={`w-4 h-4 ${
               activeTab === "drinks" 
-                ? "text-black dark:text-white" 
+                ? "text-black" 
                 : "text-gray-600 dark:text-gray-400"
             }`} />
           </div>
@@ -313,7 +313,7 @@ const CategoryNav: React.FC<{
             className={`flex flex-col items-center min-w-[60px] p-2 rounded-lg transition-all duration-200 ${
               isActive 
                 ? 'bg-black dark:bg-white text-white dark:text-black' 
-                : 'bg-white dark:bg-black text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900'
+                : 'bg-white dark:bg-background text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900'
             }`}
             onClick={() => onSelectCategory(sectionId)}
             aria-pressed={isActive ? "true" : "false"}
@@ -322,12 +322,12 @@ const CategoryNav: React.FC<{
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
               isActive 
-                ? 'bg-white dark:bg-black' 
+                ? 'bg-white dark:bg-white' 
                 : 'bg-gray-100 dark:bg-gray-800'
             }`}>
               <CategoryIcon className={`w-5 h-5 ${
                 isActive
-                  ? 'text-black dark:text-white' 
+                  ? 'text-black' 
                   : 'text-gray-700 dark:text-gray-300'
               }`} aria-hidden="true" />
             </div>
@@ -517,7 +517,7 @@ export default function MenuPage() {
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-background">
       {/* Include our highlight animation styles */}
       <HighlightAnimationStyles />
       
@@ -538,7 +538,7 @@ export default function MenuPage() {
           />
           
           {/* Sticky Category Navigation */}
-          <div className="sticky top-0 z-20 pt-4 pb-2 bg-white dark:bg-black shadow-sm">
+          <div className="sticky top-0 z-20 pt-4 pb-2 bg-white dark:bg-background shadow-sm">
             <CategoryNav 
               categories={currentMenuData}
               activeCategory={activeCategory}

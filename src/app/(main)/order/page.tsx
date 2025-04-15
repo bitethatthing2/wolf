@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Phone, UtensilsCrossed, ShoppingBag, ArrowRight } from 'lucide-react'; 
+import { Phone, UtensilsCrossed, ShoppingBag, ArrowRight, Beer } from 'lucide-react';
+import { BarTapProcess } from '@/components/features/bartap';
 
 interface DeliveryOption {
   id: string;
@@ -54,17 +55,17 @@ export default function OrderPage() {
         description="Order your favorite food for pickup or delivery" 
       />
       
-      <div className="mt-12 grid gap-8 md:grid-cols-2">
-        {/* Online Ordering Section */}
-        <div className="rounded-xl border border-border overflow-hidden">
+      <div className="mt-12 max-w-3xl mx-auto">
+        {/* Food Ordering Section */}
+        <div className="rounded-xl border border-border overflow-hidden mb-8">
           <div className="bg-muted/10 p-6">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary">
                 <ShoppingBag className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Online Ordering</h2>
-                <p className="text-muted-foreground">Get your favorite food delivered</p>
+                <h2 className="text-2xl font-bold">Food Ordering</h2>
+                <p className="text-muted-foreground">Get your favorite food delivered or for pickup</p>
               </div>
             </div>
           </div>
@@ -139,67 +140,62 @@ export default function OrderPage() {
           </div>
         </div>
         
-        {/* Table Ordering Section */}
-        <div className="rounded-xl border border-border overflow-hidden">
-          <div className="bg-muted/10 p-6">
+        {/* BarTap Promo Section */}
+        <div className="rounded-xl border border-border overflow-hidden mb-8 bg-gradient-to-r from-primary/10 to-primary/5">
+          <div className="bg-black/10 p-6">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary">
-                <UtensilsCrossed className="h-6 w-6 text-primary-foreground" />
+                <Beer className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Table Ordering</h2>
-                <p className="text-muted-foreground">Order directly from your table</p>
+                <h2 className="text-2xl font-bold">BarTap™ Premium</h2>
+                <p className="text-muted-foreground">Skip the line with our premium drink service</p>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-col justify-between h-[calc(100%-76px)]">
-            <div className="p-6">
-              <div className="mb-6 aspect-video relative rounded-lg overflow-hidden">
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="w-full md:w-1/2 aspect-video relative rounded-lg overflow-hidden">
                 <Image
-                  src="/assets/images/img_placeholder_event_default.jpg"
-                  alt="Table ordering"
+                  src="/bartap.png"
+                  alt="Bar service"
                   fill
+                  quality={90}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-xl font-bold text-white">Scan & Order</h3>
-                  <p className="text-sm text-white/80">Quick, easy, and contactless</p>
+                  <h3 className="text-xl font-bold text-white">Premium Bar Experience</h3>
+                  <p className="text-sm text-white/80">Reserve your personal bartender</p>
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <p className="text-muted-foreground">
-                  Enjoy a seamless dining experience with our table ordering system. Simply scan the QR code at your table to browse our menu, place orders, and pay - all from your phone.
-                </p>
-                <ul className="ml-6 list-disc space-y-1 text-muted-foreground">
-                  <li>No waiting for service</li>
-                  <li>Easy bill splitting</li>
-                  <li>Exclusive table ordering specials</li>
-                </ul>
+              <div className="w-full md:w-1/2 space-y-4">
+                <Link href="/bar-tap" className="block mb-4">
+                  <BarTapProcess compact />
+                </Link>
+                
+                <Link href="/bar-tap">
+                  <Button className="w-full gap-2 bg-primary hover:bg-primary/90">
+                    Learn More About BarTap™
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
-            </div>
-            
-            <div className="p-6 border-t border-border">
-              <Link href="/table-ordering">
-                <Button className="w-full gap-2">
-                  Learn More About Table Ordering
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Coming Soon Section */}
-      <div className="mt-12 rounded-lg border border-border bg-muted/30 p-6 text-center">
-        <h2 className="mb-2 text-xl font-bold">Coming Soon: Integrated Online Ordering</h2>
-        <p className="mx-auto max-w-2xl text-muted-foreground">
-          We're working on our own integrated online ordering system to make your experience even better. 
-          Stay tuned for updates and exclusive promotions when we launch!
-        </p>
+        
+        {/* Coming Soon Section */}
+        <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
+          <h2 className="mb-2 text-xl font-bold">Coming Soon: Integrated Online Ordering</h2>
+          <p className="mx-auto max-w-2xl text-muted-foreground">
+            We're working on our own integrated online ordering system to make your experience even better. 
+            Stay tuned for updates and exclusive promotions when we launch!
+          </p>
+        </div>
       </div>
     </div>
   );

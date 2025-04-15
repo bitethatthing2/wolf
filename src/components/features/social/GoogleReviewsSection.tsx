@@ -65,7 +65,7 @@ const GoogleReviewsSection: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <section className={`py-12 sm:py-16 md:py-20 ${isDark ? 'bg-gray-950/90' : 'bg-white'} w-full relative overflow-hidden`}>
+      <section className="py-12 sm:py-16 md:py-20 bg-white dark:bg-background w-full relative overflow-hidden">
         <div className="container mx-auto max-w-6xl px-4 sm:px-6 relative z-10">
           <div className="text-center mb-6">
             <h2 className={`section-title text-center mx-auto mb-4 text-2xl sm:text-3xl md:text-4xl font-bold ${isDark ? 'text-white' : 'text-black'} uppercase tracking-wider`}>Customer Reviews</h2>
@@ -86,7 +86,7 @@ const GoogleReviewsSection: React.FC = () => {
   }
   
   return (
-    <section className={`py-12 sm:py-16 md:py-20 ${isDark ? 'bg-gray-950/90' : 'bg-white'} w-full relative overflow-hidden`}>
+    <section className="py-12 sm:py-16 md:py-20 bg-white dark:bg-background w-full relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-5">
         <div className={`absolute top-[25%] left-[10%] w-32 h-32 rounded-full ${isDark ? 'bg-white/5' : 'bg-black/5'} blur-3xl`}></div>

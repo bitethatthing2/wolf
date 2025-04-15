@@ -90,7 +90,7 @@ const InstagramFeedSection: React.FC = () => {
   const isDark = theme === 'dark';
   
   return (
-    <section className={`py-12 sm:py-16 md:py-20 ${isDark ? 'bg-gray-950/90' : 'bg-white'} w-full relative overflow-hidden`}>
+    <section className="py-12 sm:py-16 md:py-20 bg-white dark:bg-background w-full relative overflow-hidden">
       {/* Load Elfsight script via our proxy for CSP compatibility */}
       <Script
         src="/api/proxy/elfsight?url=https://static.elfsight.com/platform/platform.js"
