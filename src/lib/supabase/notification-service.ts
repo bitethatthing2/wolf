@@ -6,10 +6,16 @@ import { fetchToken } from '@/lib/firebase/client';
 export interface NotificationSubscription {
   id?: string;
   created_at?: string;
-  endpoint: string;
-  p256dh: string;
-  auth: string;
-  user_agent: string;
+  device_token: string;
+  device_info: {
+    user_agent: string;
+    platform: string;
+    p256dh?: string;
+    auth?: string;
+    web_push?: boolean;
+    fcm?: boolean;
+    test?: boolean;
+  };
   last_active?: string;
 }
 
@@ -77,7 +83,7 @@ export async function testNotificationSetup(supabase: any): Promise<boolean> {
     const { error: deleteError } = await supabase
       .from('notification_subscriptions')
       .delete()
-      .eq('endpoint', uniqueEndpoint);
+      .eq('device_token', uniqueEndpoint);
 
     if (deleteError) {
       console.error('Error deleting test record:', deleteError);
@@ -221,8 +227,8 @@ export async function saveWebPushSubscription(
     };
 
     console.log("Subscription data prepared:", {
-      endpoint: subscriptionData.endpoint,
-      user_agent: subscriptionData.user_agent,
+      device_token: subscriptionData.device_token,
+      user_agent: subscriptionData.device_info.user_agent,
       last_active: subscriptionData.last_active
     });
 
@@ -452,13 +458,13 @@ export async function getActiveSubscriptions(
     // Filter by platform if specified
     if (platform && platform !== 'all') {
       if (platform === 'ios') {
-        query = query.ilike('user_agent', '%iphone%').or('user_agent.ilike=%ipad%');
+        query = query.ilike('device_info->>user_agent', '%iphone%').or('device_info->>user_agent.ilike=%ipad%');
       } else if (platform === 'android') {
-        query = query.ilike('user_agent', '%android%');
+        query = query.ilike('device_info->>user_agent', '%android%');
       } else if (platform === 'web') {
-        query = query.not.ilike('user_agent', '%android%')
-                    .not.ilike('user_agent', '%iphone%')
-                    .not.ilike('user_agent', '%ipad%');
+        query = query.not.ilike('device_info->>user_agent', '%android%')
+                    .not.ilike('device_info->>user_agent', '%iphone%')
+                    .not.ilike('device_info->>user_agent', '%ipad%');
       }
     }
     
