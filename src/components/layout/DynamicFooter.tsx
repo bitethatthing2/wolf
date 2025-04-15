@@ -135,18 +135,18 @@ export default function DynamicFooter() {
                 target="_blank" 
                 rel="noopener noreferrer" 
                 aria-label="Instagram"
-                className="h-10 w-10 bg-white rounded-full flex items-center justify-center transition-all hover:bg-gray-100 hover:shadow-md border-4 border-black dark:bg-black dark:border-transparent"
+                className="h-10 w-10 bg-white rounded-full flex items-center justify-center transition-all hover:bg-gray-100 hover:shadow-md border-4 border-black dark:bg-white dark:border-transparent"
               >
-                <Instagram className="h-5 w-5 text-black dark:text-white" strokeWidth={2.5} />
+                <Instagram className="h-5 w-5 text-black" strokeWidth={2.5} />
               </a>
               <a 
                 href="https://www.facebook.com/p/The-Side-Hustle-Bar-100094503669280/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 aria-label="Facebook"
-                className="h-10 w-10 bg-white rounded-full flex items-center justify-center transition-all hover:bg-gray-100 hover:shadow-md border-4 border-black dark:bg-black dark:border-transparent"
+                className="h-10 w-10 bg-white rounded-full flex items-center justify-center transition-all hover:bg-gray-100 hover:shadow-md border-4 border-black dark:bg-white dark:border-transparent"
               >
-                <Facebook className="h-5 w-5 text-black dark:text-white" strokeWidth={2.5} />
+                <Facebook className="h-5 w-5 text-black" strokeWidth={2.5} />
               </a>
             </div>
           </div>
@@ -157,8 +157,8 @@ export default function DynamicFooter() {
             <ul className="space-y-5">
               <li className="flex items-start">
                 <div className="flex-shrink-0 mr-3">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm icon-circle border-4 border-black dark:bg-black dark:border-transparent">
-                    <MapPin className="h-4 w-4 text-black dark:text-white" />
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm icon-circle border-4 border-black dark:bg-white dark:border-transparent">
+                    <MapPin className="h-4 w-4 text-black" />
                   </div>
                 </div>
                 <div>
@@ -170,8 +170,8 @@ export default function DynamicFooter() {
               </li>
               <li className="flex items-start">
                 <div className="flex-shrink-0 mr-3">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-black dark:border-transparent">
-                    <Phone className="h-4 w-4 text-black dark:text-white" />
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-white dark:border-transparent">
+                    <Phone className="h-4 w-4 text-black" />
                   </div>
                 </div>
                 <div>
@@ -182,8 +182,8 @@ export default function DynamicFooter() {
               </li>
               <li className="flex items-start">
                 <div className="flex-shrink-0 mr-3">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-black dark:border-transparent">
-                    <Mail className="h-4 w-4 text-black dark:text-white" />
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-white dark:border-transparent">
+                    <Mail className="h-4 w-4 text-black" />
                   </div>
                 </div>
                 <div>
@@ -194,8 +194,8 @@ export default function DynamicFooter() {
               </li>
               <li className="flex items-start">
                 <div className="flex-shrink-0 mr-3">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-black dark:border-transparent">
-                    <Clock className="h-4 w-4 text-black dark:text-white" />
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border-4 border-black dark:bg-white dark:border-transparent">
+                    <Clock className="h-4 w-4 text-black" />
                   </div>
                 </div>
                 <div>

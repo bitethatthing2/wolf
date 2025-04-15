@@ -4,16 +4,28 @@
   "description": "Side Hustle Bar offers an exciting sports bar experience with great food, drinks, and entertainment in Portland and Salem.",
   "icons": [
     {
-      "src": "/icons/splash_screens/icon.png",
+      "src": "/icons/pwa/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/splash_screens/icon.png",
+      "src": "/icons/pwa/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/pwa/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/ios/icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/apple-touch-icon.png",

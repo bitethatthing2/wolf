@@ -1,18 +1,28 @@
 /* eslint-disable no-restricted-globals */
 
-// Import service worker fix for navigation preload
-importScripts("./service-worker-fix.js");
+// Import the CSP fix from the main service worker
+importScripts("./only_these/csp-fix.js");
 
 // Self-registration for the service worker
 self.addEventListener('install', function(event) {
   console.log('[firebase-messaging-sw.js] Service Worker installed');
   self.skipWaiting(); // Ensure the service worker activates immediately
+  
+  // Indicate we're installed for main service worker coordination
+  if (self.state) {
+    self.state.firebaseMessagingInstalled = true;
+  }
 });
 
 // Handle service worker activation
 self.addEventListener('activate', function(event) {
   console.log('[firebase-messaging-sw.js] Service Worker activated');
   event.waitUntil(self.clients.claim()); // Take control of all clients
+  
+  // Indicate we're active for main service worker coordination
+  if (self.state) {
+    self.state.firebaseMessagingActive = true;
+  }
 });
 
 // Load Firebase scripts dynamically - using the newer v9 compat version

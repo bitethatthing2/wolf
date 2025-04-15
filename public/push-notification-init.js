@@ -180,7 +180,7 @@
         console.log('[Push Notification Init] Trying alternate service worker registration method');
         
         // Try to register the service worker directly as a last resort
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('/sw.js')
         .then(registration => {
           console.log('[Push Notification Init] Registered service worker directly:', registration.scope);
           window.__wolfAppInit.serviceWorkerRegistered = true;
