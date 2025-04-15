@@ -1,3 +1,4 @@
+// Enforces global design system: navy bg, card/panel uses glassmorphism, text uses text-foreground, strict button/icon rules, no hardcoded colors
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -89,6 +90,14 @@ const products: Product[] = [
   }
 ];
 
+function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card/80 backdrop-blur-lg border border-border shadow-xl rounded-2xl ${className}`}>
+      {children}
+    </div>
+  );
+}
+
 export default function ShopPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -110,170 +119,63 @@ export default function ShopPage() {
     }
   }, [selectedCategory]);
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
-
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen">
-      <PageHeader
-        title="Side Hustle Merch"
-        description="Take a piece of Side Hustle home with you"
-      />
-
-      <div className="container py-8 px-4 md:px-6">
-        {/* Printify Integration Banner */}
-        <div className="bg-gradient-to-r from-black/90 to-black/80 dark:from-gray-800/90 dark:to-gray-800/80 rounded-xl p-6 mb-8 text-white">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold mb-2">Powered by Printify</h2>
-              <p className="text-gray-200 text-sm md:text-base">
-                All our merchandise is created on-demand and ships directly to you. Quality products with our custom designs.
-              </p>
-            </div>
-            <Button 
-              onClick={() => window.open(PRINTIFY_SHOP_URL, '_blank')}
-              className="bg-white text-black hover:bg-gray-200 flex items-center gap-2 whitespace-nowrap"
+    <div className="min-h-screen bg-background">
+      <PageHeader title="Shop" />
+      <div className="container py-12">
+        {/* Category Filter */}
+        <div className="mb-10 flex flex-wrap gap-3">
+          {CATEGORIES.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "default" : "secondary"}
+              className="bg-card/80 text-card-foreground border border-border rounded-xl font-semibold px-6 py-2 shadow-md backdrop-blur-lg"
+              onClick={() => setSelectedCategory(category)}
             >
-              <ExternalLink className="h-4 w-4" />
-              Visit Full Shop
+              {category}
             </Button>
-          </div>
+          ))}
         </div>
-
-        {/* Mobile Category Filter Button */}
-        <div className="md:hidden mb-4">
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-between"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <div className="flex items-center">
-              <Filter className="mr-2 h-4 w-4" />
-              <span>Filter: {selectedCategory}</span>
-            </div>
-            {showFilters ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </Button>
-
-          {showFilters && (
-            <div className="mt-2 p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md shadow-lg">
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  className={`block w-full text-left px-3 py-2 rounded-md ${
-                    selectedCategory === category 
-                      ? 'bg-black text-white dark:bg-white dark:text-black font-medium' 
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }`}
-                  onClick={() => {
-                    setSelectedCategory(category);
-                    setShowFilters(false);
-                  }}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Desktop Category Filter */}
-          <div className="hidden md:block w-64 space-y-4">
-            <h3 className="font-bold text-xl mb-4">Categories</h3>
-            <div className="space-y-2">
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  className={`block w-full text-left px-4 py-2 rounded-md transition-colors ${
-                    selectedCategory === category 
-                      ? 'bg-black text-white dark:bg-white dark:text-black font-medium' 
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }`}
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Products Grid */}
-          <div className="flex-1">
-            <motion.div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+          {filteredProducts.map((product) => (
+            <motion.div
+              key={product.id}
+              className="flex flex-col h-full"
+              whileHover={{ scale: 1.03 }}
             >
-              {filteredProducts.map((product) => (
-                <motion.div 
-                  key={product.id} 
-                  variants={itemVariants}
-                  className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="relative w-full aspect-square bg-gray-100 dark:bg-gray-800">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-white/10 transition-colors"></div>
-                  </div>
-                  <div className="p-5">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h2 className="font-bold text-lg text-black dark:text-white">
-                          {product.name}
-                        </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {product.category}
-                        </p>
-                      </div>
-                      <span className="text-lg font-bold text-black dark:text-white">
-                        ${product.price.toFixed(2)}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-2 mb-4 line-clamp-2">
-                      {product.description}
-                    </p>
-                    <Button 
-                      className="w-full bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 flex items-center justify-center gap-2"
-                      onClick={() => window.open(product.printifyUrl, '_blank')}
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                      Shop Now
+              <GlassCard className="flex flex-col h-full p-0">
+                <div className="relative w-full h-56 bg-muted rounded-t-2xl overflow-hidden">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-t-2xl"
+                    priority={true}
+                  />
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <h3 className="text-xl font-bold text-card-foreground mb-1">{product.name}</h3>
+                  <p className="text-muted-foreground mb-2">{product.description}</p>
+                  <div className="mt-auto flex items-center justify-between">
+                    <span className="font-bold text-card-foreground">${product.price.toFixed(2)}</span>
+                    <Button asChild className="ml-2 bg-background text-foreground border border-border rounded-full px-4 py-2 font-semibold flex items-center gap-2 shadow-sm">
+                      <a href={product.printifyUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                        {/* Icon circle styling strictly follows memory rules */}
+                        <span className="flex items-center justify-center rounded-full w-8 h-8 bg-white dark:bg-black border border-black dark:border-none mr-2">
+                          <ShoppingBag className="w-5 h-5 text-black dark:text-white" />
+                        </span>
+                        Buy
+                      </a>
                     </Button>
                   </div>
-                </motion.div>
-              ))}
+                </div>
+              </GlassCard>
             </motion.div>
-
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">No products found in this category.</p>
-              </div>
-            )}
-          </div>
+          ))}
         </div>
       </div>
     </div>

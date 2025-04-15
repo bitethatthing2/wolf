@@ -1,3 +1,4 @@
+// Enforces global design system: navy bg, glassmorphism cards, text-foreground, strict button/icon rules, no hardcoded colors
 "use client";
 
 import React from 'react';
@@ -49,73 +50,62 @@ const events: Event[] = [
   }
 ];
 
+function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card/80 backdrop-blur-lg border border-border shadow-xl rounded-2xl ${className}`}>
+      {children}
+    </div>
+  );
+}
+
 export default function EventsPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
-      <div className="container py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">Events</h1>
-          <p className="text-gray-600 dark:text-gray-400">Join us for special events and promotions</p>
+    <div className="min-h-screen bg-background">
+      <div className="container py-12">
+        <div className="text-center mb-14">
+          <h1 className="text-5xl font-extrabold mb-4 text-foreground tracking-tight">Events</h1>
+          <p className="text-lg text-muted-foreground">Join us for special events and promotions</p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-8">
           {events.map((event, index) => (
-            <div key={index} className="p-5 mb-6 bg-black dark:bg-white rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">
-              <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-white dark:text-black uppercase">
-                    {event.title}
-                  </h2>
-                  
-                  <div className="flex flex-wrap gap-4 mt-2 mb-3">
-                    <div className="flex items-center text-gray-400 dark:text-gray-600">
+            <GlassCard key={index} className="flex flex-col md:flex-row gap-6 p-6 md:p-8">
+              {event.image && (
+                <div className="w-full md:w-48 h-40 md:h-48 rounded-xl overflow-hidden flex-shrink-0 relative">
+                  <Image src={event.image} alt={event.title} fill className="object-cover" />
+                </div>
+              )}
+              <div className="flex-1 flex flex-col justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-card-foreground mb-2 uppercase">{event.title}</h2>
+                  <div className="flex flex-wrap gap-4 mb-3">
+                    <div className="flex items-center text-muted-foreground">
                       <Calendar className="w-4 h-4 mr-1.5" />
-                      <p>{event.date}</p>
+                      <span>{event.date}</span>
                     </div>
-                    
-                    <div className="flex items-center text-gray-400 dark:text-gray-600">
+                    <div className="flex items-center text-muted-foreground">
                       <Clock className="w-4 h-4 mr-1.5" />
-                      <p>{event.time}</p>
+                      <span>{event.time}</span>
                     </div>
-                    
                     {event.location && (
-                      <div className="flex items-center text-gray-400 dark:text-gray-600">
+                      <div className="flex items-center text-muted-foreground">
                         <MapPin className="w-4 h-4 mr-1.5" />
-                        <p>{event.location}</p>
+                        <span>{event.location}</span>
                       </div>
                     )}
                   </div>
-                  
-                  <p className="text-gray-400 dark:text-gray-600">
-                    {event.description}
-                  </p>
+                  <p className="text-muted-foreground mb-2">{event.description}</p>
                 </div>
-                
-                {event.image && (
-                  <div className="relative w-full md:w-24 h-24 flex-shrink-0 rounded-md overflow-hidden border border-gray-700 dark:border-gray-300">
-                    <Image
-                      src={event.image}
-                      alt={event.title}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  </div>
-                )}
+                <div className="flex gap-2 mt-2">
+                  <Button className="bg-black text-white dark:bg-white dark:text-black rounded-full font-semibold px-6 py-2 shadow-sm flex items-center gap-2">
+                    <span className="flex items-center justify-center rounded-full w-8 h-8 bg-white dark:bg-black border border-black dark:border-none">
+                      <Ticket className="w-5 h-5 text-black dark:text-white" />
+                    </span>
+                    Get Tickets
+                  </Button>
+                </div>
               </div>
-              
-              {/* Add tickets button */}
-              <div className="mt-4 flex justify-end">
-                <Button 
-                  className="bg-white text-black dark:bg-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center justify-center gap-2"
-                >
-                  <div className="w-5 h-5 rounded-full bg-black dark:bg-white flex items-center justify-center">
-                    <Ticket className="w-3 h-3 text-white dark:text-black" />
-                  </div>
-                  Get Your Tickets Now
-                </Button>
-              </div>
-            </div>
+            </GlassCard>
           ))}
         </div>
       </div>

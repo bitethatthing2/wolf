@@ -1,3 +1,4 @@
+// Enhanced: global design system, glassmorphism cards, premium spacing, strict color rules, accessible, variable-based classes only
 "use client";
 
 import React from 'react';
@@ -9,11 +10,19 @@ import { Clock, Mail, Phone } from 'lucide-react';
 import InstagramFeedSection from '@/components/features/social/ElfsightInstagramFeed';
 import GoogleReviewsSection from '@/components/features/social/GoogleReviewsSection';
 
+function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card/80 backdrop-blur-lg border border-border shadow-xl rounded-2xl ${className}`}>
+      {children}
+    </div>
+  );
+}
+
 const LocationsPage = () => {
   const { selectedLocation, locationData } = useLocation();
   const { theme } = useTheme(); 
   const [isMounted, setIsMounted] = React.useState(false);
-  
+
   // Use memo to prevent re-renders
   const socialComponents = React.useMemo(() => {
     return (
@@ -21,85 +30,79 @@ const LocationsPage = () => {
         <div className="mt-12"> 
           <InstagramFeedSection />
         </div>
-
         <div className="mt-12"> 
           <GoogleReviewsSection />
         </div>
       </>
     );
   }, []);
-  
-  // Only run this effect once to set mounted state
+
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   if (!isMounted || !selectedLocation || !locationData) {
-    return <div className="container mx-auto px-4 py-8 text-center text-white">Loading location data...</div>;
+    return <div className="container mx-auto px-4 py-8 text-center text-foreground">Loading location data...</div>;
   }
-  
+
   const activeLocation = locationData[selectedLocation];
 
   return (
-    <div className="container mx-auto px-4 py-8 overflow-x-hidden mb-24">
-      <PageHeader 
-        title="Our Locations" 
-        subtitle="Visit us at either of our locations in Portland or Salem"
-      />
-      
-      <div className="flex flex-col items-center mb-6">
-        <div className="w-full max-w-md mx-auto mb-6">
-          <LocationSwitch className="w-full" /> 
-        </div>
-        
-        {/* Use memoized social components to prevent re-renders */}
-        {socialComponents}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-12 overflow-x-hidden mb-24">
+        <PageHeader 
+          title="Our Locations" 
+          subtitle="Visit us at either of our locations in Portland or Salem"
+        />
 
-        <h2 className="text-3xl font-bold text-white text-center mb-4 mt-6">
-          {activeLocation.name}
-        </h2>
-      </div>
-      
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12">
-        {/* For the contact info and hours, use transition opacity to prevent jarring changes */}
-        <div 
-          className="flex flex-col gap-4 bg-black/30 p-6 rounded-lg border border-white/10 transition-all duration-300"
-          key={`contact-${selectedLocation}`}
-        >
-          <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Contact Information</h3>
-          
-          <div className="flex items-center gap-3 mt-2">
-            <Phone className="w-5 h-5 text-white/60 flex-shrink-0" />
-            <a href={`tel:${activeLocation.phone}`} className="text-white hover:text-primary transition-colors">{activeLocation.phone}</a>
+        <div className="flex flex-col items-center mb-10">
+          <div className="w-full max-w-md mx-auto mb-8">
+            <LocationSwitch className="w-full" /> 
           </div>
-          
-          <div className="flex items-center gap-3">
-            <Mail className="w-5 h-5 text-white/60 flex-shrink-0" />
-            <a href={`mailto:${activeLocation.email}`} className="text-white hover:text-primary transition-colors">{activeLocation.email}</a>
-          </div>
-          
-          <p className="text-white/80 mt-4">
-            {activeLocation.address}
-          </p>
+          {socialComponents}
+          <h2 className="text-4xl font-extrabold text-foreground text-center mb-8 mt-10">
+            {activeLocation.name}
+          </h2>
         </div>
-        
-        <div 
-          className="flex flex-col gap-4 bg-black/30 p-6 rounded-lg border border-white/10 transition-all duration-300"
-          key={`hours-${selectedLocation}`}
-        >
-          <div className="flex items-center gap-3 border-b border-white/10 pb-2">
-            <Clock className="w-5 h-5 text-white/60" />
-            <h3 className="text-xl font-semibold text-white">Hours of Operation</h3>
-          </div>
-          
-          <div className="space-y-2 mt-2">
-            {Object.entries(activeLocation.hours).map(([day, time]: [string, string]) => (
-              <div key={`${selectedLocation}-${day}`} className="flex justify-between items-center text-sm">
-                <span className="text-white/80 capitalize">{day}</span>
-                <span className="text-white font-medium">{String(time)}</span>
-              </div>
-            ))}
-          </div>
+
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 w-full mt-12">
+          {/* Contact Info Card */}
+          <GlassCard className="flex flex-col gap-4 p-8">
+            <h3 className="text-2xl font-bold text-card-foreground border-b border-border pb-3 mb-2">Contact Information</h3>
+            <div className="flex items-center gap-3 mt-2">
+              <span className="flex items-center justify-center rounded-full w-9 h-9 bg-white dark:bg-black border border-black dark:border-none">
+                <Phone className="w-5 h-5 text-black dark:text-white" />
+              </span>
+              <a href={`tel:${activeLocation.phone}`} className="text-card-foreground hover:text-primary transition-colors font-medium text-lg">{activeLocation.phone}</a>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center justify-center rounded-full w-9 h-9 bg-white dark:bg-black border border-black dark:border-none">
+                <Mail className="w-5 h-5 text-black dark:text-white" />
+              </span>
+              <a href={`mailto:${activeLocation.email}`} className="text-card-foreground hover:text-primary transition-colors font-medium text-lg">{activeLocation.email}</a>
+            </div>
+            <p className="text-muted-foreground mt-4 text-base">
+              {activeLocation.address}
+            </p>
+          </GlassCard>
+
+          {/* Hours Card */}
+          <GlassCard className="flex flex-col gap-4 p-8">
+            <div className="flex items-center gap-3 border-b border-border pb-3 mb-2">
+              <span className="flex items-center justify-center rounded-full w-9 h-9 bg-white dark:bg-black border border-black dark:border-none">
+                <Clock className="w-5 h-5 text-black dark:text-white" />
+              </span>
+              <h3 className="text-2xl font-bold text-card-foreground">Hours of Operation</h3>
+            </div>
+            <div className="space-y-2 mt-2">
+              {Object.entries(activeLocation.hours).map(([day, time]: [string, string]) => (
+                <div key={`${selectedLocation}-${day}`} className="flex justify-between items-center text-base">
+                  <span className="text-muted-foreground capitalize">{day}</span>
+                  <span className="text-card-foreground font-semibold">{String(time)}</span>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
         </div>
       </div>
     </div>

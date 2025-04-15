@@ -15,6 +15,7 @@ import InstagramFeedSection from '@/components/features/social/ElfsightInstagram
 import ReservationSection from '@/components/features/social/ReservationSection';
 import GoogleReviewsSection from '@/components/features/social/GoogleReviewsSection';
 import AppInstallFlow from '@/components/features/install/AppInstallFlow';
+import Chatbot from '@/components/features/chatbot/Chatbot';
 
 export default function HomePage() {
   const { theme } = useTheme()
@@ -30,6 +31,7 @@ export default function HomePage() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 text-center space-y-8">
+      <Chatbot />
       <LocationSwitcher className="mb-8" /> 
 
       {/* Header Text with Animations */}
