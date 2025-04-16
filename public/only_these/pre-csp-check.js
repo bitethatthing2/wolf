@@ -47,9 +47,7 @@
     // If this is the first CSP violation we've seen, add a permissive CSP meta tag
     if (!sessionStorage.getItem('elfsightCSPIssue')) {
       sessionStorage.setItem('elfsightCSPIssue', 'true');
-      console.log('[Pre-CSP Check] First CSP violation detected, adding permissive CSP meta tag');
-      addCSPMetaTag();
-      
+      console.log('[Pre-CSP Check] First CSP violation detected, would add permissive CSP meta tag');
       // Force reload the page to apply the new CSP
       if (!sessionStorage.getItem('elfsightCSPReloaded')) {
         sessionStorage.setItem('elfsightCSPReloaded', 'true');

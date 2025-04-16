@@ -37,7 +37,6 @@ const PRECACHE_ASSETS = [
   '/elfsight-fix.js',
   '/only_these/csp-fix.js',
   '/app_icon_large.png',
-  '/service-worker-registration.js',
   '/pwa-install-helper.js',
   '/only_these/notification-badge.png',
   '/only_these/notification-icon-android.png',

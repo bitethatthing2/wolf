@@ -102,7 +102,7 @@ export default function RootLayout({
         
         {/* Service Worker Registration */}
         <Script 
-          src="/service-worker-registration.js"
+          // src="/service-worker-registration.js" // Removed: deprecated duplicate registration script
           strategy="afterInteractive"
           id="service-worker-registration"
         />
