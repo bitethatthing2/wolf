@@ -34,3 +34,16 @@ export default function MainError({
     </div>
   );
 }
+
+// Ensure critical meta tags are present even if layout is skipped
+export function head() {
+  return (
+    <>
+      <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes" />
+      <meta name="description" content="An error occurred on Side Hustle Bar." />
+      <link rel="manifest" href="/manifest.json" />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+      {/* lang attribute can't be set here, but ensure it's set in layout */}
+    </>
+  );
+}
