@@ -189,6 +189,12 @@ export const fetchToken = async (swRegistration: ServiceWorkerRegistration | nul
         serviceWorkerRegistration: swRegistration, // Pass the existing registration
       });
       
+      if (token) {
+        console.log(`[Client v${CLIENT_VERSION}] FCM token (full):`, token);
+      } else {
+        console.warn(`[Client v${CLIENT_VERSION}] No FCM token was returned. This usually means notification permission is not granted or there was a configuration issue.`);
+      }
+      
       console.log(`[Client v${CLIENT_VERSION}] FCM token obtained:`, token ? token.substring(0, 10) + "..." : "null");
       return token;
     } else {

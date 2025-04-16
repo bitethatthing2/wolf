@@ -132,7 +132,10 @@ export const useFcmNotifications = () => {
       // Set the token and notification status
       setFcmToken(token);
       setNotificationsEnabled(true);
-      
+
+      // Log the FCM token to the console for debugging
+      console.log('[FCM] Push notifications enabled, FCM token:', token);
+
       toast({
         title: "Notifications Enabled",
         description: "You will now receive notifications from Side Hustle Bar.",
