@@ -97,12 +97,13 @@ export default function RootLayout({
         {/* Manifest */}
         <link rel="manifest" href="/manifest.json" />
         
-        {/* Pre-CSP Check - Run this before anything else to detect CSP issues */}
+        {/* Removed pre-csp-check.js as it interferes with middleware CSP
         <Script 
           src="/only_these/pre-csp-check.js"
           strategy="beforeInteractive"
           id="pre-csp-check"
         />
+        */}
         
         {/* Service Worker Registration */}
         <Script 

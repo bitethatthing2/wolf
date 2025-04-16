@@ -27,12 +27,14 @@ const LocationsPage = () => {
   const socialComponents = React.useMemo(() => {
     return (
       <>
-        <div className="mt-12"> 
+        {/* Instagram Feed - Temporarily disabled */}
+        {/* <div className="mt-12"> 
           <InstagramFeedSection />
-        </div>
-        <div className="mt-12"> 
+        </div> */}
+        {/* Google Reviews - Temporarily disabled */}
+        {/* <div className="mt-12"> 
           <GoogleReviewsSection />
-        </div>
+        </div> */}
       </>
     );
   }, []);

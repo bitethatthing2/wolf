@@ -145,9 +145,11 @@ export default function HomePage() {
         )}
       </div>
 
-      <InstagramFeedSection />
-      
-      <GoogleReviewsSection />
+      {/* Google Reviews - Temporarily disabled */}
+      {/* <GoogleReviewsSection /> */}
+
+      {/* Instagram Feed - Temporarily disabled */}
+      {/* <InstagramFeedSection /> */}
     </main>
   )
 }

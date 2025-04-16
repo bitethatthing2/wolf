@@ -1,41 +1,32 @@
-/* eslint-disable no-restricted-globals */
-
-// Import the CSP fix from the main service worker
-importScripts("./only_these/csp-fix.js");
+// Import service worker fix for navigation preload
+importScripts("./service-worker-fix.js");
 
 // Self-registration for the service worker
 self.addEventListener('install', function(event) {
   console.log('[firebase-messaging-sw.js] Service Worker installed');
   self.skipWaiting(); // Ensure the service worker activates immediately
-  
-  // Indicate we're installed for main service worker coordination
-  if (self.state) {
-    self.state.firebaseMessagingInstalled = true;
-  }
 });
 
 // Handle service worker activation
 self.addEventListener('activate', function(event) {
   console.log('[firebase-messaging-sw.js] Service Worker activated');
   event.waitUntil(self.clients.claim()); // Take control of all clients
-  
-  // Indicate we're active for main service worker coordination
-  if (self.state) {
-    self.state.firebaseMessagingActive = true;
-  }
 });
 
-// Load Firebase scripts dynamically - using the newer v9 compat version
-importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
+// Import Firebase scripts
+importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js");
 
-// Basic Firebase app configuration with fallback values for development
-// These will be updated by the client-side script via postMessage 
+// Initialize Firebase with your config
+// IMPORTANT: Keep this config hardcoded for the SW context, as it cannot access process.env
 const firebaseConfig = {
-  apiKey: "AIzaSyBF8nfh2gYZnRh1U6vgP-XMfP9KCu6TKBQ",
+  apiKey: "AIzaSyB0Nxf3pvW32KBc0D1o2-K6qIeKovhGWfg",
+  authDomain: "new1-f04b3.firebaseapp.com",
   projectId: "new1-f04b3",
-  messagingSenderId: "1036893806199",
-  appId: "1:1036893806199:web:5f6b3f8d18d30eda1bffcb",
+  storageBucket: "new1-f04b3.firebasestorage.app",
+  messagingSenderId: "802463638703",
+  appId: "1:802463638703:web:bd0bbdaf3407d784d5205a",
+  measurementId: "G-3RZEW537LN"
 };
 
 // Initialize Firebase
@@ -48,282 +39,169 @@ const baseUrl = self.location.origin;
 // Helper function to validate image URLs
 function isValidImageUrl(url) {
   if (!url || url === 'undefined' || url === '') return false;
-  
-  // Allow relative URLs
+
+  // Allow relative URLs starting with /
   if (url.startsWith('/')) return true;
-  
+
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+    // Allow http, https, and data protocols
+    return ['https:', 'http:', 'data:'].includes(parsed.protocol);
   } catch {
     return false;
   }
 }
 
-// Track processed notification IDs to prevent duplicates with enhanced persistence
-let processedNotifications = new Set();
+// Track processed notification IDs to prevent duplicates
+const processedNotifications = new Set();
 
-// Service worker version for debugging
-const SW_VERSION = '3.0.0';
-console.log(`[Firebase SW v${SW_VERSION}] Service Worker initializing...`);
-
-// Load processed notifications from IndexedDB to persist across service worker restarts
-async function loadProcessedNotifications() {
-  try {
-    const db = await openDatabase();
-    const store = db.transaction('notifications', 'readonly').objectStore('notifications');
-    const allItems = await store.getAll();
-    
-    processedNotifications = new Set(allItems.map(item => item.id));
-    console.log(`[SW v${SW_VERSION}] Loaded ${processedNotifications.size} processed notifications from IndexedDB`);
-  } catch (error) {
-    console.error(`[SW v${SW_VERSION}] Error loading processed notifications:`, error);
-    // Continue with empty set if loading fails
-    processedNotifications = new Set();
-  }
-}
-
-// Save a processed notification ID to IndexedDB
-async function saveProcessedNotification(id) {
-  try {
-    const db = await openDatabase();
-    const tx = db.transaction('notifications', 'readwrite');
-    const store = tx.objectStore('notifications');
-    
-    // Add with expiration timestamp (24 hours)
-    const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-    await store.put({ id, expiresAt });
-    
-    console.log(`[SW v${SW_VERSION}] Saved notification ${id} to IndexedDB`);
-  } catch (error) {
-    console.error(`[SW v${SW_VERSION}] Error saving processed notification:`, error);
-  }
-}
-
-// Open IndexedDB for notification tracking
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('NotificationsDB', 1);
-    
-    request.onupgradeneeded = event => {
-      const db = event.target.result;
-      // Create object store with id as key
-      if (!db.objectStoreNames.contains('notifications')) {
-        const store = db.createObjectStore('notifications', { keyPath: 'id' });
-        store.createIndex('expiresAt', 'expiresAt');
-        console.log(`[SW v${SW_VERSION}] Created notifications object store`);
-      }
-    };
-    
-    request.onsuccess = event => resolve(event.target.result);
-    request.onerror = event => {
-      console.error(`[SW v${SW_VERSION}] IndexedDB error:`, event.target.error);
-      reject(event.target.error);
-    };
-  });
-}
-
-// Clean up expired notification IDs
-async function cleanupExpiredNotifications() {
-  try {
-    const db = await openDatabase();
-    const tx = db.transaction('notifications', 'readwrite');
-    const store = tx.objectStore('notifications');
-    const index = store.index('expiresAt');
-    
-    const now = Date.now();
-    const range = IDBKeyRange.upperBound(now);
-    
-    const request = index.openCursor(range);
-    let deletedCount = 0;
-    
-    request.onsuccess = event => {
-      const cursor = event.target.result;
-      if (cursor) {
-        // Delete expired notification
-        store.delete(cursor.primaryKey);
-        deletedCount++;
-        cursor.continue();
-      } else if (deletedCount > 0) {
-        console.log(`[SW v${SW_VERSION}] Deleted ${deletedCount} expired notifications`);
-      }
-    };
-  } catch (error) {
-    console.error(`[SW v${SW_VERSION}] Error cleaning up expired notifications:`, error);
-  }
-}
-
-// Load processed notifications on initialization
-loadProcessedNotifications().then(() => {
-  // Clean up expired notifications after loading
-  cleanupExpiredNotifications();
-});
-
-// Set up a message handler to receive messages from client
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'CONFIG_FIREBASE') {
-    // Update Firebase config from client
-    Object.assign(firebaseConfig, event.data.config);
-    console.log(`[SW v${SW_VERSION}] Received updated Firebase config from client`);
-  }
-});
+// Service worker version - used for logging
+const SW_VERSION = '2.3.1'; // Updated version for clarity
 
 // Set a timeout for clearing the processed notifications set to avoid memory leaks
 setTimeout(() => {
   processedNotifications.clear();
-  console.log(`[SW v${SW_VERSION}] Cleared processed notifications set after timeout`);
+  console.log(`[SW v${SW_VERSION}] Cleared processed notifications set after timeout.`);
 }, 1000 * 60 * 60); // Clear after 1 hour
 
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {
   console.log(`[SW v${SW_VERSION}] Received background message`, payload);
-  
+
   // Extract notification ID to prevent duplicates
-  // Use a combination of messageId, collapseKey, and title/body hash for better deduplication
-  const notificationTitle = payload.notification?.title || payload.data?.title || "";
-  const notificationBody = payload.notification?.body || payload.data?.body || "";
-  const contentHash = `${notificationTitle}:${notificationBody}`.split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0);
-    return a & a;
-  }, 0);
-  
-  const notificationId = payload.messageId || payload.collapseKey || 
-                       `${contentHash}_${Date.now().toString()}`;
-  
+  const notificationId = payload.messageId || payload.collapseKey || `bg_${Date.now()}`;
+
   // Skip if we've already processed this notification
   if (processedNotifications.has(notificationId)) {
-    console.log(`[SW v${SW_VERSION}] Skipping duplicate notification ${notificationId}`);
+    console.log(`[SW v${SW_VERSION}] Skipping duplicate notification: ${notificationId}`);
     return;
   }
-  
-  // Check for iOS - handle differently based on device
-  const userAgent = self.navigator ? self.navigator.userAgent : '';
-  const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-  const isAndroid = /Android/.test(userAgent);
-  console.log(`[SW v${SW_VERSION}] Device detection - iOS: ${isIOS}, Android: ${isAndroid}, UA: ${userAgent.substring(0, 50)}...`);
-  
-  // Add to processed set and persist to IndexedDB
+
+  // Check for iOS - This detection might be less reliable in SW context
+  // const userAgent = self.navigator ? self.navigator.userAgent : '';
+  // const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+  // Simpler approach: Assume non-iOS for background handling robustness
+  const isIOS = false;
+  const isAndroid = self.navigator ? /Android/.test(self.navigator.userAgent) : false;
+  console.log(`[SW v${SW_VERSION}] Device detection - Android: ${isAndroid}`);
+
+  // Add to processed set
   processedNotifications.add(notificationId);
-  saveProcessedNotification(notificationId);
-  console.log(`[SW v${SW_VERSION}] Added notification ${notificationId} to processed set. Total: ${processedNotifications.size}`);
-  
-  // Check for duplicate content in recent notifications
-  if (payload.data?.deduplicationKey) {
-    const deduplicationKey = payload.data.deduplicationKey;
-    if (processedNotifications.has(deduplicationKey)) {
-      console.log(`[SW v${SW_VERSION}] Skipping notification with duplicate content key ${deduplicationKey}`);
-      return;
-    }
-    processedNotifications.add(deduplicationKey);
-    saveProcessedNotification(deduplicationKey);
+  console.log(`[SW v${SW_VERSION}] Added ${notificationId} to processed set. Total: ${processedNotifications.size}`);
+
+  // Clear old notification IDs (keep set small)
+  if (processedNotifications.size > 30) {
+    const oldestId = processedNotifications.values().next().value;
+    processedNotifications.delete(oldestId);
+    console.log(`[SW v${SW_VERSION}] Removed oldest ID ${oldestId} from processed set.`);
   }
-  
-  // Extract notification data for display
-  const displayTitle = payload.notification?.title || payload.data?.title || "Side Hustle Bar Update";
-  const displayBody = payload.notification?.body || payload.data?.body || "Check out what's new!";
-  const displayLink = payload.fcmOptions?.link || payload.data?.url || '/';
-  const displayImage = payload.data?.image || payload.notification?.image;
-  
-  // Use the correct icon paths based on platform
+
+  // Extract notification data
+  const title = payload.notification?.title || payload.data?.title || "New Notification";
+  const body = payload.notification?.body || payload.data?.body || "You have a new message";
+  const link = payload.fcmOptions?.link || payload.data?.link || '/';
+  const image = payload.data?.image || payload.notification?.image;
+
+  // --- ICON/BADGE PATHS --- 
+  // IMPORTANT: Verify these paths match your actual assets in /public
+  const defaultIcon = `${baseUrl}/icons/icon-192x192.png`; // Default icon
+  const defaultBadge = `${baseUrl}/icons/badge-72x72.png`; // Default badge
+  // Example using source project's paths (Update if needed!):
+  const androidIcon = `${baseUrl}/only_these/android/android-launchericon-96-96.png`;
+  const iosIcon = `${baseUrl}/only_these/ios/apple-icon-180x180.png`;
+  const androidBadge = `${baseUrl}/only_these/android-icon-96x96.png`;
+  // --- END ICON/BADGE PATHS --- 
+
   const notificationOptions = {
-    body: displayBody,
-    // Use Android notification drawer icon for Android and standard icon for others
-    icon: isAndroid ? 
-      `${baseUrl}/only_these/android/notification-icon-android.png` : 
-      `${baseUrl}/only_these/ios/notification-icon-ios.png`,
-    // Use larger badge icon for better visibility in status bar
-    badge: `${baseUrl}/only_these/notification-badge.png`,
-    data: { 
-      url: displayLink,
+    body,
+    icon: isAndroid ? androidIcon : (isIOS ? iosIcon : defaultIcon),
+    badge: isAndroid ? androidBadge : defaultBadge,
+    data: {
+      url: link,
       ...payload.data,
-      // Store notification ID to prevent duplicates later
-      notificationId,
-      fromServiceWorker: true, // Flag to identify source
+      notificationId, // Store ID for click handler
+      fromServiceWorker: true,
       swVersion: SW_VERSION
     },
-    // Use notification ID as tag to prevent duplicate system notifications
-    tag: notificationId,
-    renotify: false,
-    requireInteraction: !isIOS,
-    silent: isIOS, // Keep notifications silent on iOS
+    tag: notificationId, // Use tag to group/replace notifications
+    renotify: false, // Don't vibrate/alert for updates to existing tag
+    requireInteraction: !isIOS, // Keep notification until dismissed (not on iOS)
+    silent: isIOS, // No sound/vibration on iOS
     actions: [
       {
-        action: 'open',
-        title: 'View',
-        icon: `${baseUrl}/only_these/notification-badge.png`
+        action: 'open_url', // Action identifier
+        title: 'Open', // Text displayed on the button
+        // icon: `${baseUrl}/icons/open-icon.png` // Optional action icon
       }
     ]
   };
 
   // Add image if valid
-  if (isValidImageUrl(displayImage)) {
-    notificationOptions.image = displayImage;
-    console.log(`[SW v${SW_VERSION}] Adding image to notification:`, displayImage);
+  if (isValidImageUrl(image)) {
+    // @ts-ignore - TS definitions might lag behind NotificationOptions spec
+    notificationOptions.image = image;
+    console.log(`[SW v${SW_VERSION}] Adding image to notification:`, image);
   }
 
-  console.log(`[SW v${SW_VERSION}] Creating notification with options:`, notificationOptions);
-  return self.registration.showNotification(displayTitle, notificationOptions);
+  console.log(`[SW v${SW_VERSION}] Showing notification:`, title, notificationOptions);
+
+  // Show the notification
+  const notificationPromise = self.registration.showNotification(title, notificationOptions);
+
+  // Keep the service worker alive until the notification is shown
+  return event.waitUntil(notificationPromise);
 });
 
 // Handle notification clicks
 self.addEventListener("notificationclick", (event) => {
-  console.log(`[SW v${SW_VERSION}] Notification clicked`, event);
-  event.notification.close();
-  
-  // Get the URL from the notification data
-  const url = event.notification.data?.url || '/';
-  console.log(`[SW v${SW_VERSION}] Notification click - opening URL: ${url}`);
-  
-  // Handle action clicks
-  if (event.action === 'open') {
-    console.log(`[SW v${SW_VERSION}] Open action clicked`);
-  }
-  
-  event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true })
-      .then((clientList) => {
-        // Try to focus an existing window with matching URL if found
-        for (const client of clientList) {
-          if (client.url === url && 'focus' in client) {
-            console.log(`[SW v${SW_VERSION}] Focusing existing window with URL: ${url}`);
-            return client.focus();
-          }
-        }
-        
-        // If no matching window, find any available window and navigate
-        for (const client of clientList) {
-          if ('focus' in client && 'navigate' in client) {
-            console.log(`[SW v${SW_VERSION}] Navigating existing window to: ${url}`);
-            return client.focus().then(() => client.navigate(url));
-          }
-        }
-        
-        // Otherwise open a new window
-        if (clients.openWindow) {
-          console.log(`[SW v${SW_VERSION}] Opening new window with URL: ${url}`);
-          return clients.openWindow(url);
-        }
-      })
-      .catch(err => {
-        console.error(`[SW v${SW_VERSION}] Error handling notification click:`, err);
-      })
-  );
-});
+  const clickedNotification = event.notification;
+  const action = event.action;
 
-// Add explicit push event listener to prevent browser from showing its own notification
-self.addEventListener('push', (event) => {
-  console.log(`[SW v${SW_VERSION}] Push event received but letting Firebase handle it`);
-  // Let Firebase's onBackgroundMessage handle it
-  // This prevents the browser from showing its own notification
-});
+  console.log(`[SW v${SW_VERSION}] Notification clicked. Action: '${action}'`, clickedNotification);
+  clickedNotification.close(); // Close the notification
 
-// Handle sync events for offline-stored notifications
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'process-pending-notifications') {
-    console.log(`[SW v${SW_VERSION}] Processing pending notifications via sync`);
-    event.waitUntil(
-      // Process any stored notifications here
-      Promise.resolve()
-    );
+  // Get the URL from notification data
+  const url = clickedNotification.data?.url || '/';
+
+  // Handle the 'open_url' action or a direct click on the notification body
+  if (action === 'open_url' || !action) {
+      console.log(`[SW v${SW_VERSION}] Handling click action: Opening URL: ${url}`);
+      const promise = clients.matchAll({ type: "window", includeUncontrolled: true })
+          .then((clientList) => {
+              // Check if a window/tab with the target URL is already open
+              for (const client of clientList) {
+                  // Use includes check for more flexible matching (e.g., handles query params)
+                  if (client.url.includes(url) && 'focus' in client) {
+                      console.log(`[SW v${SW_VERSION}] Focusing existing window/tab for URL: ${client.url}`);
+                      return client.focus();
+                  }
+              }
+              // If no matching window found, open a new one
+              if (clients.openWindow) {
+                  console.log(`[SW v${SW_VERSION}] No existing window found. Opening new window for URL: ${url}`);
+                  return clients.openWindow(url);
+              }
+          })
+          .catch(err => {
+              console.error(`[SW v${SW_VERSION}] Error handling notification click:`, err);
+              // Fallback if matchAll or openWindow fails
+              if (clients.openWindow) {
+                  return clients.openWindow(url);
+              }
+          });
+      event.waitUntil(promise);
+  } else {
+      console.log(`[SW v${SW_VERSION}] Unhandled action: ${action}`);
   }
 });
+
+// Optional: Listen for push subscription changes
+self.addEventListener('pushsubscriptionchange', (event) => {
+  console.log(`[SW v${SW_VERSION}] Push subscription changed`, event);
+  // Here you might re-subscribe the user and update the server
+  // const newSubscription = event.newSubscription;
+  // const oldSubscription = event.oldSubscription;
+  // event.waitUntil( /* Resubscribe and update server logic */ );
+});
+
+console.log(`[SW v${SW_VERSION}] Service Worker script fully loaded and listeners attached.`);

@@ -3,35 +3,28 @@
 import { useState, useEffect } from "react";
 import { Download, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { fetchToken } from "@/lib/firebase/client";
 import { toast } from "@/hooks/use-toast";
+import useFcmToken from "@/hooks/useFcmToken";
 
 export function AppActions() {
   const [isInstallable, setIsInstallable] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [notificationStatus, setNotificationStatus] = useState<"default" | "granted" | "denied">("default");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+
+  const { 
+    token: fcmToken, 
+    notificationPermissionStatus, 
+    requestNotificationPermission, 
+  } = useFcmToken();
 
   useEffect(() => {
-    // Check if the app is installable
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later
       setDeferredPrompt(e);
-      // Update UI to notify the user they can install the PWA
       setIsInstallable(true);
     };
 
-    // Check notification permission status
-    const checkNotificationPermission = () => {
-      if (typeof Notification !== 'undefined') {
-        setNotificationStatus(Notification.permission as "default" | "granted" | "denied");
-      }
-    };
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    checkNotificationPermission();
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -40,7 +33,6 @@ export function AppActions() {
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
-      // If the app is already installed or not installable, provide instructions
       toast({
         title: "Installation Instructions",
         description: "To install this app, use your browser's 'Add to Home Screen' or 'Install' option from the menu.",
@@ -49,11 +41,8 @@ export function AppActions() {
       return;
     }
 
-    // Show the install prompt
     deferredPrompt.prompt();
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
-    // We've used the prompt, and can't use it again, so clear it
     setDeferredPrompt(null);
     
     if (outcome === 'accepted') {
@@ -73,102 +62,23 @@ export function AppActions() {
   };
 
   const handleNotifications = async () => {
-    setIsLoading(true);
-    
+    setIsLoadingNotifications(true);
     try {
-      // First, check if notifications are supported
-      if (!("Notification" in window)) {
-        toast({
-          title: "Notifications Not Supported",
-          description: "Your browser doesn't support push notifications.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // If permission is already granted, register for push
-      if (Notification.permission === "granted") {
-        await registerForPush();
-        return;
-      }
-
-      // If permission is denied, inform the user they need to change browser settings
-      if (Notification.permission === "denied") {
-        toast({
-          title: "Notifications Blocked",
-          description: "You've blocked notifications. Please update your browser settings to enable them.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Request permission
-      const permission = await Notification.requestPermission();
-      setNotificationStatus(permission as "default" | "granted" | "denied");
-      
-      if (permission === "granted") {
-        await registerForPush();
-      } else {
-        toast({
-          title: "Notifications Declined",
-          description: "You won't receive updates about new events and promotions.",
-          variant: "default",
-        });
-      }
+      await requestNotificationPermission();
     } catch (error) {
-      console.error("Error setting up notifications:", error);
+      console.error("Error requesting notification permission:", error);
       toast({
         title: "Notification Error",
-        description: "There was a problem setting up notifications. Please try again later.",
+        description: "An unexpected error occurred while setting up notifications.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingNotifications(false);
     }
   };
 
-  const registerForPush = async () => {
-    try {
-      // Get service worker registration
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.ready;
-        
-        // Get FCM token using the registration
-        const token = await fetchToken(registration);
-        
-        if (token) {
-          // Here you would typically send this token to your backend
-          console.log("FCM Token:", token);
-          
-          // Show success message
-          toast({
-            title: "Notifications Enabled",
-            description: "You'll now receive updates about new events and promotions!",
-            variant: "default",
-          });
-          
-          // Optional: Send a test notification
-          // This could be done via your backend or directly here for testing
-          setTimeout(() => {
-            new Notification("Welcome to Side Hustle Bar!", {
-              body: "Thanks for enabling notifications. You'll now receive updates about events and promotions.",
-              icon: "/logo-main-dark.png"
-            });
-          }, 2000);
-        } else {
-          throw new Error("Failed to get notification token");
-        }
-      } else {
-        throw new Error("Service workers not supported");
-      }
-    } catch (error) {
-      console.error("Error registering for push:", error);
-      throw error;
-    }
-  };
-
-  // Check if the app is in standalone mode (installed)
   const isInStandaloneMode = () => {
+    if (typeof window === 'undefined') return false;
     return window.matchMedia('(display-mode: standalone)').matches || 
            (window.navigator as any).standalone === true;
   };
@@ -180,22 +90,22 @@ export function AppActions() {
         size="lg"
         className="w-full justify-center"
         onClick={handleInstall}
-        disabled={!isInstallable && isInStandaloneMode()}
+        disabled={!isInstallable || isInStandaloneMode()}
       >
-        <Download className="mr-2" />
-        Install App
+        <Download className="mr-2 h-5 w-5" />
+        {isInStandaloneMode() ? "App Installed" : "Install App"}
       </Button>
       <Button
         variant="hustle"
         size="lg"
         className="w-full justify-center"
         onClick={handleNotifications}
-        disabled={isLoading || notificationStatus === "denied"}
+        disabled={isLoadingNotifications || notificationPermissionStatus === "denied" || (notificationPermissionStatus === "granted" && !!fcmToken) }
       >
-        <Bell className="mr-2" />
-        {notificationStatus === "granted" 
-          ? "Notifications Enabled" 
-          : notificationStatus === "denied" 
+        <Bell className="mr-2 h-5 w-5" />
+        {notificationPermissionStatus === "granted" 
+          ? (fcmToken ? "Notifications Enabled" : "Enabling...") 
+          : notificationPermissionStatus === "denied" 
             ? "Notifications Blocked" 
             : "Enable Notifications"}
       </Button>

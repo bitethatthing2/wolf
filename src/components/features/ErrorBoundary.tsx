@@ -59,36 +59,44 @@ export default function ErrorBoundary({ children }: { children: React.ReactNode 
   // Listen for window unhandled errors
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      console.error('[ErrorBoundary] Unhandled error:', event);
-      
-      // Check if event has error property and it's a TypeError
-      // Add proper type checking to avoid "undefined" errors
-      if (
-        event.error && 
-        event.error instanceof TypeError && 
-        event.error.message && 
-        typeof event.error.message === 'string' &&
-        (event.error.message.includes('fetch') || event.error.message.includes('network')) &&
-        (
-          (event.filename && typeof event.filename === 'string' && (
-            event.filename.includes('navigation') || 
-            event.filename.includes('fetch-server-response') ||
-            event.filename.includes('router')
-          )) || 
-          // Also handle cases where filename might not be present
-          (event.error.stack && typeof event.error.stack === 'string' && (
-            event.error.stack.includes('navigation') ||
-            event.error.stack.includes('fetch') ||
-            event.error.stack.includes('router')
-          ))
-        )
-      ) {
-        console.log('[ErrorBoundary] Navigation error detected, activating recovery mode');
-        setHasNavigationError(true);
-        setErrorDetails(event.error.message);
-        
-        // Prevent default handling
-        event.preventDefault();
+      // Check if event.error exists and is a proper Error object
+      if (event.error instanceof Error) {
+        console.error('[ErrorBoundary] Unhandled error caught:', event.error); // Log the actual error
+
+        // Now check if it's a navigation-related TypeError
+        if (
+          event.error instanceof TypeError &&
+          event.error.message &&
+          typeof event.error.message === 'string' &&
+          (event.error.message.includes('fetch') || event.error.message.includes('network')) &&
+          (
+            (event.filename && typeof event.filename === 'string' && (
+              event.filename.includes('navigation') ||
+              event.filename.includes('fetch-server-response') ||
+              event.filename.includes('router')
+            )) ||
+            (event.error.stack && typeof event.error.stack === 'string' && (
+              event.error.stack.includes('navigation') ||
+              event.error.stack.includes('fetch') ||
+              event.error.stack.includes('router')
+            ))
+          )
+        ) {
+          console.log('[ErrorBoundary] Navigation error detected, activating recovery mode');
+          setHasNavigationError(true);
+          setErrorDetails(event.error.message);
+          event.preventDefault(); // Prevent default handling only for navigation errors
+        }
+        // Handle other potential Error types if needed in the future
+        // else { console.warn('[ErrorBoundary] Caught a non-navigation error:', event.error); }
+
+      } else {
+        // Log that a non-standard error event occurred
+        console.warn('[ErrorBoundary] Caught a non-standard error event (event.error missing or not an Error object):', event);
+        // Decide if you want to trigger the fallback UI for these types of errors too
+        // setHasNavigationError(true); // Optional: Trigger fallback?
+        // setErrorDetails('An unknown error occurred.'); // Optional: Set generic message?
+        // event.preventDefault(); // Optional: Prevent default?
       }
     };
     

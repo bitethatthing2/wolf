@@ -78,7 +78,7 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
                 height={360} 
                 className={`object-contain w-96 h-96 transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                 priority
-                onLoadingComplete={() => setImgLoaded(true)}
+                onLoad={() => setImgLoaded(true)}
               />
             </motion.div>
           </AnimatePresence>
