@@ -1,6 +1,8 @@
 // src/lib/firebase/config.ts
 
 // Ensure environment variables are loaded (e.g., in .env.local)
+// On Netlify, all NEXT_PUBLIC_FIREBASE_* variables should be set in the Netlify dashboard.
+// This config will automatically use those at build and runtime.
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
