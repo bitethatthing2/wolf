@@ -32,6 +32,24 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
     currentImage = isDarkMode ? '/logo-footer-dark.png' : '/logo-main-light.png';
   }
   
+  // Preload all possible images for smooth transitions
+  useEffect(() => {
+    const imagesToPreload = [
+      '/logo-footer-dark.png',
+      '/logo-main-light.png'
+    ];
+    imagesToPreload.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Track when the image has loaded for fade-in effect
+  const [imgLoaded, setImgLoaded] = useState(true);
+  useEffect(() => {
+    setImgLoaded(false);
+  }, [currentImage]);
+  
   // Function to toggle location AND theme
   const toggleLocation = () => {
     const newLocation = selectedLocation === 'portland' ? 'salem' : 'portland'
@@ -48,18 +66,19 @@ export function LocationSwitcher({ className }: LocationSwitcherProps) {
             <motion.div
               key={`${selectedLocation}-${currentImage}`}
               initial={{ rotateY: 90, opacity: 0 }}
-              animate={{ rotateY: 0, opacity: 1 }}
+              animate={{ rotateY: 0, opacity: imgLoaded ? 1 : 0 }}
               exit={{ rotateY: -90, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0"
+              className="absolute inset-0 transition-opacity duration-300"
             >
               <Image
                 src={currentImage}
                 alt={`${selectedLocation} location`}
                 width={360} 
                 height={360} 
-                className="object-contain w-96 h-96" 
+                className={`object-contain w-96 h-96 transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                 priority
+                onLoadingComplete={() => setImgLoaded(true)}
               />
             </motion.div>
           </AnimatePresence>
