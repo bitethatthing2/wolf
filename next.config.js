@@ -179,6 +179,8 @@ if (!isDevelopment) {
       disable: false, // Enable in production
       register: true,
       skipWaiting: true,
+      // Exclude problematic files from precache
+      exclude: [/_next\/dynamic-css-manifest\.json$/],
       // Exclude custom service workers
       publicExcludes: ['firebase-messaging-sw.js', 'service-worker-fix.js', 'manifest.json'],
       workboxOptions: {
