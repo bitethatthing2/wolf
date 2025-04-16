@@ -47,5 +47,45 @@ export function getSupabaseClient(): SupabaseClient {
     }
 }
 
+/**
+ * Test Supabase connection and notification_subscriptions table setup
+ * Usage: await testSupabaseConnection();
+ */
+export async function testSupabaseConnection(): Promise<boolean> {
+    try {
+        const supabase = getSupabaseClient();
+        console.log("Testing Supabase connection...");
+        const { data: tableInfo, error: tableError } = await supabase
+            .from('notification_subscriptions')
+            .select('*')
+            .limit(1);
+        if (tableError) {
+            console.error('Table check error:', tableError);
+            if (tableError.code === '42P01') {
+                console.error('Table does not exist. Please run the SQL migration first.');
+                return false;
+            }
+            return false;
+        }
+        // Test insert
+        const uniqueEndpoint = `test-endpoint-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+        const { error: insertError } = await supabase
+            .from('notification_subscriptions')
+            .insert({
+                device_token: uniqueEndpoint,
+                device_info: { user_agent: 'test-user-agent' },
+            });
+        if (insertError) {
+            console.error('Test insert error:', insertError);
+            return false;
+        }
+        console.log('Supabase connection and table verified.');
+        return true;
+    } catch (err) {
+        console.error('Supabase connection test failed:', err);
+        return false;
+    }
+}
+
 // Note: We no longer export the potentially null 'supabase' variable directly.
 // Consumers should import and call getSupabaseClient().
