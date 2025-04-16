@@ -97,8 +97,6 @@ self.addEventListener('fetch', event => {
               <!DOCTYPE html>
               <html lang="en">
                 <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
                   <title>Navigation Error</title>
                   <style>
                     body { font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa; }
@@ -146,3 +144,5 @@ self.addEventListener('fetch', event => {
     );
   }
 });
+
+// Removed invalid <meta name="viewport"> tag from JS file. This file should not contain HTML meta tags.
