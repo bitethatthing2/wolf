@@ -5,8 +5,8 @@
  * Version: 3.0.0
  */
 
-// Create a console logger with app branding
-const logger = {
+// Global-safe logger pattern
+window.logger = window.logger || {
   info: (message) => console.log('%c🐺 PWA %c' + message, 
     'background:#222;color:#bada55;padding:2px 4px;border-radius:3px', 
     'color:#888;padding:2px'),
@@ -17,6 +17,7 @@ const logger = {
     'background:#4CAF50;color:#fff;padding:2px 4px;border-radius:3px', 
     'color:#4CAF50;padding:2px')
 };
+const logger = window.logger;
 
 // Use the global app initialization state
 window.__wolfAppInit = window.__wolfAppInit || {
